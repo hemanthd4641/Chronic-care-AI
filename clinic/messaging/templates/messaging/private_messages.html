@@ -1,0 +1,301 @@
+{% extends "base.html" %}
+{% block content %}
+<style>
+  .messages-container {
+    backdrop-filter: blur(16px) saturate(180%);
+    background: rgba(255, 255, 255, 0.85);
+    border-radius: 25px;
+    border: 1px solid rgba(255, 255, 255, 0.18);
+    box-shadow: 0 25px 50px rgba(31, 38, 135, 0.15);
+    transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    animation: fadeInUp 0.8s ease-out;
+    padding: 2rem;
+    margin-bottom: 2rem;
+  }
+  
+  .messages-container:hover {
+    transform: translateY(-5px) scale(1.01);
+    box-shadow: 0 35px 70px rgba(31, 38, 135, 0.2);
+    background: rgba(255, 255, 255, 0.95);
+  }
+  
+  @keyframes fadeInUp {
+    from {
+      opacity: 0;
+      transform: translateY(40px) scale(0.95);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0) scale(1);
+    }
+  }
+  
+  .message-card {
+    backdrop-filter: blur(16px) saturate(180%);
+    background: rgba(255, 255, 255, 0.9);
+    border-radius: 20px;
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    box-shadow: 0 15px 40px rgba(31, 38, 135, 0.1);
+    transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    overflow: hidden;
+    position: relative;
+  }
+  
+  .message-card:hover {
+    transform: translateY(-8px) scale(1.02);
+    box-shadow: 0 25px 50px rgba(31, 38, 135, 0.15);
+    background: rgba(255, 255, 255, 1);
+  }
+  
+  .message-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(102, 126, 234, 0.1), transparent);
+    transition: left 0.6s;
+  }
+  
+  .message-card:hover::before {
+    left: 100%;
+  }
+  
+  .card-header {
+    border-radius: 20px 20px 0 0 !important;
+    padding: 1.5rem;
+    font-weight: 700;
+    position: relative;
+    overflow: hidden;
+  }
+  
+  .card-header::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: linear-gradient(45deg, transparent, rgba(255,255,255,0.1), transparent);
+    animation: shimmer 3s infinite;
+  }
+  
+  @keyframes shimmer {
+    0% { transform: translateX(-100%) translateY(-100%) rotate(45deg); }
+    100% { transform: translateX(100%) translateY(100%) rotate(45deg); }
+  }
+  
+  .received-header {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  }
+  
+  .sent-header {
+    background: linear-gradient(135deg, #a3d977 0%, #2d5016 100%);
+  }
+  
+  .list-group-item {
+    border: none;
+    border-radius: 15px;
+    margin-bottom: 0.5rem;
+    transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    background: rgba(255, 255, 255, 0.7);
+    backdrop-filter: blur(10px);
+    position: relative;
+    overflow: hidden;
+  }
+  
+  .list-group-item:hover {
+    transform: translateX(8px) scale(1.02);
+    background: rgba(102, 126, 234, 0.1);
+    box-shadow: 0 8px 25px rgba(102, 126, 234, 0.15);
+  }
+  
+  .list-group-item.unread {
+    background: linear-gradient(135deg, rgba(102, 126, 234, 0.15), rgba(118, 75, 162, 0.1));
+    border-left: 4px solid #667eea;
+  }
+  
+  .btn {
+    border-radius: 18px;
+    padding: 12px 24px;
+    transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    font-weight: 700;
+    letter-spacing: 0.5px;
+    border: none;
+    position: relative;
+    overflow: hidden;
+  }
+  
+  .btn::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+    transition: left 0.6s;
+  }
+  
+  .btn:hover::before {
+    left: 100%;
+  }
+  
+  .btn-primary {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    box-shadow: 0 8px 20px rgba(102, 126, 234, 0.3);
+  }
+  
+  .btn-primary:hover {
+    transform: translateY(-3px) scale(1.05);
+    box-shadow: 0 15px 35px rgba(102, 126, 234, 0.4);
+    color: white;
+  }
+  
+  .badge {
+    border-radius: 15px;
+    padding: 8px 12px;
+    font-weight: 600;
+    animation: pulse 2s infinite;
+  }
+  
+  @keyframes pulse {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.05); }
+    100% { transform: scale(1); }
+  }
+  
+  .empty-state {
+    animation: floatUp 3s ease-in-out infinite;
+  }
+  
+  @keyframes floatUp {
+    0%, 100% { transform: translateY(0px); }
+    50% { transform: translateY(-10px); }
+  }
+  
+  .gradient-text {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    font-weight: 900;
+  }
+</style>
+
+<div class="container mt-4">
+  <div class="row justify-content-center">
+    <div class="col-lg-10">
+      <div class="messages-container">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+          <div>
+            <h1 class="display-5 fw-bold gradient-text mb-2">
+              <i class="bi bi-envelope-heart-fill me-3"></i>Private Messages
+            </h1>
+            <p class="text-muted fs-5">Secure communication with {% if request.user.is_superuser %}patients{% else %}doctors{% endif %}</p>
+          </div>
+          <div class="text-end">
+            <a href="{% url 'messaging:send_message' %}" class="btn btn-primary btn-lg px-4">
+              <i class="bi bi-plus-circle-fill me-2"></i>New Message
+            </a>
+            {% if unread_count > 0 %}
+              <span class="badge bg-danger fs-6 ms-2">{{ unread_count }} Unread</span>
+            {% endif %}
+          </div>
+        </div>
+      </div>
+
+      <div class="row g-4 align-items-stretch">
+        <!-- Received Messages -->
+        <div class="col-md-6">
+          <div class="message-card h-100">
+            <div class="card-header text-white received-header">
+              <h5 class="mb-0 position-relative">
+                <i class="bi bi-inbox-fill me-2"></i>Received Messages
+              </h5>
+            </div>
+            <div class="card-body p-3">
+              {% if received_messages %}
+                <div class="list-group list-group-flush">
+                  {% for message in received_messages %}
+                    <a href="{% url 'messaging:view_message' message.id %}" class="list-group-item list-group-item-action {% if not message.is_read %}unread{% endif %} text-decoration-none">
+                      <div class="d-flex justify-content-between align-items-start">
+                        <div class="flex-grow-1">
+                          <h6 class="mb-2 {% if not message.is_read %}fw-bold{% endif %}">
+                            <i class="bi bi-person-circle-fill me-2 text-primary"></i>{{ message.sender.get_full_name|default:message.sender.username }}
+                          </h6>
+                          <p class="mb-1 {% if not message.is_read %}fw-semibold{% endif %}">{{ message.subject }}</p>
+                          <small class="text-muted">{{ message.message|truncatechars:100 }}</small>
+                        </div>
+                        <div class="text-end">
+                          <small class="text-muted">{{ message.created_at|date:"M d" }}</small>
+                          {% if not message.is_read %}
+                            <span class="badge bg-primary ms-2">New</span>
+                          {% endif %}
+                        </div>
+                      </div>
+                    </a>
+                  {% endfor %}
+                </div>
+              {% else %}
+                <div class="text-center py-5 empty-state">
+                  <i class="bi bi-inbox display-1 text-muted mb-3"></i>
+                  <h5 class="text-muted mt-3">No messages received</h5>
+                  <p class="text-muted">You haven't received any private messages yet.</p>
+                </div>
+              {% endif %}
+            </div>
+          </div>
+        </div>
+
+        <!-- Sent Messages -->
+        <div class="col-md-6">
+          <div class="message-card h-100">
+            <div class="card-header text-white sent-header">
+              <h5 class="mb-0 position-relative">
+                <i class="bi bi-send-fill me-2"></i>Sent Messages
+              </h5>
+            </div>
+            <div class="card-body p-3">
+              {% if sent_messages %}
+                <div class="list-group list-group-flush">
+                  {% for message in sent_messages %}
+                    <a href="{% url 'messaging:view_message' message.id %}" class="list-group-item list-group-item-action text-decoration-none">
+                      <div class="d-flex justify-content-between align-items-start">
+                        <div class="flex-grow-1">
+                          <h6 class="mb-2">
+                            <i class="bi bi-person-circle-fill me-2 text-success"></i>{{ message.recipient.get_full_name|default:message.recipient.username }}
+                          </h6>
+                          <p class="mb-1">{{ message.subject }}</p>
+                          <small class="text-muted">{{ message.message|truncatechars:100 }}</small>
+                        </div>
+                        <div class="text-end">
+                          <small class="text-muted">{{ message.created_at|date:"M d" }}</small>
+                          {% if message.is_read %}
+                            <span class="badge bg-success ms-2">Read</span>
+                          {% else %}
+                            <span class="badge bg-warning ms-2">Unread</span>
+                          {% endif %}
+                        </div>
+                      </div>
+                    </a>
+                  {% endfor %}
+                </div>
+              {% else %}
+                <div class="text-center py-5 empty-state">
+                  <i class="bi bi-send display-1 text-muted mb-3"></i>
+                  <h5 class="text-muted mt-3">No messages sent</h5>
+                  <p class="text-muted">You haven't sent any private messages yet.</p>
+                </div>
+              {% endif %}
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+

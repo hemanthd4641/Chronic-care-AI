@@ -1,0 +1,644 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Compare Predictions{% endblock title %}
+
+{% block content %}
+<div class="container mt-4">
+    <!-- Header Section -->
+    <div class="row mb-3">
+        <div class="col-12">
+            <div class="glass-card p-4 text-center">
+                <h1 class="fw-bold gradient-text mb-3">
+                    <i class="fas fa-balance-scale me-3"></i>Compare Predictions
+                </h1>
+                <p class="text-muted mb-4">Compare your health predictions across different diseases and time periods</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Comparison Type Selection -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="glass-card p-3">
+                <h5 class="fw-semibold text-primary mb-3">
+                    <i class="fas fa-cogs me-2"></i>Comparison Options
+                </h5>
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <div class="form-check">
+                            <input class="form-check-input" type="radio" name="compareType" id="diseaseCompare" value="disease" checked>
+                            <label class="form-check-label" for="diseaseCompare">
+                                <i class="fas fa-heartbeat me-2"></i>Compare by Disease Type
+                            </label>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-check">
+                            <input class="form-check-input" type="radio" name="compareType" id="timeCompare" value="time">
+                            <label class="form-check-label" for="timeCompare">
+                                <i class="fas fa-calendar-alt me-2"></i>Compare by Time Period
+                            </label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Disease Comparison -->
+    <div id="diseaseComparison" class="comparison-section">
+        <div class="row mb-3">
+            <div class="col-12">
+                <div class="glass-card p-3">
+                    <h5 class="fw-semibold text-primary mb-3">
+                        <i class="fas fa-chart-bar me-2"></i>Disease Comparison
+                    </h5>
+                    <div class="row g-3">
+                        {% for disease, data in comparison_data.items %}
+                        <div class="col-md-3">
+                            <div class="comparison-card p-4 text-center">
+                                <div class="disease-icon mb-3">
+                                    {% if disease == 'heart' %}
+                                        <i class="fas fa-heart text-danger fs-1"></i>
+                                    {% elif disease == 'diabetes' %}
+                                        <i class="fas fa-tint text-warning fs-1"></i>
+                                    {% elif disease == 'hypertension' %}
+                                        <i class="fas fa-heartbeat text-info fs-1"></i>
+                                    {% elif disease == 'kidney' %}
+                                        <i class="fas fa-kidneys text-success fs-1"></i>
+                                    {% endif %}
+                                </div>
+                                <h6 class="fw-bold text-primary">{{ disease|title }}</h6>
+                                <div class="stats mt-3">
+                                    <div class="stat-item mb-2">
+                                        <span class="text-muted">Total Tests:</span>
+                                        <span class="fw-bold text-primary">{{ data.total }}</span>
+                                    </div>
+                                    <div class="stat-item mb-2">
+                                        <span class="text-muted">High Risk:</span>
+                                        <span class="fw-bold text-danger">{{ data.high_risk }}</span>
+                                    </div>
+                                    <div class="stat-item">
+                                        <span class="text-muted">Avg Confidence:</span>
+                                        <span class="fw-bold text-success">{{ data.avg_confidence|floatformat:1 }}%</span>
+                                    </div>
+                                </div>
+                                <div class="progress mt-3" style="height: 8px;">
+                                    <div class="progress-bar bg-primary" style="width: {{ data.total|add:0 }}0%"></div>
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Disease Comparison Chart -->
+        <div class="row mb-3">
+            <div class="col-12">
+                <div class="glass-card p-3">
+                    <h5 class="fw-semibold text-primary mb-3">
+                        <i class="fas fa-chart-line me-2"></i>Disease Comparison Chart
+                    </h5>
+                    <div style="height:280px"><canvas id="diseaseComparisonChart"></canvas></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Time Period Comparison -->
+    <div id="timeComparison" class="comparison-section" style="display: none;">
+        <div class="row mb-3">
+            <div class="col-12">
+                <div class="glass-card p-3">
+                    <h5 class="fw-semibold text-primary mb-3">
+                        <i class="fas fa-calendar-alt me-2"></i>Time Period Comparison
+                    </h5>
+                    <div class="row g-3">
+                        <div class="col-md-4">
+                            <label class="form-label">Period 1 Start</label>
+                            <input type="date" class="form-control" id="period1Start">
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label">Period 1 End</label>
+                            <input type="date" class="form-control" id="period1End">
+                        </div>
+                        <div class="col-md-4 d-flex align-items-end">
+                            <button class="btn btn-primary" onclick="compareTimePeriods()">
+                                <i class="fas fa-search me-1"></i>Compare
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Time Comparison Results -->
+        <div id="timeComparisonResults" class="row mb-3" style="display: none;">
+            <div class="col-12">
+                <div class="glass-card p-3">
+                    <h5 class="fw-semibold text-primary mb-3">
+                        <i class="fas fa-chart-area me-2"></i>Time Period Comparison Results
+                    </h5>
+                    <div id="timeComparisonContent">
+                        <!-- Results will be loaded here -->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Summary Statistics -->
+    <div class="row mb-3">
+        <div class="col-12">
+            <div class="glass-card p-3">
+                <h5 class="fw-semibold text-primary mb-3">
+                    <i class="fas fa-chart-pie me-2"></i>Summary Statistics
+                </h5>
+                <div class="row g-3">
+                    <div class="col-md-4">
+                        <div class="summary-card p-3 text-center">
+                            <i class="fas fa-chart-bar text-primary fs-1 mb-2"></i>
+                            <h4 class="fw-bold text-primary">
+                                {% for disease, data in comparison_data.items %}
+                                    {{ data.total|add:0 }}
+                                {% endfor %}
+                            </h4>
+                            <p class="text-muted mb-0">Total Predictions</p>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="summary-card p-3 text-center">
+                            <i class="fas fa-exclamation-triangle text-warning fs-1 mb-2"></i>
+                            <h4 class="fw-bold text-warning">
+                                {% for disease, data in comparison_data.items %}
+                                    {{ data.high_risk|add:0 }}
+                                {% endfor %}
+                            </h4>
+                            <p class="text-muted mb-0">High Risk Results</p>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="summary-card p-3 text-center">
+                            <i class="fas fa-percentage text-success fs-1 mb-2"></i>
+                            <h4 class="fw-bold text-success">
+                                {% for disease, data in comparison_data.items %}
+                                    {{ data.avg_confidence|floatformat:1 }}%
+                                {% endfor %}
+                            </h4>
+                            <p class="text-muted mb-0">Average Confidence</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Recommendations -->
+    <div class="row">
+        <div class="col-12">
+            <div class="glass-card p-4">
+                <h5 class="fw-semibold text-primary mb-3">
+                    <i class="fas fa-lightbulb me-2"></i>Recommendations
+                </h5>
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <div class="recommendation-item p-3">
+                            <i class="fas fa-heart text-danger me-2"></i>
+                            <strong>Heart Health:</strong> Regular cardiovascular exercise and monitoring
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="recommendation-item p-3">
+                            <i class="fas fa-tint text-warning me-2"></i>
+                            <strong>Diabetes Management:</strong> Blood sugar monitoring and diet control
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="recommendation-item p-3">
+                            <i class="fas fa-heartbeat text-info me-2"></i>
+                            <strong>Blood Pressure:</strong> Regular monitoring and stress management
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="recommendation-item p-3">
+                            <i class="fas fa-kidneys text-success me-2"></i>
+                            <strong>Kidney Health:</strong> Hydration and regular kidney function tests
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Chart.js -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Disease comparison chart
+    const diseaseCtx = document.getElementById('diseaseComparisonChart').getContext('2d');
+    const diseaseData = {{ comparison_data|safe }};
+    
+    new Chart(diseaseCtx, {
+        type: 'bar',
+        data: {
+            labels: Object.keys(diseaseData),
+            datasets: [{
+                label: 'Total Tests',
+                data: Object.values(diseaseData).map(d => d.total),
+                backgroundColor: 'rgba(54, 162, 235, 0.8)',
+                borderColor: 'rgba(54, 162, 235, 1)',
+                borderWidth: 2
+            }, {
+                label: 'High Risk Results',
+                data: Object.values(diseaseData).map(d => d.high_risk),
+                backgroundColor: 'rgba(255, 99, 132, 0.8)',
+                borderColor: 'rgba(255, 99, 132, 1)',
+                borderWidth: 2
+            }]
+        },
+        options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom' } }, scales: { y: { beginAtZero: true } } }
+    });
+
+    // Comparison type toggle
+    document.querySelectorAll('input[name="compareType"]').forEach(radio => {
+        radio.addEventListener('change', function() {
+            const diseaseSection = document.getElementById('diseaseComparison');
+            const timeSection = document.getElementById('timeComparison');
+            
+            if (this.value === 'disease') {
+                diseaseSection.style.display = 'block';
+                timeSection.style.display = 'none';
+            } else {
+                diseaseSection.style.display = 'none';
+                timeSection.style.display = 'block';
+            }
+        });
+    });
+});
+
+function compareTimePeriods() {
+    const period1Start = document.getElementById('period1Start').value;
+    const period1End = document.getElementById('period1End').value;
+    
+    if (!period1Start || !period1End) {
+        alert('Please select both start and end dates for Period 1');
+        return;
+    }
+    
+    // Show results section
+    document.getElementById('timeComparisonResults').style.display = 'block';
+    
+    // Load comparison data (this would be implemented with AJAX)
+    document.getElementById('timeComparisonContent').innerHTML = `
+        <div class="row g-4">
+            <div class="col-md-6">
+                <div class="period-card p-3">
+                    <h6 class="fw-bold text-primary">Period 1 (${period1Start} to ${period1End})</h6>
+                    <div class="stat-item">Total Tests: <span class="fw-bold">12</span></div>
+                    <div class="stat-item">High Risk: <span class="fw-bold text-danger">3</span></div>
+                    <div class="stat-item">Risk Rate: <span class="fw-bold">25%</span></div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="period-card p-3">
+                    <h6 class="fw-bold text-success">Current Period</h6>
+                    <div class="stat-item">Total Tests: <span class="fw-bold">8</span></div>
+                    <div class="stat-item">High Risk: <span class="fw-bold text-danger">1</span></div>
+                    <div class="stat-item">Risk Rate: <span class="fw-bold">12.5%</span></div>
+                </div>
+            </div>
+        </div>
+        <div class="mt-4">
+            <div class="alert alert-info">
+                <i class="fas fa-info-circle me-2"></i>
+                <strong>Analysis:</strong> Your risk rate has decreased from 25% to 12.5%, indicating improved health trends.
+            </div>
+        </div>
+    `;
+}
+</script>
+
+<style>
+.glass-card {
+    backdrop-filter: blur(16px) saturate(180%);
+    background: rgba(255, 255, 255, 0.85);
+    border-radius: 25px;
+    border: 1px solid rgba(255, 255, 255, 0.18);
+    box-shadow: 0 25px 50px rgba(31, 38, 135, 0.15);
+    transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    animation: fadeInUp 0.8s ease-out;
+}
+
+.glass-card:hover {
+    transform: translateY(-5px) scale(1.01);
+    box-shadow: 0 35px 70px rgba(31, 38, 135, 0.2);
+    background: rgba(255, 255, 255, 0.95);
+}
+
+.gradient-text {
+    background: linear-gradient(135deg, #e6f3ff 0%, #f0f9ff 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    color: #1e40af;
+    font-weight: 900;
+}
+
+.comparison-card {
+    background: rgba(255, 255, 255, 0.9);
+    border-radius: 20px;
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    position: relative;
+    overflow: hidden;
+    backdrop-filter: blur(15px);
+}
+
+.comparison-card::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: linear-gradient(45deg, transparent, rgba(30, 64, 175, 0.05), transparent);
+    animation: shimmer 3s infinite;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.comparison-card:hover::before {
+    opacity: 1;
+}
+
+.comparison-card:hover {
+    transform: translateY(-8px) scale(1.02);
+    box-shadow: 0 15px 40px rgba(30, 64, 175, 0.2);
+    border-color: rgba(30, 64, 175, 0.3);
+}
+
+@keyframes shimmer {
+    0% { transform: translateX(-100%) translateY(-100%) rotate(45deg); }
+    100% { transform: translateX(100%) translateY(100%) rotate(45deg); }
+}
+
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(40px) scale(0.95);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+.summary-card {
+    background: rgba(255, 255, 255, 0.9);
+    border-radius: 20px;
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    backdrop-filter: blur(15px);
+    position: relative;
+    overflow: hidden;
+}
+
+.summary-card:hover {
+    transform: translateY(-8px) scale(1.05);
+    box-shadow: 0 15px 40px rgba(0,0,0,0.15);
+    background: rgba(255, 255, 255, 1);
+}
+
+.recommendation-item {
+    background: rgba(255, 255, 255, 0.9);
+    border-radius: 15px;
+    border-left: 4px solid #3b82f6;
+    transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    backdrop-filter: blur(10px);
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+}
+
+.recommendation-item:hover {
+    background: linear-gradient(135deg, rgba(230, 243, 255, 0.3), rgba(240, 249, 255, 0.2));
+    transform: translateX(8px) translateY(-2px);
+    box-shadow: 0 8px 25px rgba(59, 130, 246, 0.15);
+    border-left-color: #1e40af;
+}
+
+.period-card {
+    background: rgba(255, 255, 255, 0.9);
+    border-radius: 15px;
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    backdrop-filter: blur(10px);
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+}
+
+.period-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+}
+
+.stat-item {
+    margin-bottom: 0.75rem;
+    font-weight: 500;
+    transition: all 0.3s ease;
+}
+
+.btn {
+    border-radius: 18px;
+    padding: 14px 24px;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+    transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    position: relative;
+    overflow: hidden;
+    border: none;
+}
+
+.btn::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+    transition: left 0.6s;
+}
+
+.btn:hover::before {
+    left: 100%;
+}
+
+.btn:hover {
+    transform: translateY(-3px) scale(1.05);
+    box-shadow: 0 15px 35px rgba(0,0,0,0.2);
+}
+
+.btn-primary {
+    background: linear-gradient(135deg, #e6f3ff 0%, #f0f9ff 100%);
+    color: #1e40af;
+    box-shadow: 0 8px 20px rgba(30, 64, 175, 0.2);
+}
+
+.btn-primary:hover {
+    box-shadow: 0 15px 35px rgba(30, 64, 175, 0.3);
+    color: #1e40af;
+}
+
+.form-control, .form-select {
+    border-radius: 15px;
+    border: 2px solid rgba(226, 232, 240, 0.8);
+    background: rgba(255, 255, 255, 0.9);
+    padding: 14px 20px;
+    transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    font-weight: 500;
+    backdrop-filter: blur(10px);
+}
+
+.form-control:focus, .form-select:focus {
+    border-color: #3b82f6;
+    box-shadow: 0 0 0 0.25rem rgba(59, 130, 246, 0.15), 0 8px 25px rgba(59, 130, 246, 0.1);
+    background: rgba(255, 255, 255, 1);
+    transform: translateY(-2px);
+}
+
+.form-label {
+    font-weight: 700;
+    color: #4a5568;
+    margin-bottom: 8px;
+    font-size: 0.95rem;
+}
+
+.form-check-input {
+    border-radius: 8px;
+    border: 2px solid rgba(226, 232, 240, 0.8);
+    background: rgba(255, 255, 255, 0.9);
+    transition: all 0.3s ease;
+}
+
+.form-check-input:checked {
+    background-color: #3b82f6;
+    border-color: #3b82f6;
+}
+
+.form-check-label {
+    font-weight: 600;
+    color: #4a5568;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.form-check-label:hover {
+    color: #1e40af;
+}
+
+.disease-icon {
+    transition: all 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.comparison-card:hover .disease-icon {
+    transform: scale(1.2) rotate(10deg);
+    animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+    0% { transform: scale(1.2) rotate(10deg); }
+    50% { transform: scale(1.3) rotate(-10deg); }
+    100% { transform: scale(1.2) rotate(10deg); }
+}
+
+.progress {
+    border-radius: 15px;
+    background: rgba(226, 232, 240, 0.3);
+    backdrop-filter: blur(10px);
+    overflow: hidden;
+    height: 10px;
+}
+
+.progress-bar {
+    border-radius: 15px;
+    transition: all 0.4s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+.bg-primary {
+    background: linear-gradient(135deg, #e6f3ff 0%, #f0f9ff 100%) !important;
+}
+
+.progress-bar::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+    animation: progressShine 2s infinite;
+}
+
+@keyframes progressShine {
+    0% { left: -100%; }
+    100% { left: 100%; }
+}
+
+.text-primary { color: #1e40af !important; }
+.text-success { color: #166534 !important; }
+.text-warning { color: #92400e !important; }
+.text-info { color: #1e40af !important; }
+.text-danger { color: #991b1b !important; }
+
+.alert {
+    border-radius: 15px;
+    border: none;
+    backdrop-filter: blur(10px);
+    font-weight: 600;
+}
+
+.alert-info {
+    background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
+    color: #1e40af;
+}
+
+/* Chart container styling */
+canvas {
+    border-radius: 15px;
+    backdrop-filter: blur(10px);
+}
+
+/* Enhanced animations for cards */
+.glass-card:nth-child(1) { animation-delay: 0.1s; }
+.glass-card:nth-child(2) { animation-delay: 0.2s; }
+.glass-card:nth-child(3) { animation-delay: 0.3s; }
+.glass-card:nth-child(4) { animation-delay: 0.4s; }
+
+.comparison-card:nth-child(1) { animation-delay: 0.1s; }
+.comparison-card:nth-child(2) { animation-delay: 0.2s; }
+.comparison-card:nth-child(3) { animation-delay: 0.3s; }
+.comparison-card:nth-child(4) { animation-delay: 0.4s; }
+
+/* Mobile responsiveness */
+@media (max-width: 768px) {
+    .glass-card {
+        margin: 1rem 0.5rem;
+        padding: 1.5rem;
+    }
+    
+    .btn {
+        padding: 12px 20px;
+        font-size: 0.9rem;
+    }
+    
+    .comparison-card {
+        margin-bottom: 1rem;
+    }
+}
+</style>
+{% endblock content %}

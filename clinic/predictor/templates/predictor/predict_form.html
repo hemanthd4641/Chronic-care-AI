@@ -1,0 +1,88 @@
+{% extends "base.html" %}
+{% load form_extras %}
+{% block content %}
+<div class="container mt-4" style="max-width: 1000px;">
+  <div class="row justify-content-center">
+    <div class="col-12">
+      <div class="card shadow-lg border-0">
+        <div class="card-header bg-primary text-white">
+          <div class="d-flex align-items-center">
+            <i class="bi bi-heart-pulse-fill me-3 fs-4"></i>
+            <div>
+              <h3 class="mb-0">{{ title }}</h3>
+              <small>AI-Powered Health Risk Assessment</small>
+            </div>
+          </div>
+        </div>
+        <div class="card-body p-4">
+          {% if not done %}
+            <div class="alert alert-info" role="alert">
+              <i class="bi bi-info-circle-fill me-2"></i>
+              <strong>Instructions:</strong> Please fill in all the required information accurately. The more accurate your data, the better the prediction will be.
+            </div>
+          {% endif %}
+
+          <form method="post" novalidate>
+            {% csrf_token %}
+            <div class="row g-4">
+              {% for field in form %}
+                <div class="col-md-6 col-lg-4">
+                  <div class="form-group">
+                    <label class="form-label fw-semibold">{{ field.label }}</label>
+                    {% if field.field.widget.input_type == 'select' %}
+                      {{ field|add_class:"form-select" }}
+                    {% else %}
+                      {{ field|add_class:"form-control" }}
+                    {% endif %}
+                    {% if field.help_text %}<div class="form-text text-muted">{{ field.help_text }}</div>{% endif %}
+                    {% for e in field.errors %}<div class="text-danger small mt-1">{{ e }}</div>{% endfor %}
+                  </div>
+                </div>
+              {% endfor %}
+            </div>
+            
+            <div class="mt-5 d-flex justify-content-center gap-3">
+              <button class="btn btn-primary btn-lg rounded-pill px-5" type="submit">
+                <i class="bi bi-cpu me-2"></i>Get Prediction
+              </button>
+              <a class="btn btn-outline-secondary btn-lg rounded-pill px-4" href="{% url 'predictor:index' %}">
+                <i class="bi bi-arrow-left me-2"></i>Back to Menu
+              </a>
+            </div>
+          </form>
+
+          {% if done %}
+            <hr class="my-5">
+            <div class="text-center">
+              <div class="alert {% if pred == 1 %}alert-danger{% else %}alert-success{% endif %} shadow-sm border-0">
+                <div class="d-flex align-items-center justify-content-center gap-3 mb-3">
+                  <i class="bi {% if pred == 1 %}bi-exclamation-triangle-fill{% else %}bi-check-circle-fill{% endif %} display-4"></i>
+                  <div>
+                    <h4 class="mb-1 fw-bold">
+                      {% if pred == 1 %}⚠️ High Risk Detected{% else %}✅ Low Risk Detected{% endif %}
+                    </h4>
+                    {% if proba %}
+                      <span class="badge bg-dark fs-6">{{ proba }} Confidence</span>
+                    {% endif %}
+                  </div>
+                </div>
+                <div class="small">
+                  <strong>Disclaimer:</strong> This is a statistical estimate based on machine learning algorithms. 
+                  It should not replace professional medical advice, diagnosis, or treatment. 
+                  Always consult with a qualified healthcare provider for medical concerns.
+                </div>
+              </div>
+              
+              <div class="mt-4">
+                <a class="btn btn-primary rounded-pill px-4" href="{% url 'predictor:predict' key %}">
+                  <i class="bi bi-arrow-clockwise me-2"></i>Try Another Assessment
+                </a>
+              </div>
+            </div>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

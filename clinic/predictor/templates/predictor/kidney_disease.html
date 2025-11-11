@@ -1,0 +1,1107 @@
+{% extends "base.html" %}
+{% load form_extras %}
+{% block content %}
+<style>
+    body {
+        background: linear-gradient(135deg, #ffffff 0%, #f8fafc 50%, #ecfeff 100%);
+        background-attachment: fixed;
+        font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    }
+
+    .prediction-container {
+        backdrop-filter: blur(20px) saturate(180%);
+        background: rgba(255, 255, 255, 0.85);
+        border-radius: 25px;
+        border: 1px solid rgba(255, 255, 255, 0.18);
+        box-shadow: 0 25px 50px rgba(31, 38, 135, 0.15);
+        transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        animation: fadeInUp 0.8s ease-out;
+        position: relative;
+        overflow: hidden;
+    }
+    
+    .prediction-container::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 6px;
+        background: linear-gradient(90deg, #cffafe 0%, #67e8f9 50%, #06b6d4 100%);
+        background-size: 200% 100%;
+        animation: gradientShift 3s ease-in-out infinite;
+    }
+    
+    @keyframes gradientShift {
+        0%, 100% { background-position: 0% 50%; }
+        50% { background-position: 100% 50%; }
+    }
+    
+    .prediction-container:hover {
+        transform: translateY(-5px) scale(1.01);
+        box-shadow: 0 35px 70px rgba(31, 38, 135, 0.2);
+        background: rgba(255, 255, 255, 0.95);
+    }
+
+    .prediction-header {
+        background: linear-gradient(135deg, #cffafe 0%, #67e8f9 100%);
+        padding: 3rem;
+        text-align: left;
+        border-bottom: none;
+        position: relative;
+        overflow: hidden;
+        border-radius: 25px 25px 0 0;
+    }
+
+    .prediction-header::before {
+        content: '';
+        position: absolute;
+        top: -50%;
+        left: -50%;
+        width: 200%;
+        height: 200%;
+        background: linear-gradient(45deg, transparent, rgba(6, 182, 212, 0.05), transparent);
+        animation: shimmer 3s infinite;
+    }
+
+    @keyframes shimmer {
+        0% { transform: translateX(-100%) translateY(-100%) rotate(45deg); }
+        100% { transform: translateX(100%) translateY(100%) rotate(45deg); }
+    }
+
+    .prediction-title {
+        color: #0891b2;
+        font-size: 2rem;
+        font-weight: 900;
+        margin-bottom: 10px;
+        position: relative;
+        z-index: 1;
+    }
+
+    .prediction-subtitle {
+        color: #0e7490;
+        font-size: 1rem;
+        margin: 0;
+        font-weight: 500;
+        position: relative;
+        z-index: 1;
+    }
+
+    .form-container {
+        padding: 3rem;
+        background: rgba(255, 255, 255, 0.9);
+        backdrop-filter: blur(15px);
+        border-radius: 0 0 25px 25px;
+    }
+
+    .form-group {
+        margin-bottom: 1.5rem;
+    }
+
+    .form-label {
+        color: #374151;
+        font-weight: 700;
+        margin-bottom: 0.75rem;
+        display: block;
+        font-size: 0.95rem;
+    }
+
+    .form-control, .form-select {
+        border: 2px solid rgba(6, 182, 212, 0.1);
+        border-radius: 15px;
+        padding: 12px 16px;
+        font-size: 0.95rem;
+        transition: all 0.3s ease;
+        background: rgba(255, 255, 255, 0.9);
+        backdrop-filter: blur(10px);
+    }
+
+    .form-control:focus, .form-select:focus {
+        border-color: rgba(6, 182, 212, 0.4);
+        box-shadow: 0 0 0 3px rgba(6, 182, 212, 0.1);
+        background: rgba(255, 255, 255, 1);
+        outline: none;
+        transform: translateY(-1px);
+    }
+    
+    .form-control.is-invalid {
+        border-color: #dc3545;
+        box-shadow: 0 0 0 3px rgba(220, 53, 69, 0.1);
+    }
+    
+    .form-control.is-valid {
+        border-color: #28a745;
+        box-shadow: 0 0 0 3px rgba(40, 167, 69, 0.1);
+    }
+    
+    .input-group {
+        position: relative;
+    }
+    
+    .input-tooltip {
+        position: absolute;
+        top: -8px;
+        right: 10px;
+        background: linear-gradient(135deg, #06b6d4, #0891b2);
+        color: white;
+        border-radius: 50%;
+        width: 20px;
+        height: 20px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 12px;
+        cursor: help;
+        z-index: 10;
+    }
+    
+    .progress-bar-custom {
+        height: 6px;
+        background: linear-gradient(90deg, #dc3545 0%, #ffc107 50%, #28a745 100%);
+        border-radius: 3px;
+        margin: 10px 0;
+    }
+    
+    .form-validation-message {
+        background: linear-gradient(135deg, rgba(220, 53, 69, 0.1), rgba(220, 53, 69, 0.05));
+        border: 1px solid rgba(220, 53, 69, 0.2);
+        border-radius: 8px;
+        padding: 8px 12px;
+        margin-top: 5px;
+        font-size: 0.8rem;
+        color: #721c24;
+    }
+
+    .form-text {
+        color: #6b7280;
+        font-size: 0.85rem;
+        margin-top: 0.5rem;
+        font-style: italic;
+    }
+
+    .btn {
+        border-radius: 18px;
+        font-weight: 700;
+        padding: 14px 24px;
+        transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        position: relative;
+        overflow: hidden;
+        backdrop-filter: blur(10px);
+    }
+
+    .btn::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+        transition: left 0.6s;
+    }
+
+    .btn:hover::before {
+        left: 100%;
+    }
+
+    .btn:hover {
+        transform: translateY(-3px) scale(1.05);
+        box-shadow: 0 15px 35px rgba(0, 0, 0, 0.2);
+    }
+
+    .btn-info {
+        background: linear-gradient(135deg, #cffafe 0%, #67e8f9 100%);
+        border: none;
+        color: #0891b2;
+        box-shadow: 0 8px 20px rgba(6, 182, 212, 0.2);
+    }
+
+    .btn-info:hover {
+        background: linear-gradient(135deg, #67e8f9 0%, #06b6d4 100%);
+        color: #0891b2;
+        box-shadow: 0 15px 35px rgba(6, 182, 212, 0.3);
+    }
+
+    .alert {
+        border-radius: 15px;
+        border: none;
+        backdrop-filter: blur(10px);
+        position: relative;
+        overflow: hidden;
+    }
+
+    .alert::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 4px;
+        height: 100%;
+        background: linear-gradient(135deg, #cffafe 0%, #67e8f9 100%);
+    }
+
+    @keyframes fadeInUp {
+        from {
+            opacity: 0;
+            transform: translateY(30px) scale(0.9);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0) scale(1);
+        }
+    }
+    
+    /* Comprehensive Mobile Responsiveness */
+    @media (max-width: 992px) {
+        .prediction-container {
+            margin: 1.5rem 0.75rem;
+            border-radius: 22px;
+        }
+        
+        .prediction-header {
+            padding: 2.5rem 2rem;
+            border-radius: 22px 22px 0 0;
+        }
+        
+        .prediction-title {
+            font-size: 1.75rem;
+        }
+        
+        .prediction-subtitle {
+            font-size: 0.95rem;
+        }
+        
+        .form-container {
+            padding: 2.5rem 2rem;
+        }
+        
+        .form-control,
+        .form-select {
+            min-height: 50px;
+            padding: 14px 18px;
+            font-size: 0.95rem;
+            border-radius: 13px;
+            touch-action: manipulation;
+            -webkit-tap-highlight-color: transparent;
+        }
+        
+        .btn {
+            min-height: 50px;
+            padding: 15px 28px;
+            font-size: 0.95rem;
+            border-radius: 16px;
+            touch-action: manipulation;
+        }
+        
+        .form-label {
+            font-size: 0.9rem;
+            margin-bottom: 0.625rem;
+        }
+        
+        .form-text {
+            font-size: 0.8rem;
+        }
+        
+        .input-tooltip {
+            width: 22px;
+            height: 22px;
+            font-size: 13px;
+        }
+        
+        .col-md-6,
+        .col-lg-4 {
+            margin-bottom: 1.25rem;
+        }
+    }
+    
+    @media (max-width: 768px) {
+        .prediction-container {
+            margin: 1.25rem 0.5rem;
+            border-radius: 20px;
+        }
+        
+        .prediction-header {
+            padding: 2rem 1.5rem;
+            border-radius: 20px 20px 0 0;
+            text-align: center;
+        }
+        
+        .prediction-title {
+            font-size: 1.6rem;
+        }
+        
+        .prediction-subtitle {
+            font-size: 0.9rem;
+        }
+        
+        .form-container {
+            padding: 2rem 1.5rem;
+        }
+        
+        .form-control,
+        .form-select {
+            min-height: 48px;
+            padding: 13px 16px;
+            font-size: 0.9rem;
+            border-radius: 12px;
+        }
+        
+        .btn {
+            min-height: 48px;
+            padding: 14px 26px;
+            font-size: 0.9rem;
+            border-radius: 14px;
+            width: 100%;
+        }
+        
+        .form-label {
+            font-size: 0.85rem;
+            margin-bottom: 0.5rem;
+        }
+        
+        .form-text {
+            font-size: 0.75rem;
+        }
+        
+        .small {
+            font-size: 0.7rem !important;
+        }
+        
+        .input-tooltip {
+            width: 20px;
+            height: 20px;
+            font-size: 11px;
+        }
+        
+        .col-md-6,
+        .col-lg-4 {
+            width: 100% !important;
+            max-width: 100% !important;
+            flex: 0 0 100% !important;
+            margin-bottom: 1rem;
+        }
+        
+        .row.g-4 {
+            gap: 0.75rem !important;
+        }
+        
+        /* Stack form elements vertically */
+        .d-flex {
+            flex-direction: column;
+            align-items: stretch !important;
+        }
+        
+        .alert {
+            border-radius: 12px;
+            padding: 1rem 1.25rem;
+            font-size: 0.85rem;
+        }
+    }
+    
+    @media (max-width: 576px) {
+        .prediction-container {
+            margin: 1rem 0.375rem;
+            border-radius: 18px;
+        }
+        
+        .prediction-header {
+            padding: 1.75rem 1.25rem;
+            border-radius: 18px 18px 0 0;
+        }
+        
+        .prediction-title {
+            font-size: 1.45rem;
+        }
+        
+        .prediction-subtitle {
+            font-size: 0.85rem;
+        }
+        
+        .form-container {
+            padding: 1.75rem 1.25rem;
+        }
+        
+        .form-control,
+        .form-select {
+            min-height: 46px;
+            padding: 12px 15px;
+            font-size: 0.85rem;
+            border-radius: 11px;
+        }
+        
+        .btn {
+            min-height: 46px;
+            padding: 13px 24px;
+            font-size: 0.85rem;
+            border-radius: 13px;
+        }
+        
+        .form-label {
+            font-size: 0.8rem;
+            margin-bottom: 0.4rem;
+        }
+        
+        .form-text {
+            font-size: 0.7rem;
+        }
+        
+        .small {
+            font-size: 0.65rem !important;
+        }
+        
+        .input-tooltip {
+            width: 18px;
+            height: 18px;
+            font-size: 10px;
+        }
+        
+        .col-md-6,
+        .col-lg-4 {
+            margin-bottom: 0.875rem;
+        }
+        
+        .row.g-4 {
+            gap: 0.5rem !important;
+            margin: 0 !important;
+        }
+        
+        .alert {
+            border-radius: 10px;
+            padding: 0.875rem 1rem;
+            font-size: 0.8rem;
+        }
+        
+        .bi {
+            font-size: 1.1rem;
+        }
+    }
+    
+    @media (max-width: 480px) {
+        .prediction-container {
+            margin: 0.75rem 0.25rem;
+            border-radius: 16px;
+        }
+        
+        .prediction-header {
+            padding: 1.5rem 1rem;
+            border-radius: 16px 16px 0 0;
+        }
+        
+        .prediction-title {
+            font-size: 1.3rem;
+        }
+        
+        .prediction-subtitle {
+            font-size: 0.8rem;
+        }
+        
+        .form-container {
+            padding: 1.5rem 1rem;
+        }
+        
+        .form-control,
+        .form-select {
+            min-height: 44px;
+            padding: 11px 14px;
+            font-size: 0.8rem;
+            border-radius: 10px;
+        }
+        
+        .btn {
+            min-height: 44px;
+            padding: 12px 22px;
+            font-size: 0.8rem;
+            border-radius: 12px;
+        }
+        
+        .form-label {
+            font-size: 0.75rem;
+            margin-bottom: 0.3rem;
+        }
+        
+        .form-text {
+            font-size: 0.65rem;
+        }
+        
+        .small {
+            font-size: 0.6rem !important;
+        }
+        
+        .input-tooltip {
+            width: 16px;
+            height: 16px;
+            font-size: 9px;
+        }
+        
+        .col-md-6,
+        .col-lg-4 {
+            margin-bottom: 0.75rem;
+        }
+        
+        .row.g-4 {
+            gap: 0.375rem !important;
+        }
+        
+        .alert {
+            border-radius: 8px;
+            padding: 0.75rem 0.875rem;
+            font-size: 0.75rem;
+        }
+        
+        .bi {
+            font-size: 1rem;
+        }
+        
+        /* Ultra-compact form layout */
+        .form-group {
+            margin-bottom: 1rem;
+        }
+        
+        .progress-bar-custom {
+            height: 4px;
+        }
+    }
+    
+    /* Touch device optimizations */
+    .touch-device .prediction-container:hover {
+        transform: none;
+    }
+    
+    .touch-device .btn:hover {
+        transform: none;
+    }
+    
+    .touch-device .form-control:focus,
+    .touch-device .form-select:focus {
+        transform: none;
+    }
+    
+    /* Enhanced accessibility for mobile */
+    @media (max-width: 768px) {
+        .form-control:focus,
+        .form-select:focus,
+        .btn:focus {
+            outline: 3px solid rgba(6, 182, 212, 0.6);
+            outline-offset: 2px;
+        }
+        
+        /* Better text legibility */
+        .prediction-container {
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+            text-rendering: optimizeLegibility;
+        }
+        
+        /* Improved form accessibility */
+        .form-control,
+        .form-select {
+            -webkit-appearance: none;
+            -moz-appearance: textfield;
+        }
+    }
+    
+    /* Landscape orientation adjustments for mobile */
+    @media (max-width: 992px) and (orientation: landscape) {
+        .prediction-container {
+            margin: 1rem 2rem;
+        }
+        
+        .prediction-header {
+            padding: 1.75rem 2rem;
+        }
+        
+        .prediction-title {
+            font-size: 1.5rem;
+        }
+        
+        .form-container {
+            padding: 1.75rem 2rem;
+        }
+        
+        .col-md-6,
+        .col-lg-4 {
+            flex: 0 0 50% !important;
+            max-width: 50% !important;
+            width: 50% !important;
+        }
+    }
+</style>
+
+<div class="container mt-4" style="max-width: 1200px;">
+  <div class="row justify-content-center">
+    <div class="col-12">
+      <div class="prediction-container">
+        <div class="prediction-header">
+          <div class="d-flex align-items-center">
+            <i class="bi bi-heart-fill me-3 fs-4"></i>
+            <div>
+              <h3 class="prediction-title mb-0">Chronic Kidney Disease Assessment</h3>
+              <small class="prediction-subtitle">AI-Powered Kidney Function Health Analysis</small>
+            </div>
+          </div>
+        </div>
+        <div class="form-container">
+          {% if form.errors %}
+            <div class="alert alert-danger" role="alert">
+              <strong>There were problems with your input:</strong>
+              <ul class="mb-0 mt-2">
+                {% for field, errors in form.errors.items %}
+                  {% for error in errors %}
+                    <li><strong>{{ field|title }}</strong>: {{ error }}</li>
+                  {% endfor %}
+                {% endfor %}
+              </ul>
+            </div>
+          {% endif %}
+          {% if not done %}
+            <div class="alert alert-info" role="alert">
+              <i class="bi bi-info-circle-fill me-2"></i>
+              <strong>Instructions:</strong> Please fill in all the required kidney function and health information accurately. This comprehensive assessment helps evaluate your risk of chronic kidney disease.
+            </div>
+          {% endif %}
+
+          {% if error_message %}
+            <div class="alert alert-warning" role="alert">
+              <i class="bi bi-exclamation-triangle me-2"></i>{{ error_message }}
+            </div>
+          {% endif %}
+
+          <form method="post" novalidate>
+            {% csrf_token %}
+            <div class="row g-4">
+              <div class="col-md-6 col-lg-4">
+                <div class="form-group">
+                  <label class="form-label fw-semibold">Age</label>
+                  <div class="input-group">
+                    {{ form.age|add_class:"form-control" }}
+                    <span class="input-tooltip" data-bs-toggle="tooltip" title="Enter your current age in years">?</span>
+                  </div>
+                  <div class="form-text text-muted">Your current age (2-90 years)</div>
+                  <div class="progress-bar-custom d-none" id="age-progress"></div>
+                </div>
+              </div>
+              <div class="col-md-6 col-lg-4">
+                <div class="form-group">
+                  <label class="form-label fw-semibold">Blood Pressure</label>
+                  <div class="input-group">
+                    {{ form.bp|add_class:"form-control" }}
+                    <span class="input-tooltip" data-bs-toggle="tooltip" title="Systolic blood pressure - Normal: <120, High: ≥140 mmHg">?</span>
+                  </div>
+                  <div class="form-text text-muted">Blood pressure reading (50-180 mmHg)</div>
+                  <div class="small text-info mt-1">💡 Normal: <120, Pre-hypertension: 120-139, High: ≥140 mmHg</div>
+                </div>
+              </div>
+              <div class="col-md-6 col-lg-4">
+                <div class="form-group">
+                  <label class="form-label fw-semibold">Blood Glucose Random</label>
+                  <div class="input-group">
+                    {{ form.bgr|add_class:"form-control" }}
+                    <span class="input-tooltip" data-bs-toggle="tooltip" title="Random blood glucose - Normal: <140, Diabetes: ≥200 mg/dL">?</span>
+                  </div>
+                  <div class="form-text text-muted">Random blood glucose (22-490 mg/dl)</div>
+                  <div class="small text-info mt-1">💡 Normal: <140, Pre-diabetes: 140-199, Diabetes: ≥200 mg/dL</div>
+                </div>
+              </div>
+              <div class="col-md-6 col-lg-4">
+                <div class="form-group">
+                  <label class="form-label fw-semibold">Blood Urea</label>
+                  <div class="input-group">
+                    {{ form.bu|add_class:"form-control" }}
+                    <span class="input-tooltip" data-bs-toggle="tooltip" title="Blood Urea Nitrogen - Normal: 7-20 mg/dL">?</span>
+                  </div>
+                  <div class="form-text text-muted">Blood urea nitrogen (1.5-391 mg/dl)</div>
+                  <div class="small text-info mt-1">💡 Normal: 7-20 mg/dL, High levels may indicate kidney problems</div>
+                </div>
+              </div>
+              <div class="col-md-6 col-lg-4">
+                <div class="form-group">
+                  <label class="form-label fw-semibold">Serum Creatinine</label>
+                  <div class="input-group">
+                    {{ form.sc|add_class:"form-control" }}
+                    <span class="input-tooltip" data-bs-toggle="tooltip" title="Key kidney function marker - Normal: 0.6-1.2 mg/dL">?</span>
+                  </div>
+                  <div class="form-text text-muted">Kidney function marker (0.4-76 mg/dl)</div>
+                  <div class="small text-info mt-1">💡 Normal: Men 0.7-1.2, Women 0.6-1.1 mg/dL</div>
+                </div>
+              </div>
+              <div class="col-md-6 col-lg-4">
+                <div class="form-group">
+                  <label class="form-label fw-semibold">Sodium</label>
+                  <div class="input-group">
+                    {{ form.sod|add_class:"form-control" }}
+                    <span class="input-tooltip" data-bs-toggle="tooltip" title="Serum sodium level - Normal: 136-145 mEq/L">?</span>
+                  </div>
+                  <div class="form-text text-muted">Serum sodium (4.5-163 mEq/L)</div>
+                  <div class="small text-info mt-1">💡 Normal: 136-145 mEq/L</div>
+                </div>
+              </div>
+              <div class="col-md-6 col-lg-4">
+                <div class="form-group">
+                  <label class="form-label fw-semibold">Potassium</label>
+                  <div class="input-group">
+                    {{ form.pot|add_class:"form-control" }}
+                    <span class="input-tooltip" data-bs-toggle="tooltip" title="Serum potassium level - Normal: 3.5-5.0 mEq/L">?</span>
+                  </div>
+                  <div class="form-text text-muted">Serum potassium (2.5-47 mEq/L)</div>
+                  <div class="small text-info mt-1">💡 Normal: 3.5-5.0 mEq/L</div>
+                </div>
+              </div>
+              <div class="col-md-6 col-lg-4">
+                <div class="form-group">
+                  <label class="form-label fw-semibold">Hemoglobin</label>
+                  <div class="input-group">
+                    {{ form.hemo|add_class:"form-control" }}
+                    <span class="input-tooltip" data-bs-toggle="tooltip" title="Blood hemoglobin - Normal: Men 14-18, Women 12-16 g/dL">?</span>
+                  </div>
+                  <div class="form-text text-muted">Blood hemoglobin (3.1-17.8 g/dl)</div>
+                  <div class="small text-info mt-1">💡 Normal: Men 14-18, Women 12-16 g/dL</div>
+                </div>
+              </div>
+              <div class="col-md-6 col-lg-4">
+                <div class="form-group">
+                  <label class="form-label fw-semibold">WBC Count</label>
+                  <div class="input-group">
+                    {{ form.wc|add_class:"form-control" }}
+                    <span class="input-tooltip" data-bs-toggle="tooltip" title="White blood cell count - Normal: 4,500-11,000 cells/μL">?</span>
+                  </div>
+                  <div class="form-text text-muted">White blood cell count (2200-26400 cells/μL)</div>
+                  <div class="small text-info mt-1">💡 Normal: 4,500-11,000 cells/μL</div>
+                </div>
+              </div>
+              <div class="col-md-6 col-lg-4">
+                <div class="form-group">
+                  <label class="form-label fw-semibold">RBC Count</label>
+                  <div class="input-group">
+                    {{ form.rc|add_class:"form-control" }}
+                    <span class="input-tooltip" data-bs-toggle="tooltip" title="Red blood cell count - Normal: Men 4.7-6.1, Women 4.2-5.4 million/μL">?</span>
+                  </div>
+                  <div class="form-text text-muted">Red blood cell count (2.1-8 million/μL)</div>
+                  <div class="small text-info mt-1">💡 Normal: Men 4.7-6.1, Women 4.2-5.4 million/μL</div>
+                </div>
+              </div>
+              <div class="col-md-6 col-lg-4">
+                <div class="form-group">
+                  <label class="form-label fw-semibold">Hypertension</label>
+                  <div class="input-group">
+                    {{ form.htn|add_class:"form-select" }}
+                    <span class="input-tooltip" data-bs-toggle="tooltip" title="History of high blood pressure (≥140/90 mmHg)">?</span>
+                  </div>
+                  <div class="form-text text-muted">High blood pressure history</div>
+                </div>
+              </div>
+              <div class="col-md-6 col-lg-4">
+                <div class="form-group">
+                  <label class="form-label fw-semibold">Diabetes Mellitus</label>
+                  <div class="input-group">
+                    {{ form.dm|add_class:"form-select" }}
+                    <span class="input-tooltip" data-bs-toggle="tooltip" title="History of diabetes mellitus (blood sugar disorders)">?</span>
+                  </div>
+                  <div class="form-text text-muted">Diabetes history</div>
+                </div>
+              </div>
+              <div class="col-md-6 col-lg-4">
+                <div class="form-group">
+                  <label class="form-label fw-semibold">Coronary Artery Disease</label>
+                  <div class="input-group">
+                    {{ form.cad|add_class:"form-select" }}
+                    <span class="input-tooltip" data-bs-toggle="tooltip" title="History of coronary artery disease (blocked heart arteries)">?</span>
+                  </div>
+                  <div class="form-text text-muted">Heart disease history</div>
+                </div>
+              </div>
+              <div class="col-md-6 col-lg-4">
+                <div class="form-group">
+                  <label class="form-label fw-semibold">Appetite</label>
+                  <div class="input-group">
+                    {{ form.appet|add_class:"form-select" }}
+                    <span class="input-tooltip" data-bs-toggle="tooltip" title="Current appetite level - Poor appetite can indicate kidney problems">?</span>
+                  </div>
+                  <div class="form-text text-muted">Current appetite status</div>
+                </div>
+              </div>
+              <div class="col-md-6 col-lg-4">
+                <div class="form-group">
+                  <label class="form-label fw-semibold">Anemia</label>
+                  <div class="input-group">
+                    {{ form.ane|add_class:"form-select" }}
+                    <span class="input-tooltip" data-bs-toggle="tooltip" title="Anemia (low red blood cells) - Common in kidney disease">?</span>
+                  </div>
+                  <div class="form-text text-muted">Anemia condition</div>
+                </div>
+              </div>
+            </div>
+            
+            <div class="mt-5 d-flex justify-content-center gap-3">
+              <button class="btn btn-info btn-lg rounded-pill px-5" type="submit">
+                <i class="bi bi-heart me-2"></i>Assess Kidney Disease Risk
+              </button>
+              <a class="btn btn-outline-secondary btn-lg rounded-pill px-4" href="{% url 'predictor:index' %}">
+                <i class="bi bi-arrow-left me-2"></i>Back to Menu
+              </a>
+            </div>
+          </form>
+
+          {% if done %}
+            <hr class="my-5">
+            <div class="text-center">
+              <div class="alert {% if pred == 1 %}alert-danger{% else %}alert-success{% endif %} shadow-sm border-0">
+                <div class="d-flex align-items-center justify-content-center gap-3 mb-3">
+                  <i class="bi {% if pred == 1 %}bi-exclamation-triangle-fill{% else %}bi-check-circle-fill{% endif %} display-4"></i>
+                  <div>
+                    <h4 class="mb-1 fw-bold">
+                      {% if pred == 1 %}⚠️ High Kidney Disease Risk{% else %}✅ Low Kidney Disease Risk{% endif %}
+                    </h4>
+                    {% if proba %}
+                      <span class="badge bg-dark fs-6">{{ proba }} Confidence</span>
+                    {% endif %}
+                  </div>
+                </div>
+                <div class="small">
+                  <strong>Disclaimer:</strong> This is a statistical estimate based on machine learning algorithms. 
+                  It should not replace professional medical advice, diagnosis, or treatment. 
+                  Always consult with a qualified healthcare provider for medical concerns.
+                </div>
+              </div>
+              
+              <div class="mt-4">
+                <a class="btn btn-info rounded-pill px-4" href="{% url 'predictor:predict' 'kidney' %}">
+                  <i class="bi bi-arrow-clockwise me-2"></i>Try Another Assessment
+                </a>
+              </div>
+            </div>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+// Initialize Bootstrap tooltips
+var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+  return new bootstrap.Tooltip(tooltipTriggerEl);
+});
+
+// Form validation and user guidance for kidney disease
+document.addEventListener('DOMContentLoaded', function() {
+    const form = document.querySelector('form');
+    const inputs = form.querySelectorAll('input[type="number"], input[type="text"], select');
+    
+    // Real-time validation
+    inputs.forEach(input => {
+        input.addEventListener('input', function() {
+            validateKidneyField(this);
+        });
+        
+        input.addEventListener('blur', function() {
+            validateKidneyField(this);
+        });
+    });
+    
+    function validateKidneyField(field) {
+        const value = parseFloat(field.value);
+        const fieldName = field.name;
+        
+        // Remove existing validation classes
+        field.classList.remove('is-valid', 'is-invalid');
+        
+        if (field.value === '') return;
+        
+        let isValid = true;
+        let message = '';
+        
+        // Field-specific validation for kidney disease
+        switch(fieldName) {
+            case 'bp':
+                if (value < 50 || value > 180) {
+                    isValid = false;
+                } else if (value >= 140) {
+                    message = '🚨 High blood pressure (≥140 mmHg) - kidney disease risk factor';
+                    field.classList.add('is-valid');
+                } else if (value >= 120) {
+                    message = '⚠️ Pre-hypertension (120-139 mmHg)';
+                    field.classList.add('is-valid');
+                } else {
+                    message = '✅ Normal blood pressure (<120 mmHg)';
+                    field.classList.add('is-valid');
+                }
+                break;
+                
+            case 'bgr':
+                if (value < 22 || value > 490) {
+                    isValid = false;
+                } else if (value >= 200) {
+                    message = '🚨 Diabetes range (≥200 mg/dL) - high kidney disease risk';
+                    field.classList.add('is-valid');
+                } else if (value >= 140) {
+                    message = '⚠️ Pre-diabetes range (140-199 mg/dL)';
+                    field.classList.add('is-valid');
+                } else {
+                    message = '✅ Normal glucose (<140 mg/dL)';
+                    field.classList.add('is-valid');
+                }
+                break;
+                
+            case 'bu':
+                if (value < 1.5 || value > 391) {
+                    isValid = false;
+                } else if (value > 20) {
+                    message = '⚠️ Elevated blood urea (>20 mg/dL) may indicate kidney problems';
+                    field.classList.add('is-valid');
+                } else {
+                    message = '✅ Normal blood urea (7-20 mg/dL)';
+                    field.classList.add('is-valid');
+                }
+                break;
+                
+            case 'sc':
+                if (value < 0.4 || value > 76) {
+                    isValid = false;
+                } else if (value > 1.2) {
+                    message = '🚨 High creatinine (>1.2 mg/dL) indicates kidney dysfunction';
+                    field.classList.add('is-valid');
+                } else {
+                    message = '✅ Normal kidney function';
+                    field.classList.add('is-valid');
+                }
+                break;
+                
+            case 'sod':
+                if (value < 4.5 || value > 163) {
+                    isValid = false;
+                } else if (value < 136 || value > 145) {
+                    message = '⚠️ Sodium imbalance - may affect kidney function';
+                    field.classList.add('is-valid');
+                } else {
+                    message = '✅ Normal sodium level (136-145 mEq/L)';
+                    field.classList.add('is-valid');
+                }
+                break;
+                
+            case 'pot':
+                if (value < 2.5 || value > 47) {
+                    isValid = false;
+                } else if (value < 3.5 || value > 5.0) {
+                    message = '⚠️ Potassium imbalance - kidney regulation issue';
+                    field.classList.add('is-valid');
+                } else {
+                    message = '✅ Normal potassium level (3.5-5.0 mEq/L)';
+                    field.classList.add('is-valid');
+                }
+                break;
+                
+            case 'hemo':
+                if (value < 3.1 || value > 17.8) {
+                    isValid = false;
+                } else if (value < 12) {
+                    message = '⚠️ Low hemoglobin - anemia common in kidney disease';
+                    field.classList.add('is-valid');
+                } else {
+                    message = '✅ Normal hemoglobin level';
+                    field.classList.add('is-valid');
+                }
+                break;
+                
+            case 'wc':
+                if (value < 2200 || value > 26400) {
+                    isValid = false;
+                } else if (value > 11000) {
+                    message = '⚠️ High WBC count may indicate infection or inflammation';
+                    field.classList.add('is-valid');
+                } else if (value < 4500) {
+                    message = '⚠️ Low WBC count may indicate immune system issues';
+                    field.classList.add('is-valid');
+                } else {
+                    message = '✅ Normal WBC count (4,500-11,000)';
+                    field.classList.add('is-valid');
+                }
+                break;
+                
+            case 'rc':
+                if (value < 2.1 || value > 8) {
+                    isValid = false;
+                } else if (value < 4.2) {
+                    message = '⚠️ Low RBC count - anemia';
+                    field.classList.add('is-valid');
+                } else {
+                    message = '✅ Normal RBC count';
+                    field.classList.add('is-valid');
+                }
+                break;
+                
+            default:
+                if (field.value !== '') {
+                    field.classList.add('is-valid');
+                }
+        }
+        
+        if (!isValid) {
+            field.classList.add('is-invalid');
+        }
+    }
+    
+    // Add kidney health tips
+    addKidneyTips();
+});
+
+function addKidneyTips() {
+    const tipsData = [
+        {
+            icon: '💧',
+            text: 'Stay well hydrated - aim for 8-10 glasses of water daily for kidney health'
+        },
+        {
+            icon: '🧂',
+            text: 'Limit sodium intake (<2,300mg/day) to reduce kidney strain and blood pressure'
+        },
+        {
+            icon: '🥗',
+            text: 'Follow a kidney-friendly diet low in phosphorus and potassium if recommended'
+        },
+        {
+            icon: '💊',
+            text: 'Avoid overuse of NSAIDs (ibuprofen, naproxen) which can damage kidneys'
+        },
+        {
+            icon: '🏃',
+            text: 'Regular exercise helps control blood pressure and diabetes - key for kidney health'
+        },
+        {
+            icon: '🩺',
+            text: 'Monitor blood pressure and blood sugar regularly if you have diabetes or hypertension'
+        }
+    ];
+    
+    const tipsContainer = document.createElement('div');
+    tipsContainer.className = 'alert alert-info mt-4';
+    tipsContainer.innerHTML = `
+        <h6><i class="bi bi-heart me-2"></i>Kidney Health Tips</h6>
+        <div class="tips-carousel">
+            ${tipsData.map(tip => `<div class="tip-item"><span class="me-2">${tip.icon}</span>${tip.text}</div>`).join('')}
+        </div>
+    `;
+    
+    const form = document.querySelector('form');
+    const submitButton = form.querySelector('.mt-5');
+    form.insertBefore(tipsContainer, submitButton);
+    
+    // Rotate tips every 4 seconds
+    let currentTip = 0;
+    const tipItems = tipsContainer.querySelectorAll('.tip-item');
+    
+    tipItems.forEach((item, index) => {
+        item.style.display = index === 0 ? 'block' : 'none';
+    });
+    
+    setInterval(() => {
+        tipItems[currentTip].style.display = 'none';
+        currentTip = (currentTip + 1) % tipItems.length;
+        tipItems[currentTip].style.display = 'block';
+    }, 4000);
+}
+</script>
+{% endblock %}
+
+

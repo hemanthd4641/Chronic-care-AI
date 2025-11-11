@@ -1,0 +1,246 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Edit Health Log{% endblock title %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="glass-card p-4 animate__animated animate__fadeInUp">
+                <h2 class="fw-bold gradient-text mb-4">
+                    <i class="fas fa-edit me-3"></i>Edit Health Log
+                </h2>
+                
+                {% if messages %}
+                    {% for message in messages %}
+                        <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                            {{ message }}
+                            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                        </div>
+                    {% endfor %}
+                {% endif %}
+
+                <form method="POST">
+                    {% csrf_token %}
+                    <div class="row g-3">
+                        <!-- Weight -->
+                        <div class="col-md-6">
+                            <label class="form-label">
+                                <i class="fas fa-weight me-2"></i>Weight (kg)
+                            </label>
+                            <input type="number" name="weight" class="form-control" step="0.1" 
+                                   value="{{ health_log.weight|default:'' }}" id="weightInput">
+                            <small class="text-muted">Normal range: 50-100 kg</small>
+                        </div>
+
+                        <!-- Heart Rate -->
+                        <div class="col-md-6">
+                            <label class="form-label">
+                                <i class="fas fa-heartbeat me-2"></i>Heart Rate (BPM)
+                            </label>
+                            <input type="number" name="heart_rate" class="form-control" 
+                                   value="{{ health_log.heart_rate|default:'' }}" id="heartRateInput">
+                            <small class="text-muted">Normal range: 60-100 BPM</small>
+                        </div>
+
+                        <!-- Blood Pressure -->
+                        <div class="col-md-6">
+                            <label class="form-label">
+                                <i class="fas fa-tint me-2"></i>Systolic BP
+                            </label>
+                            <input type="number" name="blood_pressure_systolic" class="form-control" 
+                                   value="{{ health_log.blood_pressure_systolic|default:'' }}" id="systolicInput">
+                            <small class="text-muted">Normal: 90-120 mmHg</small>
+                        </div>
+
+                        <div class="col-md-6">
+                            <label class="form-label">
+                                <i class="fas fa-tint me-2"></i>Diastolic BP
+                            </label>
+                            <input type="number" name="blood_pressure_diastolic" class="form-control" 
+                                   value="{{ health_log.blood_pressure_diastolic|default:'' }}" id="diastolicInput">
+                            <small class="text-muted">Normal: 60-80 mmHg</small>
+                        </div>
+
+                        <!-- Blood Sugar -->
+                        <div class="col-md-6">
+                            <label class="form-label">
+                                <i class="fas fa-vial me-2"></i>Blood Sugar (mg/dL)
+                            </label>
+                            <input type="number" name="blood_sugar" class="form-control" step="0.1" 
+                                   value="{{ health_log.blood_sugar|default:'' }}" id="bloodSugarInput">
+                            <small class="text-muted">Normal: 70-100 mg/dL (fasting)</small>
+                        </div>
+
+                        <!-- Mood -->
+                        <div class="col-md-6">
+                            <label class="form-label">
+                                <i class="fas fa-smile me-2"></i>Mood
+                            </label>
+                            <select name="mood" class="form-select" id="moodSelect">
+                                <option value="excellent" {% if health_log.mood == 'excellent' %}selected{% endif %}>Excellent</option>
+                                <option value="good" {% if health_log.mood == 'good' %}selected{% endif %}>Good</option>
+                                <option value="fair" {% if health_log.mood == 'fair' %}selected{% endif %}>Fair</option>
+                                <option value="poor" {% if health_log.mood == 'poor' %}selected{% endif %}>Poor</option>
+                            </select>
+                        </div>
+
+                        <!-- Notes -->
+                        <div class="col-12">
+                            <label class="form-label">
+                                <i class="fas fa-sticky-note me-2"></i>Notes
+                            </label>
+                            <textarea name="notes" class="form-control" rows="3" 
+                                      placeholder="Any additional notes about your health...">{{ health_log.notes|default:'' }}</textarea>
+                        </div>
+                    </div>
+
+                    <div class="d-flex justify-content-between mt-4">
+                        <a href="{% url 'health_dashboard' %}" class="btn btn-secondary">
+                            <i class="fas fa-arrow-left me-2"></i>Back to Dashboard
+                        </a>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-save me-2"></i>Update Log
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.glass-card {
+    backdrop-filter: blur(10px);
+    background: rgba(255, 255, 255, 0.7);
+    border-radius: 18px;
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    box-shadow: 0 8px 32px rgba(31, 38, 135, 0.1);
+}
+
+.gradient-text {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+.form-control, .form-select {
+    border: 2px solid #e9ecef;
+    border-radius: 12px;
+    padding: 0.75rem 1rem;
+    transition: all 0.3s ease;
+}
+
+.form-control:focus, .form-select:focus {
+    border-color: #667eea;
+    box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.25);
+}
+
+.btn {
+    border-radius: 12px;
+    padding: 0.75rem 1.5rem;
+    transition: all 0.3s ease;
+}
+
+.btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+}
+</style>
+
+<script>
+// Health validation and tips (same as add_log.html)
+document.addEventListener('DOMContentLoaded', function() {
+    const weightInput = document.getElementById('weightInput');
+    const heartRateInput = document.getElementById('heartRateInput');
+    const systolicInput = document.getElementById('systolicInput');
+    const diastolicInput = document.getElementById('diastolicInput');
+    const bloodSugarInput = document.getElementById('bloodSugarInput');
+
+    if (weightInput) {
+        weightInput.addEventListener('input', function() {
+            const weight = parseFloat(this.value);
+            if (weight < 30 || weight > 200) {
+                this.style.borderColor = '#dc3545';
+                showFieldTip(this, 'Please enter a realistic weight value');
+            } else {
+                this.style.borderColor = '#28a745';
+                hideFieldTip(this);
+            }
+        });
+    }
+
+    if (heartRateInput) {
+        heartRateInput.addEventListener('input', function() {
+            const hr = parseInt(this.value);
+            if (hr < 40 || hr > 200) {
+                this.style.borderColor = '#dc3545';
+                showFieldTip(this, 'Heart rate seems unusual. Please verify.');
+            } else {
+                this.style.borderColor = '#28a745';
+                hideFieldTip(this);
+            }
+        });
+    }
+
+    if (systolicInput && diastolicInput) {
+        [systolicInput, diastolicInput].forEach(input => {
+            input.addEventListener('input', function() {
+                const systolic = parseInt(systolicInput.value) || 0;
+                const diastolic = parseInt(diastolicInput.value) || 0;
+                
+                if (systolic > 0 && diastolic > 0) {
+                    if (systolic < diastolic) {
+                        systolicInput.style.borderColor = '#dc3545';
+                        diastolicInput.style.borderColor = '#dc3545';
+                        showFieldTip(systolicInput, 'Systolic should be higher than diastolic');
+                    } else if (systolic > 180 || diastolic > 120) {
+                        systolicInput.style.borderColor = '#ffc107';
+                        diastolicInput.style.borderColor = '#ffc107';
+                        showFieldTip(systolicInput, 'High blood pressure detected. Consult your doctor.');
+                    } else {
+                        systolicInput.style.borderColor = '#28a745';
+                        diastolicInput.style.borderColor = '#28a745';
+                        hideFieldTip(systolicInput);
+                    }
+                }
+            });
+        });
+    }
+
+    if (bloodSugarInput) {
+        bloodSugarInput.addEventListener('input', function() {
+            const sugar = parseFloat(this.value);
+            if (sugar < 50 || sugar > 300) {
+                this.style.borderColor = '#dc3545';
+                showFieldTip(this, 'Blood sugar level seems unusual. Please verify.');
+            } else if (sugar > 126) {
+                this.style.borderColor = '#ffc107';
+                showFieldTip(this, 'High blood sugar detected. Consult your doctor.');
+            } else {
+                this.style.borderColor = '#28a745';
+                hideFieldTip(this);
+            }
+        });
+    }
+});
+
+function showFieldTip(input, message) {
+    hideFieldTip(input);
+    const tip = document.createElement('div');
+    tip.className = 'field-tip text-danger small mt-1';
+    tip.textContent = message;
+    tip.style.fontSize = '0.75rem';
+    input.parentNode.appendChild(tip);
+}
+
+function hideFieldTip(input) {
+    const existingTip = input.parentNode.querySelector('.field-tip');
+    if (existingTip) {
+        existingTip.remove();
+    }
+}
+</script>
+{% endblock content %}

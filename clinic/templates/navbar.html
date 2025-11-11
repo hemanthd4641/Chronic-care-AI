@@ -1,0 +1,959 @@
+{% load static %}
+{% block navbar %}
+<style>
+  /* Modern Glassmorphism Sidebar styles */
+  .sidebar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    height: 100vh;
+    width: 280px;
+    background: linear-gradient(145deg, rgba(255, 255, 255, 0.15) 0%, rgba(255, 255, 255, 0.08) 100%);
+    backdrop-filter: blur(25px) saturate(180%);
+    border-right: 2px solid rgba(255, 255, 255, 0.2);
+    padding: 1.5rem 1rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    box-shadow: 0 25px 50px rgba(31, 38, 135, 0.15),
+                inset 0 1px 0 rgba(255, 255, 255, 0.3);
+    z-index: 1030;
+    transition: all 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    overflow-y: auto;
+  }
+  
+  /* Animated border effect */
+  .sidebar::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: linear-gradient(90deg, 
+      transparent, 
+      rgba(59, 130, 246, 0.8), 
+      rgba(16, 185, 129, 0.8), 
+      rgba(139, 92, 246, 0.8), 
+      transparent);
+    animation: borderShine 3s ease-in-out infinite;
+  }
+  
+  @keyframes borderShine {
+    0%, 100% { transform: translateX(-100%); }
+    50% { transform: translateX(100%); }
+  }
+  
+  /* Floating background elements */
+  .sidebar::after {
+    content: '';
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: conic-gradient(from 0deg, transparent, rgba(59, 130, 246, 0.03), transparent);
+    animation: rotate 20s linear infinite;
+    z-index: -1;
+    pointer-events: none;
+  }
+  
+  @keyframes rotate {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+  }
+
+  .sidebar::-webkit-scrollbar {
+    width: 6px;
+  }
+  
+  .sidebar::-webkit-scrollbar-track {
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 10px;
+  }
+  
+  .sidebar::-webkit-scrollbar-thumb {
+    background: linear-gradient(135deg, rgba(59, 130, 246, 0.6), rgba(16, 185, 129, 0.6));
+    border-radius: 10px;
+    transition: all 0.3s ease;
+  }
+  
+  .sidebar::-webkit-scrollbar-thumb:hover {
+    background: linear-gradient(135deg, rgba(59, 130, 246, 0.8), rgba(16, 185, 129, 0.8));
+  }
+
+  /* Sidebar hover effect */
+  .sidebar:hover {
+    transform: translateX(3px);
+    box-shadow: 0 30px 60px rgba(31, 38, 135, 0.2),
+                inset 0 1px 0 rgba(255, 255, 255, 0.4);
+    background: linear-gradient(145deg, rgba(255, 255, 255, 0.2) 0%, rgba(255, 255, 255, 0.1) 100%);
+  }
+
+  .sidebar .nav-link,
+  .sidebar .btn {
+    color: #374151 !important;
+    text-align: left;
+    border-radius: 18px;
+    padding: 1rem 1.25rem;
+    font-size: 0.9rem;
+    font-weight: 600;
+    position: relative;
+    overflow: hidden;
+    transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    background: rgba(255, 255, 255, 0.1);
+    border: 2px solid rgba(255, 255, 255, 0.2);
+    box-shadow: 0 8px 20px rgba(31, 38, 135, 0.1);
+    backdrop-filter: blur(15px);
+    letter-spacing: 0.3px;
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    text-decoration: none;
+  }
+
+  /* Glass button shimmer effect */
+  .sidebar .nav-link::before,
+  .sidebar .btn::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent);
+    transition: left 0.8s;
+    z-index: 1;
+  }
+  
+  .sidebar .nav-link:hover::before,
+  .sidebar .btn:hover::before {
+    left: 100%;
+  }
+
+  /* Button hover animation */
+  .sidebar .nav-link:hover,
+  .sidebar .btn:hover {
+    background: rgba(255, 255, 255, 0.25);
+    transform: translateX(8px) translateY(-3px) scale(1.02);
+    box-shadow: 0 15px 35px rgba(31, 38, 135, 0.2);
+    color: #1e40af !important;
+    border-color: rgba(59, 130, 246, 0.4);
+  }
+
+  /* Specific modern button styles */
+  .sidebar .btn-light {
+    background: linear-gradient(135deg, rgba(243, 244, 246, 0.9) 0%, rgba(229, 231, 235, 0.8) 100%) !important;
+    color: #1e40af !important;
+    border: 2px solid rgba(156, 163, 175, 0.3);
+    box-shadow: 0 8px 20px rgba(156, 163, 175, 0.2);
+  }
+
+  .sidebar .btn-warning {
+    background: linear-gradient(135deg, rgba(251, 191, 36, 0.9) 0%, rgba(245, 158, 11, 0.8) 100%) !important;
+    color: #1e3a8a !important;
+    border: 2px solid rgba(217, 119, 6, 0.3);
+    box-shadow: 0 8px 20px rgba(245, 158, 11, 0.3);
+  }
+
+  .sidebar .btn-info {
+    background: linear-gradient(135deg, rgba(14, 165, 233, 0.9) 0%, rgba(56, 189, 248, 0.8) 100%) !important;
+    color: #ffffff !important;
+    border: 2px solid rgba(2, 132, 199, 0.3);
+    box-shadow: 0 8px 20px rgba(14, 165, 233, 0.3);
+  }
+
+  .sidebar .btn-danger {
+    background: linear-gradient(135deg, rgba(239, 68, 68, 0.9) 0%, rgba(248, 113, 113, 0.8) 100%) !important;
+    color: #ffffff !important;
+    border: 2px solid rgba(220, 38, 38, 0.3);
+    box-shadow: 0 8px 20px rgba(239, 68, 68, 0.3);
+  }
+
+  .sidebar .btn-primary {
+    background: linear-gradient(135deg, rgba(59, 130, 246, 0.9) 0%, rgba(37, 99, 235, 0.8) 100%) !important;
+    color: #ffffff !important;
+    border: 2px solid rgba(29, 78, 216, 0.3);
+    box-shadow: 0 8px 20px rgba(59, 130, 246, 0.4);
+  }
+
+  .sidebar .btn-success {
+    background: linear-gradient(135deg, rgba(34, 197, 94, 0.9) 0%, rgba(16, 185, 129, 0.8) 100%) !important;
+    color: #ffffff !important;
+    border: 2px solid rgba(5, 150, 105, 0.3);
+    box-shadow: 0 8px 20px rgba(34, 197, 94, 0.4);
+  }
+
+  .sidebar .btn-secondary {
+    background: linear-gradient(135deg, rgba(156, 163, 175, 0.9) 0%, rgba(107, 114, 128, 0.8) 100%) !important;
+    color: #ffffff !important;
+    border: 2px solid rgba(75, 85, 99, 0.3);
+    box-shadow: 0 8px 20px rgba(156, 163, 175, 0.4);
+  }
+
+  .sidebar .navbar-brand {
+    background: linear-gradient(135deg, #3b82f6 0%, #10b981 50%, #8b5cf6 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    background-size: 200% 200%;
+    animation: gradientShift 4s ease-in-out infinite;
+    font-size: 1.4rem;
+    font-weight: 900;
+    text-transform: uppercase;
+    letter-spacing: 1.2px;
+    transition: all 0.4s ease;
+    text-decoration: none;
+    filter: drop-shadow(0 4px 8px rgba(59, 130, 246, 0.3));
+  }
+  
+  @keyframes gradientShift {
+    0%, 100% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+  }
+
+  .sidebar .navbar-brand:hover {
+    transform: scale(1.05);
+    filter: drop-shadow(0 6px 12px rgba(59, 130, 246, 0.5));
+  }
+
+  /* Sidebar section styling */
+  .sidebar-section {
+    margin: 1.5rem 0;
+    padding: 1rem 0;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.15);
+    position: relative;
+  }
+  
+  .sidebar-section::before {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, rgba(59, 130, 246, 0.5), transparent);
+  }
+  
+  .sidebar-section-title {
+    background: linear-gradient(135deg, #374151 0%, #6b7280 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    font-size: 0.75rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    margin-bottom: 1rem;
+    padding: 0 1rem;
+    position: relative;
+  }
+  
+  .sidebar-section-title::before {
+    content: '✦';
+    color: #3b82f6;
+    font-size: 0.6rem;
+    margin-right: 0.5rem;
+    animation: sparkle 2s ease-in-out infinite;
+  }
+  
+  @keyframes sparkle {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50% { opacity: 0.7; transform: scale(1.2); }
+  }
+
+  /* Enhanced responsive design with comprehensive mobile support */
+  @media (max-width: 992px) {
+    .sidebar {
+      width: 100%;
+      height: 100vh;
+      padding: 1.5rem 1rem;
+      transform: translateX(-100%);
+      transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+      z-index: 1055;
+      overflow-y: auto;
+      -webkit-overflow-scrolling: touch;
+    }
+    
+    .sidebar.active {
+      transform: translateX(0);
+    }
+    
+    .sidebar .nav-link,
+    .sidebar .btn {
+      font-size: 1rem;
+      padding: 1rem 1.25rem;
+      margin-bottom: 0.75rem;
+      border-radius: 15px;
+      min-height: 56px;
+      display: flex;
+      align-items: center;
+      justify-content: flex-start;
+      touch-action: manipulation;
+      -webkit-tap-highlight-color: transparent;
+    }
+    
+    .sidebar .navbar-brand {
+      font-size: 1.3rem;
+      text-align: center;
+      padding: 1rem 0;
+      margin-bottom: 1rem;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+    }
+    
+    .sidebar-section {
+      margin: 2rem 0;
+    }
+    
+    .sidebar-section-title {
+      font-size: 0.75rem;
+      padding: 0 1.25rem;
+      margin-bottom: 1rem;
+    }
+    
+    .sidebar .bi {
+      font-size: 1.3rem;
+      margin-right: 1rem;
+      min-width: 24px;
+    }
+  }
+  
+  @media (max-width: 768px) {
+    .sidebar {
+      padding: 1.25rem 0.875rem;
+    }
+    
+    .sidebar .nav-link,
+    .sidebar .btn {
+      font-size: 0.95rem;
+      padding: 0.9rem 1.1rem;
+      margin-bottom: 0.6rem;
+      min-height: 52px;
+    }
+    
+    .sidebar .navbar-brand {
+      font-size: 1.2rem;
+    }
+    
+    .sidebar-section-title {
+      font-size: 0.7rem;
+      padding: 0 1rem;
+    }
+    
+    .sidebar .bi {
+      font-size: 1.2rem;
+      margin-right: 0.875rem;
+    }
+  }
+  
+  @media (max-width: 576px) {
+    .sidebar {
+      width: 100%;
+      padding: 1rem 0.75rem;
+    }
+    
+    .sidebar .nav-link,
+    .sidebar .btn {
+      font-size: 0.9rem;
+      padding: 0.8rem 1rem;
+      border-radius: 12px;
+      margin-bottom: 0.5rem;
+      min-height: 48px;
+    }
+    
+    .sidebar .navbar-brand {
+      font-size: 1.1rem;
+      padding: 0.75rem 0;
+    }
+    
+    .sidebar-section {
+      margin: 1.5rem 0;
+    }
+    
+    .sidebar-section-title {
+      font-size: 0.65rem;
+      padding: 0 1rem;
+    }
+    
+    .sidebar .bi {
+      font-size: 1.1rem;
+      margin-right: 0.75rem;
+      min-width: 20px;
+    }
+  }
+  
+  @media (max-width: 480px) {
+    .sidebar {
+      padding: 0.875rem 0.5rem;
+    }
+    
+    .sidebar .nav-link,
+    .sidebar .btn {
+      font-size: 0.85rem;
+      padding: 0.75rem 0.875rem;
+      border-radius: 10px;
+      margin-bottom: 0.4rem;
+      min-height: 44px;
+    }
+    
+    .sidebar .navbar-brand {
+      font-size: 1rem;
+      padding: 0.5rem 0;
+    }
+    
+    .sidebar-section {
+      margin: 1.25rem 0;
+    }
+    
+    .sidebar-section-title {
+      font-size: 0.6rem;
+      padding: 0 0.875rem;
+    }
+    
+    .sidebar .bi {
+      font-size: 1rem;
+      margin-right: 0.6rem;
+      min-width: 18px;
+    }
+  }
+
+  /* Mobile sidebar toggle with glassmorphism and enhanced mobile support */
+  @media (max-width: 992px) {
+    .sidebar {
+      transform: translateX(-100%);
+      transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+      box-shadow: 0 0 50px rgba(31, 38, 135, 0.3);
+      z-index: 1055;
+    }
+    
+    .sidebar.active {
+      transform: translateX(0);
+    }
+    
+    .sidebar-toggler {
+      display: block !important;
+      position: fixed;
+      top: 15px;
+      left: 15px;
+      z-index: 1056;
+      background: rgba(255, 255, 255, 0.25);
+      backdrop-filter: blur(20px) saturate(180%);
+      border: 2px solid rgba(255, 255, 255, 0.3);
+      border-radius: 15px;
+      padding: 12px 14px;
+      cursor: pointer;
+      box-shadow: 0 8px 25px rgba(31, 38, 135, 0.2);
+      transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+      animation: pulseButton 3s ease-in-out infinite;
+      touch-action: manipulation;
+      -webkit-tap-highlight-color: transparent;
+      min-width: 48px;
+      min-height: 48px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    
+    @keyframes pulseButton {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.05); }
+    }
+    
+    .sidebar-toggler:hover {
+      background: rgba(255, 255, 255, 0.35);
+      transform: scale(1.1) translateY(-2px);
+      box-shadow: 0 12px 35px rgba(31, 38, 135, 0.3);
+    }
+    
+    .sidebar-toggler:active {
+      transform: scale(0.95);
+      background: rgba(255, 255, 255, 0.4);
+    }
+    
+    .sidebar-toggler .bi {
+      font-size: 1.5rem;
+      color: #374151;
+      transition: all 0.3s ease;
+    }
+    
+    .sidebar-toggler:hover .bi {
+      color: #3b82f6;
+      transform: rotate(90deg);
+    }
+    
+    /* Mobile overlay with blur effect */
+    .mobile-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.5);
+      backdrop-filter: blur(8px);
+      z-index: 1054;
+      opacity: 0;
+      visibility: hidden;
+      transition: all 0.3s ease;
+      touch-action: none;
+    }
+    
+    .mobile-overlay.active {
+      opacity: 1;
+      visibility: visible;
+    }
+  }
+  
+  /* Smaller mobile devices */
+  @media (max-width: 768px) {
+    .sidebar-toggler {
+      top: 12px;
+      left: 12px;
+      padding: 10px 12px;
+      border-radius: 12px;
+      min-width: 44px;
+      min-height: 44px;
+    }
+    
+    .sidebar-toggler .bi {
+      font-size: 1.4rem;
+    }
+  }
+  
+  @media (max-width: 576px) {
+    .sidebar-toggler {
+      top: 10px;
+      left: 10px;
+      padding: 8px 10px;
+      border-radius: 10px;
+      min-width: 40px;
+      min-height: 40px;
+    }
+    
+    .sidebar-toggler .bi {
+      font-size: 1.3rem;
+    }
+  }
+  
+  @media (max-width: 480px) {
+    .sidebar-toggler {
+      top: 8px;
+      left: 8px;
+      padding: 6px 8px;
+      border-radius: 8px;
+      min-width: 36px;
+      min-height: 36px;
+    }
+    
+    .sidebar-toggler .bi {
+      font-size: 1.2rem;
+    }
+  }
+  
+  /* Icon animation with medical theme */
+  .sidebar .bi {
+    transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    margin-right: 0.75rem;
+    font-size: 1.1rem;
+    filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.1));
+  }
+
+  .sidebar .nav-link:hover .bi,
+  .sidebar .btn:hover .bi {
+    transform: scale(1.2) rotate(10deg);
+    filter: drop-shadow(0 4px 8px rgba(59, 130, 246, 0.3));
+  }
+  
+  /* Medical pulse animation for health-related buttons */
+  .sidebar .btn:nth-child(n):hover .bi-heart-pulse-fill,
+  .sidebar .btn:nth-child(n):hover .bi-calendar-check,
+  .sidebar .btn:nth-child(n):hover .bi-graph-up {
+    animation: heartbeat 0.8s ease-in-out infinite;
+  }
+  
+  @keyframes heartbeat {
+    0%, 100% { transform: scale(1.2) rotate(10deg); }
+    50% { transform: scale(1.3) rotate(15deg); }
+  }
+  
+  /* Staggered animation for menu items */
+  .sidebar .btn,
+  .sidebar .nav-link {
+    animation: slideInLeft 0.6s ease-out;
+    animation-fill-mode: both;
+  }
+  
+  .sidebar .btn:nth-child(1) { animation-delay: 0.1s; }
+  .sidebar .btn:nth-child(2) { animation-delay: 0.2s; }
+  .sidebar .btn:nth-child(3) { animation-delay: 0.3s; }
+  .sidebar .btn:nth-child(4) { animation-delay: 0.4s; }
+  .sidebar .btn:nth-child(5) { animation-delay: 0.5s; }
+  
+  @keyframes slideInLeft {
+    from {
+      opacity: 0;
+      transform: translateX(-30px);
+    }
+    to {
+      opacity: 1;
+      transform: translateX(0);
+    }
+  }
+  
+  /* Enhanced Animated home icon */
+  .animated-home-icon {
+    animation: bounceAndGlow 2s ease-in-out infinite;
+    display: inline-block;
+    font-size: 2rem;
+    color: #3b82f6;
+    text-shadow: 0 0 15px rgba(59, 130, 246, 1), 0 0 30px rgba(59, 130, 246, 0.8);
+    filter: drop-shadow(0 0 10px rgba(59, 130, 246, 1));
+    font-weight: 900;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    background: linear-gradient(135deg, #3b82f6, #10b981);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+  
+  @keyframes bounceAndGlow {
+    0%, 100% {
+      transform: translateY(0);
+      text-shadow: 0 0 15px rgba(59, 130, 246, 1), 0 0 30px rgba(59, 130, 246, 0.8);
+    }
+    50% {
+      transform: translateY(-12px);
+      text-shadow: 0 0 25px rgba(59, 130, 246, 1), 0 0 40px rgba(59, 130, 246, 0.9), 0 0 50px rgba(59, 130, 246, 0.7);
+    }
+  }
+</style>
+
+<!-- Mobile toggle button and overlay -->
+<button class="btn sidebar-toggler d-lg-none" type="button" style="display: none;">
+  <i class="bi bi-list"></i>
+</button>
+<div class="mobile-overlay" id="mobileOverlay"></div>
+
+<div class="sidebar d-flex flex-column align-items-start">
+  <!-- Brand -->
+  <a class="navbar-brand fw-bold fs-4 d-flex align-items-center mb-4 animate__animated animate__fadeInDown" href="{% url 'admission:index' %}" style="text-decoration: none;">
+    <i class="bi bi-house-door-fill me-2 animated-home-icon"></i> Home
+  </a>
+
+  {% if request.user.is_authenticated %}
+    <!-- Doctor/Admin Features -->
+    {% if request.user.is_superuser %}
+        <div class="sidebar-section">
+          <div class="sidebar-section-title">Doctor Panel</div>
+          <a class="btn btn-warning fw-semibold w-100 mb-2 animate__animated animate__fadeInLeft" href="{% url 'admission:registration' %}">
+            <i class="bi bi-person-plus-fill me-2"></i> New Registration
+          </a>
+          <a class="btn btn-light fw-semibold w-100 mb-2 animate__animated animate__fadeInLeft" href="{% url 'admission:viewstudents' %}">
+            <i class="bi bi-people-fill me-2"></i> Patient List
+          </a>
+          <a class="btn btn-light fw-semibold w-100 mb-2 animate__animated animate__fadeInLeft" href="{% url 'admission:announcement' %}">
+            <i class="bi bi-megaphone-fill me-2"></i> Announcement
+          </a>
+          <a class="btn btn-primary w-100 mb-2 animate__animated animate__fadeInLeft" href="{% url 'appointments:doctor_appointments' %}">
+            <i class="bi bi-calendar-check me-2"></i> Patient Appointments
+          </a>
+          <a class="btn btn-success w-100 mb-2 animate__animated animate__fadeInLeft" href="{% url 'messaging:doctor_patient_messages' %}">
+            <i class="bi bi-chat-heart-fill me-2"></i> Patient Messages
+          </a>
+          <a class="btn btn-light fw-semibold w-100 mb-2 animate__animated animate__fadeInLeft" href="{% url 'view_cart' %}">
+            <i class="bi bi-credit-card-fill me-2"></i> Payments
+          </a>
+        </div>
+    {% endif %}
+
+    <!-- Communication Section -->
+    <div class="sidebar-section">
+      <div class="sidebar-section-title">Communication</div>
+      <a class="btn btn-info fw-semibold w-100 mb-2 animate__animated animate__fadeInLeft" href="{% url 'chatroom:index' %}">
+        <i class="bi bi-chat-dots-fill me-2"></i> Community Chat
+      </a>
+      <a class="btn btn-light fw-semibold w-100 mb-2 animate__animated animate__fadeInLeft" href="{% url 'messaging:private_messages' %}">
+        <i class="bi bi-envelope-fill me-2"></i> Private Messages
+      </a>
+      <a class="btn btn-light fw-semibold w-100 mb-2 animate__animated animate__fadeInLeft" href="{% url 'chatroom:report' %}">
+        <i class="bi bi-chat-square-heart-fill me-2"></i> Feedback
+      </a>
+    </div>
+
+    <!-- Patient Features -->
+    {% if not request.user.is_superuser %}
+        <div class="sidebar-section">
+          <div class="sidebar-section-title">Health Services</div>
+          <a class="btn btn-light fw-semibold w-100 mb-2 animate__animated animate__fadeInLeft" href="{% url 'predictor:index' %}">
+            <i class="bi bi-heart-pulse-fill me-2"></i> Prediction Room
+          </a>
+          <a class="btn btn-light fw-semibold w-100 mb-2 animate__animated animate__fadeInLeft" href="{% url 'predictor:history' %}">
+            <i class="bi bi-clock-history me-2"></i> Prediction History
+          </a>
+          <a class="btn btn-primary fw-semibold w-100 mb-2 animate__animated animate__fadeInLeft" href="{% url 'predictor:compare' %}">
+            <i class="bi bi-graph-up-arrow me-2"></i> Reports & Charts
+          </a>
+          <a class="btn btn-success w-100 mb-2 animate__animated animate__fadeInLeft" href="{% url 'health_dashboard' %}">
+            <i class="bi bi-graph-up me-2"></i> Health Tracker
+          </a>
+          <a class="btn btn-info w-100 mb-2 animate__animated animate__fadeInLeft" href="{% url 'appointments:book_appointment' %}">
+            <i class="bi bi-calendar-plus me-2"></i> Book Appointment
+          </a>
+          <a class="btn btn-secondary w-100 mb-2 animate__animated animate__fadeInLeft" href="{% url 'appointments:my_appointments' %}">
+            <i class="bi bi-calendar-event me-2"></i> My Appointments
+          </a>
+        </div>
+        
+        <div class="sidebar-section">
+          <div class="sidebar-section-title">Medical Store</div>
+          <a class="btn btn-warning w-100 mb-2 animate__animated animate__fadeInLeft" href="{% url 'medicine_list' %}">
+            <i class="bi bi-cart-fill me-2"></i> Medicine Store
+          </a>
+          <a class="btn btn-success w-100 mb-2 animate__animated animate__fadeInLeft" href="{% url 'view_cart' %}">
+            <i class="bi bi-basket-fill me-2"></i> Cart
+          </a>
+        </div>
+    {% endif %}
+
+    <!-- General Services -->
+    <div class="sidebar-section">
+      <div class="sidebar-section-title">General</div>
+      <a class="nav-link text-white fw-semibold w-100 mb-2 animate__animated animate__fadeInLeft" href="{% url 'userprofile:profile' %}">
+        <i class="bi bi-person-circle me-2"></i> Profile
+      </a>
+    </div>
+
+    <!-- Logout -->
+    <div class="mt-auto">
+      <a class="btn btn-danger fw-semibold w-100 animate__animated animate__fadeInUp" href="{% url 'admission:logout' %}">
+        <i class="bi bi-box-arrow-right me-2"></i> Logout
+      </a>
+    </div>
+  {% else %}
+    <a class="btn btn-light text-primary fw-semibold w-100" href="{% url 'admission:login' %}">Login</a>
+  {% endif %}
+</div>
+
+<!-- Enhanced mobile sidebar toggle script with comprehensive mobile support -->
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    const sidebar = document.querySelector('.sidebar');
+    const sidebarToggler = document.querySelector('.sidebar-toggler');
+    const mobileOverlay = document.getElementById('mobileOverlay');
+    const mainContent = document.querySelector('.main-content');
+    let isInitialized = false;
+    
+    // Enhanced mobile interface management
+    function updateMobileInterface() {
+      if (window.innerWidth <= 992) {
+        sidebarToggler.style.display = 'flex';
+        
+        // Only initialize event listeners once
+        if (!isInitialized) {
+          // Toggle sidebar on button click
+          sidebarToggler.addEventListener('click', function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            
+            const isActive = sidebar.classList.toggle('active');
+            mobileOverlay.classList.toggle('active', isActive);
+            document.body.style.overflow = isActive ? 'hidden' : 'auto';
+            
+            // Haptic feedback on supported devices
+            if (navigator.vibrate) {
+              navigator.vibrate(50);
+            }
+            
+            // Change icon with animation
+            const icon = sidebarToggler.querySelector('i');
+            icon.style.transform = 'scale(0.8) rotate(180deg)';
+            
+            setTimeout(() => {
+              if (isActive) {
+                icon.classList.replace('bi-list', 'bi-x-lg');
+              } else {
+                icon.classList.replace('bi-x-lg', 'bi-list');
+              }
+              icon.style.transform = 'scale(1) rotate(0deg)';
+            }, 150);
+          });
+          
+          // Close sidebar when clicking overlay
+          mobileOverlay.addEventListener('click', function() {
+            closeSidebar();
+          });
+          
+          // Close sidebar when clicking any nav link on mobile
+          const navLinks = sidebar.querySelectorAll('.nav-link, .btn');
+          navLinks.forEach(link => {
+            link.addEventListener('click', function() {
+              if (window.innerWidth <= 992) {
+                setTimeout(() => {
+                  closeSidebar();
+                }, 300); // Small delay for better UX
+              }
+            });
+          });
+          
+          // Enhanced swipe gesture support
+          let startX = null;
+          let startY = null;
+          let currentX = null;
+          let currentY = null;
+          let isScrolling = false;
+          
+          document.addEventListener('touchstart', function(e) {
+            startX = e.touches[0].clientX;
+            startY = e.touches[0].clientY;
+            isScrolling = false;
+          }, { passive: true });
+          
+          document.addEventListener('touchmove', function(e) {
+            if (!startX || !startY) return;
+            
+            currentX = e.touches[0].clientX;
+            currentY = e.touches[0].clientY;
+            
+            const diffX = currentX - startX;
+            const diffY = currentY - startY;
+            
+            // Determine if user is scrolling vertically
+            if (Math.abs(diffY) > Math.abs(diffX)) {
+              isScrolling = true;
+              return;
+            }
+            
+            if (isScrolling) return;
+            
+            // Swipe right to open sidebar (from left edge)
+            if (diffX > 80 && startX < 50 && window.innerWidth <= 992 && !sidebar.classList.contains('active')) {
+              e.preventDefault();
+              openSidebar();
+            }
+            
+            // Swipe left to close sidebar
+            if (diffX < -80 && sidebar.classList.contains('active') && currentX > 280) {
+              e.preventDefault();
+              closeSidebar();
+            }
+          }, { passive: false });
+          
+          document.addEventListener('touchend', function() {
+            startX = null;
+            startY = null;
+            currentX = null;
+            currentY = null;
+            isScrolling = false;
+          }, { passive: true });
+          
+          // Keyboard navigation support
+          document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape' && sidebar.classList.contains('active')) {
+              closeSidebar();
+            }
+          });
+          
+          // Handle orientation change
+          window.addEventListener('orientationchange', function() {
+            setTimeout(() => {
+              if (sidebar.classList.contains('active')) {
+                closeSidebar();
+              }
+              updateMobileInterface();
+            }, 100);
+          });
+          
+          isInitialized = true;
+        }
+        
+      } else {
+        sidebarToggler.style.display = 'none';
+        sidebar.classList.remove('active');
+        mobileOverlay.classList.remove('active');
+        document.body.style.overflow = 'auto';
+      }
+    }
+    
+    // Helper functions for better code organization
+    function openSidebar() {
+      sidebar.classList.add('active');
+      mobileOverlay.classList.add('active');
+      document.body.style.overflow = 'hidden';
+      
+      // Update toggle button icon
+      const icon = sidebarToggler.querySelector('i');
+      icon.style.transform = 'scale(0.8) rotate(180deg)';
+      setTimeout(() => {
+        icon.classList.replace('bi-list', 'bi-x-lg');
+        icon.style.transform = 'scale(1) rotate(0deg)';
+      }, 150);
+      
+      // Add focus to first focusable element in sidebar
+      const firstFocusable = sidebar.querySelector('a, button');
+      if (firstFocusable) {
+        setTimeout(() => firstFocusable.focus(), 300);
+      }
+      
+      // Haptic feedback
+      if (navigator.vibrate) {
+        navigator.vibrate(50);
+      }
+    }
+    
+    function closeSidebar() {
+      sidebar.classList.remove('active');
+      mobileOverlay.classList.remove('active');
+      document.body.style.overflow = 'auto';
+      
+      // Update toggle button icon
+      const icon = sidebarToggler.querySelector('i');
+      icon.style.transform = 'scale(0.8) rotate(-180deg)';
+      setTimeout(() => {
+        icon.classList.replace('bi-x-lg', 'bi-list');
+        icon.style.transform = 'scale(1) rotate(0deg)';
+      }, 150);
+      
+      // Return focus to toggle button
+      sidebarToggler.focus();
+    }
+    
+    // Initialize mobile interface
+    updateMobileInterface();
+    
+    // Handle window resize with debouncing
+    let resizeTimeout;
+    window.addEventListener('resize', function() {
+      clearTimeout(resizeTimeout);
+      resizeTimeout = setTimeout(updateMobileInterface, 250);
+    });
+    
+    // Add mobile-specific CSS classes
+    if (/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)) {
+      document.body.classList.add('mobile-device');
+    }
+    
+    // Prevent zoom on double tap for iOS
+    if (/iPad|iPhone|iPod/.test(navigator.userAgent)) {
+      document.addEventListener('touchend', function(e) {
+        const now = (new Date()).getTime();
+        if (now - lastTouchEnd <= 300) {
+          e.preventDefault();
+        }
+        lastTouchEnd = now;
+      }, false);
+    }
+    
+    let lastTouchEnd = 0;
+    
+    // Add smooth scrolling for mobile sidebar
+    if (window.innerWidth <= 992) {
+      sidebar.style.scrollBehavior = 'smooth';
+    }
+    
+    // Performance optimization: Remove hover effects on touch devices
+    if ('ontouchstart' in window) {
+      document.body.classList.add('touch-device');
+    }
+  });
+</script>
+{% endblock navbar %}

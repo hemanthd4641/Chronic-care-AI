@@ -1,0 +1,423 @@
+{% extends "base.html" %}
+{% block content %}
+<style>
+    .cart-container {
+        background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+        min-height: 100vh;
+        padding: 2rem 0;
+    }
+
+    .cart-main {
+        max-width: 1000px;
+        margin: 0 auto;
+        background: white;
+        border-radius: 20px;
+        box-shadow: 0 16px 48px rgba(0, 0, 0, 0.1);
+        overflow: hidden;
+        position: relative;
+    }
+
+    .cart-main::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 6px;
+        background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+    }
+
+    .cart-header {
+        background: linear-gradient(135deg, #f8f9fc 0%, #e9ecef 100%);
+        padding: 30px;
+        text-align: center;
+        border-bottom: 1px solid #dee2e6;
+    }
+
+    .cart-title {
+        color: #2d3748;
+        font-size: 2.5rem;
+        font-weight: 700;
+        margin-bottom: 10px;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+    }
+
+    .cart-subtitle {
+        color: #6c757d;
+        font-size: 1.1rem;
+        margin: 0;
+    }
+
+    .cart-content {
+        padding: 30px;
+    }
+
+    .cart-item {
+        background: linear-gradient(135deg, #f8f9fc 0%, #ffffff 100%);
+        border-radius: 16px;
+        padding: 24px;
+        margin-bottom: 16px;
+        border: 1px solid rgba(102, 126, 234, 0.1);
+        transition: all 0.3s ease;
+        position: relative;
+    }
+
+    .cart-item:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
+        border-color: rgba(102, 126, 234, 0.2);
+    }
+
+    .cart-item::before {
+        content: '';
+        position: absolute;
+        left: 0;
+        top: 0;
+        bottom: 0;
+        width: 4px;
+        background: linear-gradient(180deg, #28a745 0%, #20c997 100%);
+        border-radius: 0 4px 4px 0;
+    }
+
+    .item-content {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        flex-wrap: wrap;
+        gap: 16px;
+    }
+
+    .item-info {
+        display: flex;
+        align-items: center;
+        gap: 16px;
+        flex: 1;
+        min-width: 200px;
+    }
+
+    .item-icon {
+        width: 50px;
+        height: 50px;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-size: 20px;
+    }
+
+    .item-details {
+        flex: 1;
+    }
+
+    .item-name {
+        color: #2d3748;
+        font-size: 1.25rem;
+        font-weight: 600;
+        margin-bottom: 4px;
+    }
+
+    .item-price {
+        color: #6c757d;
+        font-size: 0.9rem;
+        font-weight: 500;
+    }
+
+    .quantity-controls {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        margin: 10px 0;
+    }
+
+    .quantity-btn {
+        width: 35px;
+        height: 35px;
+        border: 2px solid #e9ecef;
+        background: white;
+        border-radius: 8px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        font-weight: 600;
+    }
+
+    .quantity-btn:hover {
+        border-color: #667eea;
+        background: #667eea;
+        color: white;
+    }
+
+    .quantity-input {
+        width: 60px;
+        text-align: center;
+        border: 2px solid #e9ecef;
+        border-radius: 8px;
+        padding: 8px;
+        font-weight: 600;
+    }
+
+    .item-total {
+        color: #28a745;
+        font-size: 1.3rem;
+        font-weight: 700;
+        text-align: right;
+        min-width: 100px;
+    }
+
+    .remove-btn {
+        background: linear-gradient(135deg, #dc3545 0%, #c82333 100%);
+        border: none;
+        border-radius: 8px;
+        padding: 8px 16px;
+        color: white;
+        font-weight: 500;
+        text-decoration: none;
+        font-size: 0.875rem;
+        transition: all 0.3s ease;
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+    }
+
+    .remove-btn:hover {
+        background: linear-gradient(135deg, #c82333 0%, #a71e2a 100%);
+        color: white;
+        transform: translateY(-1px);
+        box-shadow: 0 4px 12px rgba(220, 53, 69, 0.3);
+    }
+
+    .summary-section {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        border-radius: 16px;
+        padding: 24px;
+        margin: 30px 0;
+        color: white;
+    }
+
+    .summary-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 12px;
+        font-size: 1.1rem;
+    }
+
+    .summary-row.total {
+        font-size: 1.5rem;
+        font-weight: 700;
+        border-top: 2px solid rgba(255, 255, 255, 0.3);
+        padding-top: 12px;
+        margin-top: 12px;
+    }
+
+    .discount-badge {
+        background: rgba(255, 255, 255, 0.2);
+        padding: 4px 12px;
+        border-radius: 20px;
+        font-size: 0.875rem;
+        font-weight: 600;
+    }
+
+    .checkout-btn {
+        background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+        border: none;
+        border-radius: 16px;
+        padding: 16px 32px;
+        color: white;
+        font-weight: 600;
+        font-size: 1.1rem;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 12px;
+        transition: all 0.3s ease;
+        box-shadow: 0 4px 16px rgba(40, 167, 69, 0.3);
+        width: 100%;
+        justify-content: center;
+    }
+
+    .checkout-btn:hover {
+        background: linear-gradient(135deg, #218838 0%, #1ea085 100%);
+        color: white;
+        transform: translateY(-2px);
+        box-shadow: 0 8px 24px rgba(40, 167, 69, 0.4);
+    }
+
+    .continue-shopping-btn {
+        background: linear-gradient(135deg, #007bff 0%, #0056b3 100%);
+        border: none;
+        border-radius: 16px;
+        padding: 16px 32px;
+        color: white;
+        font-weight: 600;
+        font-size: 1.1rem;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 12px;
+        transition: all 0.3s ease;
+        box-shadow: 0 4px 16px rgba(0, 123, 255, 0.3);
+    }
+
+    .continue-shopping-btn:hover {
+        background: linear-gradient(135deg, #0056b3 0%, #003d82 100%);
+        color: white;
+        transform: translateY(-2px);
+        box-shadow: 0 8px 24px rgba(0, 123, 255, 0.4);
+    }
+
+    .empty-cart {
+        text-align: center;
+        padding: 60px 20px;
+        color: #6c757d;
+    }
+
+    .empty-cart i {
+        font-size: 4rem;
+        margin-bottom: 20px;
+        color: #dee2e6;
+    }
+
+    .empty-cart h4 {
+        color: #495057;
+        margin-bottom: 16px;
+    }
+
+    .cart-footer {
+        text-align: center;
+        padding: 30px;
+        border-top: 1px solid #dee2e6;
+        background: #f8f9fa;
+    }
+
+    @media (max-width: 768px) {
+        .cart-title {
+            font-size: 2rem;
+        }
+
+        .item-content {
+            flex-direction: column;
+            align-items: stretch;
+        }
+
+        .item-info {
+            min-width: auto;
+        }
+
+        .item-total {
+            text-align: left;
+            margin-top: 8px;
+        }
+    }
+</style>
+
+<div class="cart-container">
+    <div class="container">
+        <div class="cart-main animate__animated animate__fadeInUp">
+            <!-- Cart Header -->
+            <div class="cart-header">
+                <h2 class="cart-title">
+                    <i class="bi bi-cart-fill"></i> Your Cart
+                </h2>
+                <p class="cart-subtitle">Review your selected medicines</p>
+            </div>
+
+            <!-- Cart Content -->
+            <div class="cart-content">
+                {% for item in cart_items %}
+                <div class="cart-item" data-cart-item-id="{{ item.id }}">
+                    <div class="item-content">
+                        <div class="item-info">
+                            <div class="item-icon">
+                                <i class="bi bi-capsule"></i>
+                            </div>
+                            <div class="item-details">
+                                <div class="item-name">{{ item.medicine.name }}</div>
+                                <div class="item-price">₹{{ item.price }} each</div>
+                                
+                                <div class="item-quantity">
+                                    <i class="bi bi-times"></i> Quantity: {{ item.quantity }}
+                                </div>
+                            </div>
+                        </div>
+                        <div class="item-total" id="item-total-{{ item.id }}">
+                            ₹{{ item.get_total }}
+                        </div>
+                        <a href="{% url 'remove_from_cart' item.id %}" class="remove-btn" 
+                           onclick="return confirmRemove('{{ item.medicine.name }}')">
+                            <i class="bi bi-trash"></i>
+                            Remove
+                        </a>
+                    </div>
+                </div>
+                {% empty %}
+                <div class="empty-cart">
+                    <i class="bi bi-cart"></i>
+                    <h4>Your cart is empty</h4>
+                    <p>Add some medicines to your cart to get started.</p>
+                </div>
+                {% endfor %}
+
+                <!-- Summary Section (only show if cart has items) -->
+                {% if cart_items %}
+                <div class="summary-section">
+                    <div class="summary-row">
+                        <span>Subtotal:</span>
+                        <span>₹{{ total_price }}</span>
+                    </div>
+                    {% if discount > 0 %}
+                    <div class="summary-row">
+                        <span>Discount (10% off orders over ₹500):</span>
+                        <span class="discount-badge">-₹{{ discount }}</span>
+                    </div>
+                    {% endif %}
+                    <div class="summary-row total">
+                        <span>Total:</span>
+                        <span id="cart-total">₹{{ final_total }}</span>
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+
+            <!-- Cart Footer -->
+            <div class="cart-footer">
+                {% if cart_items %}
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <a href="{% url 'medicine_list' %}" class="continue-shopping-btn">
+                            <i class="bi bi-arrow-left"></i>
+                            Continue Shopping
+                        </a>
+                    </div>
+                    <div class="col-md-6">
+                        <button class="checkout-btn" onclick="alert('Checkout functionality will be implemented in the next version.')">
+                            <i class="bi bi-credit-card"></i>
+                            Proceed to Checkout
+                        </button>
+                    </div>
+                </div>
+                {% else %}
+                <a href="{% url 'medicine_list' %}" class="continue-shopping-btn">
+                    <i class="bi bi-arrow-left"></i>
+                    Start Shopping
+                </a>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+// Simple confirmation for remove item
+function confirmRemove(medicineName) {
+    return confirm(`Are you sure you want to remove ${medicineName} from your cart?`);
+}
+</script>
+{% endblock %}

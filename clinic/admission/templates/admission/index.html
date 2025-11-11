@@ -1,0 +1,2031 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}Dashboard{% endblock title %}
+{% block content %}
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" />
+<link href="https://cdn.jsdelivr.net/npm/aos@2.3.4/dist/aos.css" rel="stylesheet" />
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet" />
+
+<style>
+  body {
+    background: linear-gradient(135deg, #ffffff 0%, #f8fafc 50%, #e2e8f0 100%);
+    background-attachment: fixed;
+    font-family: 'Inter', sans-serif;
+  }
+
+  .container {
+    padding: 1.5rem 1rem;
+    min-height: 100vh;
+    max-width: 1400px;
+  }
+  
+  /* Improved Grid System */
+  .row {
+    margin-left: -0.5rem;
+    margin-right: -0.5rem;
+    margin-bottom: 1.5rem;
+  }
+  
+  .row > * {
+    padding-left: 0.5rem;
+    padding-right: 0.5rem;
+    margin-bottom: 1rem;
+  }
+  
+  /* Consistent Card Heights */
+  .card-container {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+  }
+  
+  /* Compact card variation */
+  .glass-card.compact {
+    padding: 1.5rem 1rem;
+    min-height: 200px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    align-items: center;
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.9), rgba(240, 249, 255, 0.8));
+    border: 1px solid rgba(147, 197, 253, 0.2);
+    border-radius: 20px;
+    box-shadow: 0 8px 32px rgba(31, 38, 135, 0.15);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    position: relative;
+    overflow: hidden;
+  }
+  
+  .glass-card.compact::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: linear-gradient(90deg, #3b82f6, #10b981, #8b5cf6);
+    transform: scaleX(0);
+    transition: transform 0.3s ease;
+  }
+  
+  .glass-card.compact:hover::before {
+    transform: scaleX(1);
+  }
+  
+  .glass-card.compact:hover {
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.95), rgba(240, 249, 255, 0.9));
+    border: 1px solid rgba(147, 197, 253, 0.3);
+    transform: translateY(-5px) scale(1.02);
+    box-shadow: 0 12px 40px rgba(31, 38, 135, 0.2);
+  }
+
+  .glass-card.compact .btn {
+    margin-top: auto;
+    border-radius: 12px;
+    font-weight: 600;
+    padding: 0.6rem 1.2rem;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+  }
+  
+  .glass-card.compact .btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(0,0,0,0.15);
+  }
+
+  h2, h4, h5 {
+    letter-spacing: 0.6px;
+    font-weight: 800;
+  }
+
+  .gradient-text {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  /* Modern Card Styles - Enhanced */
+  .glass-card {
+    backdrop-filter: blur(16px) saturate(180%);
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.95), rgba(248, 250, 252, 0.9));
+    border-radius: 20px;
+    border: 1px solid rgba(255, 255, 255, 0.25);
+    box-shadow: 0 12px 40px rgba(102, 126, 234, 0.08);
+    transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    position: relative;
+    overflow: hidden;
+    height: 100%;
+  }
+  
+  .glass-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: linear-gradient(90deg, #3b82f6, #10b981, #8b5cf6);
+    transform: scaleX(0);
+    transition: transform 0.3s ease;
+  }
+  
+  .glass-card:hover::before {
+    transform: scaleX(1);
+  }
+
+  .glass-card:hover {
+    transform: translateY(-8px) scale(1.02);
+    box-shadow: 0 25px 50px rgba(102, 126, 234, 0.12);
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.98), rgba(248, 250, 252, 0.95));
+  }
+  
+  .glass-card-header {
+    background: linear-gradient(135deg, #e0e7ff 0%, #f1f5f9 100%);
+    color: #475569;
+    font-weight: 700;
+    padding: 1.25rem;
+    border: none;
+    border-radius: 18px 18px 0 0 !important;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+  }
+  
+  .glass-card-header i {
+    font-size: 1.25rem;
+  }
+
+  .list-group-item {
+    border: none;
+    padding: 1.25rem 1.5rem;
+    background: linear-gradient(135deg, rgba(248, 250, 252, 0.5), rgba(241, 245, 249, 0.3));
+    transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    border-radius: 12px;
+    margin-bottom: 0.5rem;
+  }
+
+  .list-group-item:hover {
+    background: linear-gradient(135deg, rgba(224, 231, 255, 0.6), rgba(199, 210, 254, 0.4));
+    transform: translateX(8px) scale(1.02);
+    box-shadow: 0 8px 25px rgba(102, 126, 234, 0.1);
+  }
+
+  .clock-widget, .info-widget {
+    backdrop-filter: blur(16px);
+    border-radius: 20px;
+    padding: 2rem;
+    text-align: center;
+    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.05);
+    transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    position: relative;
+    overflow: hidden;
+  }
+  
+  .clock-widget::before, .info-widget::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 3px;
+    background: linear-gradient(90deg, #3b82f6, #10b981);
+    transform: scaleX(0);
+    transition: transform 0.3s ease;
+  }
+  
+  .clock-widget:hover::before, .info-widget:hover::before {
+    transform: scaleX(1);
+  }
+
+  .clock-widget {
+    background: linear-gradient(135deg, #e0e7ff 0%, #c7d2fe 100%);
+    color: #475569;
+  }
+
+  .clock-widget:hover {
+    transform: translateY(-5px) scale(1.05);
+    box-shadow: 0 20px 50px rgba(99, 102, 241, 0.15);
+  }
+
+  .info-widget {
+    background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%);
+    color: #374151;
+  }
+
+  .info-widget:hover {
+    transform: translateY(-5px) scale(1.05);
+    box-shadow: 0 20px 50px rgba(34, 197, 94, 0.15);
+  }
+
+  /* Enhanced Stat Cards */
+  .stat-card {
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.95), rgba(248, 250, 252, 0.9));
+    border-radius: 20px;
+    padding: 2rem;
+    text-align: center;
+    border: 1px solid rgba(226, 232, 240, 0.3);
+    box-shadow: 0 12px 40px rgba(0,0,0,0.05);
+    transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    backdrop-filter: blur(16px);
+    position: relative;
+    overflow: hidden;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+  }
+  
+  .stat-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: linear-gradient(90deg, #3b82f6, #10b981, #8b5cf6);
+    transform: scaleX(0);
+    transition: transform 0.3s ease;
+  }
+  
+  .stat-card:hover::before {
+    transform: scaleX(1);
+  }
+
+  .stat-card:hover {
+    transform: translateY(-10px) scale(1.03);
+    box-shadow: 0 25px 50px rgba(0,0,0,0.08);
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.98), rgba(248, 250, 252, 0.95));
+  }
+  
+  .stat-icon {
+    width: 70px;
+    height: 70px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 1rem;
+    font-size: 1.5rem;
+    box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+    transition: all 0.3s ease;
+  }
+  
+  .stat-card:hover .stat-icon {
+    transform: scale(1.1) rotate(5deg);
+    box-shadow: 0 12px 25px rgba(0,0,0,0.15);
+  }
+  
+  .stat-card h3 {
+    font-size: 2.2rem;
+    font-weight: 800;
+    margin: 0.5rem 0;
+    background: linear-gradient(135deg, #3b82f6, #10b981);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+  
+  .stat-card h6 {
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: #64748b;
+    margin-bottom: 1rem;
+  }
+  
+  .stat-card .badge {
+    border-radius: 20px;
+    padding: 0.5rem 0.8rem;
+    font-size: 0.75rem;
+    font-weight: 600;
+  }
+
+  .alert {
+    border-radius: 20px;
+    background: linear-gradient(135deg, rgba(254, 252, 232, 0.95), rgba(253, 230, 138, 0.3));
+    border: 1px solid rgba(251, 191, 36, 0.2);
+    box-shadow: 0 8px 25px rgba(245, 158, 11, 0.1);
+    backdrop-filter: blur(16px);
+    font-weight: 600;
+    animation: fadeInUp 0.6s ease-out;
+    color: #92400e;
+  }
+
+  .quote-card {
+    background: linear-gradient(135deg, #fef3c7 0%, #fed7aa 100%);
+    border-radius: 25px;
+    color: #92400e;
+    box-shadow: 0 15px 40px rgba(245, 158, 11, 0.15);
+    transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    padding: 2.5rem;
+    position: relative;
+    overflow: hidden;
+  }
+  
+  .quote-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: linear-gradient(90deg, #f59e0b, #f97316);
+    transform: scaleX(0);
+    transition: transform 0.3s ease;
+  }
+  
+  .quote-card:hover::before {
+    transform: scaleX(1);
+  }
+
+  .quote-card:hover {
+    transform: translateY(-8px) scale(1.02);
+    box-shadow: 0 25px 60px rgba(245, 158, 11, 0.2);
+  }
+
+  footer {
+    background: rgba(255, 255, 255, 0.95);
+    font-size: 0.9rem;
+    border-top: 1px solid rgba(226, 232, 240, 0.6);
+    box-shadow: 0 -8px 25px rgba(0, 0, 0, 0.08);
+    backdrop-filter: blur(16px);
+    border-radius: 20px 20px 0 0;
+    margin-top: 3rem;
+  }
+
+  /* Enhanced Mobile Responsiveness - Medium Screens */
+  @media (max-width: 992px) {
+    .container { 
+      padding: 1.5rem 0.75rem;
+    }
+    
+    .glass-card {
+      border-radius: 22px;
+      margin-bottom: 1.5rem;
+    }
+    
+    .glass-card .btn {
+      min-height: 50px;
+      padding: 14px 20px;
+      font-size: 0.9rem;
+      border-radius: 12px;
+      touch-action: manipulation;
+      -webkit-tap-highlight-color: transparent;
+    }
+    
+    .btn-sm {
+      min-height: 44px;
+      padding: 10px 16px;
+      font-size: 0.85rem;
+      border-radius: 10px;
+    }
+    
+    .col-lg-3,
+    .col-lg-4 {
+      flex: 0 0 50%;
+      max-width: 50%;
+    }
+    
+    .quick-action-item {
+      margin-bottom: 1rem;
+    }
+    
+    .action-icon {
+      width: 60px;
+      height: 60px;
+    }
+    
+    .stats-card {
+      padding: 2rem 1.5rem !important;
+    }
+    
+    .clock-widget {
+      padding: 1.75rem;
+    }
+    
+    .welcome-section {
+      margin-bottom: 2rem;
+    }
+  }
+  
+  @media (max-width: 768px) {
+    .container { 
+      margin-left: 0;
+      padding: 1rem 0.5rem;
+    }
+    
+    .row {
+      margin-left: -0.5rem;
+      margin-right: -0.5rem;
+      margin-bottom: 1.25rem;
+    }
+    
+    .row > * {
+      padding-left: 0.5rem;
+      padding-right: 0.5rem;
+      margin-bottom: 1rem;
+    }
+    
+    .glass-card {
+      padding: 1.5rem 1.25rem !important;
+      border-radius: 20px;
+      min-height: auto;
+      margin-bottom: 1.25rem;
+    }
+    
+    .glass-card.compact {
+      padding: 1.25rem 1rem !important;
+      min-height: 200px;
+    }
+    
+    .welcome-section {
+      margin-bottom: 2rem;
+    }
+    
+    .welcome-section h4 {
+      font-size: 1.35rem;
+    }
+    
+    .clock-widget {
+      padding: 1.25rem;
+      margin-top: 1rem;
+      border-radius: 18px;
+    }
+    
+    h2 {
+      font-size: 1.85rem;
+    }
+    
+    h4 {
+      font-size: 1.35rem;
+    }
+    
+    h5, h6 {
+      font-size: 1.15rem;
+    }
+    
+    .btn {
+      padding: 12px 20px;
+      font-size: 0.9rem;
+      min-height: 48px;
+      touch-action: manipulation;
+      -webkit-tap-highlight-color: transparent;
+    }
+    
+    .btn-sm {
+      padding: 10px 16px;
+      font-size: 0.85rem;
+      min-height: 42px;
+    }
+    
+    .fs-2 {
+      font-size: 1.6rem !important;
+    }
+    
+    .card-header {
+      padding: 1rem 1.25rem;
+    }
+    
+    .health-metric {
+      padding: 0.75rem 0;
+    }
+    
+    .notification-item,
+    .activity-item,
+    .tip-item {
+      padding: 0.75rem 0;
+      font-size: 0.9rem;
+    }
+    
+    .quick-action-item {
+      margin-bottom: 1rem;
+      padding: 1.25rem !important;
+      border-radius: 18px;
+    }
+    
+    .action-icon {
+      width: 55px;
+      height: 55px;
+      margin-right: 1rem !important;
+    }
+    
+    .action-content h6 {
+      font-size: 1rem;
+      margin-bottom: 0.5rem;
+    }
+    
+    .action-content p {
+      font-size: 0.85rem;
+      margin-bottom: 0.75rem;
+    }
+    
+    .stats-card {
+      padding: 1.75rem 1.25rem !important;
+      margin-bottom: 1.25rem;
+    }
+    
+    .stats-icon {
+      width: 70px;
+      height: 70px;
+    }
+    
+    .stats-card h3 {
+      font-size: 2.25rem;
+    }
+    
+    .list-group-item {
+      padding: 1rem 1.25rem;
+      margin-bottom: 0.75rem;
+      border-radius: 15px;
+    }
+    
+    .col-lg-3,
+    .col-lg-4,
+    .col-md-3,
+    .col-md-4 {
+      flex: 0 0 100%;
+      max-width: 100%;
+      margin-bottom: 1rem;
+    }
+    
+    .col-md-6 {
+      flex: 0 0 100%;
+      max-width: 100%;
+      margin-bottom: 1rem;
+    }
+    
+    .d-flex.gap-2 {
+      gap: 1rem !important;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+    
+    /* Table responsiveness */
+    .table {
+      font-size: 0.85rem;
+    }
+    
+    .table th,
+    .table td {
+      padding: 0.75rem 0.5rem;
+    }
+    
+    /* Modal improvements */
+    .modal-dialog {
+      margin: 1rem;
+      max-width: calc(100% - 2rem);
+    }
+    
+    .modal-content {
+      border-radius: 20px;
+    }
+    
+    /* Touch optimizations */
+    .glass-card:hover {
+      transform: none;
+    }
+    
+    .btn:hover {
+      transform: none;
+    }
+    
+    .glass-card,
+    .btn {
+      transition: background-color 0.3s ease, border-color 0.3s ease;
+    }
+  }
+  
+  @media (max-width: 576px) {
+    .container { 
+      margin-left: 0; 
+      padding: 0.75rem 0.375rem;
+    }
+    
+    .row {
+      margin-left: -0.25rem;
+      margin-right: -0.25rem;
+      margin-bottom: 1rem;
+    }
+    
+    .row > * {
+      padding-left: 0.25rem;
+      padding-right: 0.25rem;
+      margin-bottom: 0.75rem;
+    }
+    
+    .glass-card {
+      padding: 1rem 0.875rem !important;
+      border-radius: 16px;
+      margin-bottom: 0.875rem;
+    }
+    
+    .glass-card.compact {
+      padding: 1rem 0.75rem !important;
+      min-height: 180px;
+    }
+    
+    .welcome-section {
+      margin-bottom: 1.75rem;
+      padding: 1.25rem 0.75rem !important;
+      border-radius: 18px;
+    }
+    
+    .welcome-section h4 {
+      font-size: 1.2rem;
+    }
+    
+    .clock-widget {
+      padding: 1rem;
+      margin-top: 0.875rem;
+      border-radius: 16px;
+    }
+    
+    .btn {
+      padding: 10px 16px;
+      font-size: 0.85rem;
+      min-height: 44px;
+      border-radius: 12px;
+      width: 100%;
+      margin-bottom: 0.5rem;
+      touch-action: manipulation;
+      -webkit-tap-highlight-color: transparent;
+    }
+    
+    .btn-sm {
+      padding: 8px 12px;
+      font-size: 0.8rem;
+      min-height: 40px;
+      border-radius: 10px;
+      width: 100%;
+      margin-bottom: 0.375rem;
+    }
+    
+    h2 {
+      font-size: 1.6rem;
+    }
+    
+    h4 {
+      font-size: 1.2rem;
+    }
+    
+    h5, h6 {
+      font-size: 1.05rem;
+    }
+    
+    .fs-2 {
+      font-size: 1.35rem !important;
+    }
+    
+    .clock-widget, .info-widget {
+      padding: 1rem;
+      border-radius: 16px;
+    }
+    
+    .quote-card {
+      padding: 1.25rem;
+      border-radius: 20px;
+    }
+    
+    .card-header {
+      padding: 0.875rem 1rem;
+      font-size: 0.95rem;
+      border-radius: 16px 16px 0 0;
+    }
+    
+    .alert {
+      padding: 1rem 1.25rem;
+      font-size: 0.9rem;
+      border-radius: 16px;
+    }
+    
+    .health-metric {
+      padding: 0.5rem 0;
+    }
+    
+    .metric-value {
+      font-size: 1.1rem;
+    }
+    
+    .metric-label {
+      font-size: 0.75rem;
+    }
+    
+    .notification-item,
+    .activity-item,
+    .tip-item {
+      padding: 0.625rem 0;
+      font-size: 0.85rem;
+    }
+    
+    .activity-icon {
+      width: 40px;
+      height: 40px;
+      margin-right: 0.875rem;
+    }
+    
+    .quick-action-item {
+      margin-bottom: 1rem;
+      padding: 1.25rem !important;
+      border-radius: 18px;
+      display: flex !important;
+      align-items: center;
+    }
+    
+    .action-icon {
+      width: 55px;
+      height: 55px;
+      margin-right: 1rem !important;
+      flex-shrink: 0;
+    }
+    
+    .action-content {
+      flex: 1;
+    }
+    
+    .action-content h6 {
+      font-size: 1rem;
+      margin-bottom: 0.5rem;
+    }
+    
+    .action-content p {
+      font-size: 0.85rem;
+      margin-bottom: 0.75rem;
+      line-height: 1.4;
+    }
+    
+    .action-content .btn {
+      font-size: 0.8rem;
+      padding: 8px 16px;
+      width: auto;
+      margin-bottom: 0;
+    }
+    
+    /* Quick Actions specific mobile grid */
+    .quick-actions-row .col-md-6 {
+      flex: 0 0 100%;
+      max-width: 100%;
+      margin-bottom: 0.75rem;
+    }
+    
+    .stats-card {
+      padding: 1.5rem 1rem !important;
+      margin-bottom: 0.875rem;
+      border-radius: 18px;
+    }
+    
+    .stats-icon {
+      width: 60px;
+      height: 60px;
+    }
+    
+    .stats-card h3 {
+      font-size: 2rem;
+    }
+    
+    .list-group-item {
+      padding: 0.875rem 1rem;
+      margin-bottom: 0.5rem;
+      border-radius: 12px;
+      font-size: 0.85rem;
+    }
+    
+    /* Ensure proper mobile stacking */
+    .col-lg-3,
+    .col-lg-4,
+    .col-md-3,
+    .col-md-4,
+    .col-md-6 {
+      flex: 0 0 100% !important;
+      max-width: 100% !important;
+    }
+    
+    .d-flex.gap-2 {
+      gap: 0.75rem !important;
+      flex-direction: column;
+      align-items: stretch;
+    }
+    
+    /* Enhanced mobile table */
+    .table {
+      font-size: 0.8rem;
+      border-radius: 12px;
+    }
+    
+    .table th,
+    .table td {
+      padding: 0.625rem 0.375rem;
+    }
+    
+    .table-responsive {
+      border-radius: 12px;
+      -webkit-overflow-scrolling: touch;
+    }
+    
+    /* Modal improvements */
+    .modal-dialog {
+      margin: 0.5rem;
+      max-width: calc(100% - 1rem);
+    }
+    
+    .modal-content {
+      border-radius: 16px;
+    }
+    
+    /* Disable hover effects on touch devices */
+    .glass-card:hover {
+      transform: none;
+    }
+    
+    .btn:hover {
+      transform: translateY(-1px);
+    }
+    
+    .stats-card:hover {
+      transform: none;
+    }
+    
+    .quick-action-item:hover {
+      transform: none;
+    }
+    
+    /* Better spacing adjustments */
+    .mb-4 { margin-bottom: 1.25rem !important; }
+    .mb-3 { margin-bottom: 1rem !important; }
+    .mb-2 { margin-bottom: 0.75rem !important; }
+    .mt-4 { margin-top: 1.25rem !important; }
+    .mt-3 { margin-top: 1rem !important; }
+    .mt-2 { margin-top: 0.75rem !important; }
+    
+    .p-4 { padding: 1rem !important; }
+    .p-3 { padding: 0.875rem !important; }
+    .p-2 { padding: 0.75rem !important; }
+    
+    /* Badge improvements */
+    .badge {
+      padding: 0.375rem 0.75rem;
+      font-size: 0.75rem;
+      border-radius: 10px;
+    }
+    
+    /* Text adjustments */
+    .small {
+      font-size: 0.8rem !important;
+    }
+    
+    .text-muted {
+      font-size: 0.85rem;
+    }
+  }
+
+  /* Health Metrics */
+  .health-metric {
+    padding: 0.5rem;
+  }
+  .metric-value {
+    font-size: 1.2rem;
+    font-weight: 700;
+    margin-bottom: 0.25rem;
+  }
+  .metric-label {
+    font-size: 0.8rem;
+    color: #6b7280;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+
+  /* Notifications */
+  .notification-list {
+    max-height: 200px;
+    overflow-y: auto;
+  }
+  .notification-item {
+    padding: 0.75rem 0;
+    border-bottom: 1px solid rgba(0,0,0,0.05);
+    display: flex;
+    align-items: center;
+    font-size: 0.9rem;
+  }
+  .notification-item:last-child {
+    border-bottom: none;
+  }
+
+  /* Activity List */
+  .activity-list {
+    max-height: 300px;
+    overflow-y: auto;
+  }
+  .activity-item {
+    display: flex;
+    align-items: center;
+    padding: 1.25rem 0;
+    border-bottom: 1px solid rgba(226, 232, 240, 0.6);
+    transition: all 0.3s ease;
+  }
+  .activity-item:last-child {
+    border-bottom: none;
+  }
+  .activity-item:hover {
+    transform: translateX(8px);
+    background: rgba(102, 126, 234, 0.05);
+    border-radius: 12px;
+    padding-left: 1rem;
+    padding-right: 1rem;
+  }
+  .activity-icon {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    margin-right: 1.25rem;
+    flex-shrink: 0;
+    box-shadow: 0 8px 20px rgba(0,0,0,0.15);
+  }
+  .activity-content {
+    flex: 1;
+  }
+  .activity-title {
+    font-weight: 700;
+    color: #2d3748;
+    margin-bottom: 0.25rem;
+  }
+  .activity-time {
+    font-size: 0.85rem;
+    color: #6b7280;
+    font-weight: 500;
+  }
+
+  /* Health Tips */
+  .health-tips {
+    max-height: 250px;
+    overflow-y: auto;
+    padding: 0.5rem;
+  }
+  .tip-item {
+    padding: 1rem 0;
+    border-bottom: 1px solid rgba(226, 232, 240, 0.6);
+    display: flex;
+    align-items: center;
+    font-size: 0.95rem;
+    font-weight: 500;
+    transition: all 0.3s ease;
+    background: linear-gradient(135deg, rgba(254, 252, 232, 0.3), rgba(253, 230, 138, 0.1));
+    border-radius: 10px;
+    margin-bottom: 0.5rem;
+    padding: 0.75rem 1rem !important;
+  }
+  .tip-item:last-child {
+    border-bottom: none;
+    margin-bottom: 0;
+  }
+  .tip-item:hover {
+    transform: translateX(8px);
+    background: linear-gradient(135deg, rgba(67, 233, 123, 0.1), rgba(16, 185, 129, 0.1));
+    border-radius: 12px;
+    padding-left: 1rem;
+    padding-right: 1rem;
+  }
+
+  /* Medical-themed animations */
+  .floating-medical-icon {
+    animation: heartbeat 2s ease-in-out infinite;
+  }
+  
+  .medical-pulse {
+    animation: medicalPulse 3s ease-in-out infinite;
+  }
+  
+  @keyframes heartbeat {
+    0%, 50%, 100% {
+      transform: scale(1);
+    }
+    25% {
+      transform: scale(1.1);
+    }
+    75% {
+      transform: scale(1.05);
+    }
+  }
+  
+  @keyframes medicalPulse {
+    0%, 100% {
+      box-shadow: 0 0 0 0 rgba(255, 193, 7, 0.4);
+    }
+    50% {
+      box-shadow: 0 0 0 15px rgba(255, 193, 7, 0);
+    }
+  }
+  
+  /* Enhanced Quick Actions */
+  .quick-action-item {
+    background: linear-gradient(135deg, rgba(248, 250, 252, 0.6), rgba(241, 245, 249, 0.4));
+    border: 1px solid rgba(226, 232, 240, 0.3);
+    transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    backdrop-filter: blur(10px);
+    margin-bottom: 0.5rem;
+  }
+  
+  .quick-action-item:hover {
+    background: linear-gradient(135deg, rgba(224, 231, 255, 0.7), rgba(199, 210, 254, 0.5));
+    transform: translateX(8px) scale(1.02);
+    box-shadow: 0 8px 25px rgba(102, 126, 234, 0.12);
+    border-color: rgba(102, 126, 234, 0.2);
+  }
+  
+  .action-icon {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.2rem;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    transition: all 0.3s ease;
+  }
+  
+  .quick-action-item:hover .action-icon {
+    transform: scale(1.1) rotate(5deg);
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+  }
+  
+  .action-content h6 {
+    font-size: 0.95rem;
+    margin-bottom: 0.25rem;
+  }
+  
+  .action-content p {
+    font-size: 0.8rem;
+    line-height: 1.3;
+    margin-bottom: 0.5rem;
+  }
+  
+  .action-content .btn {
+    font-size: 0.75rem;
+    padding: 0.4rem 0.8rem;
+    border-radius: 8px;
+    font-weight: 600;
+    transition: all 0.3s ease;
+  }
+  
+  .action-content .btn:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  }
+  
+  /* System Overview Styles */
+  .system-metric {
+    padding: 0.75rem 0;
+    border-bottom: 1px solid rgba(226, 232, 240, 0.3);
+    transition: all 0.3s ease;
+  }
+  
+  .system-metric:last-child {
+    border-bottom: none;
+  }
+  
+  .system-metric:hover {
+    background: linear-gradient(135deg, rgba(240, 249, 255, 0.5), rgba(219, 234, 254, 0.3));
+    border-radius: 8px;
+    padding-left: 0.5rem;
+    padding-right: 0.5rem;
+  }
+  
+  .system-metric .badge {
+    font-size: 0.7rem;
+    padding: 0.3rem 0.6rem;
+    border-radius: 12px;
+  }
+  
+  /* Enhanced Quick Actions */
+  .glass-card .btn {
+    border-radius: 12px;
+    font-weight: 600;
+    padding: 0.6rem 1.2rem;
+    transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    font-size: 0.85rem;
+    letter-spacing: 0.3px;
+    border: none;
+    position: relative;
+    overflow: hidden;
+    min-height: 44px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    touch-action: manipulation;
+    -webkit-tap-highlight-color: transparent;
+  }
+  
+  .glass-card .btn-sm {
+    padding: 0.4rem 0.8rem;
+    font-size: 0.8rem;
+    border-radius: 10px;
+  }
+  
+  .glass-card .btn::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+    transition: left 0.6s;
+  }
+  
+  .glass-card .btn:hover::before {
+    left: 100%;
+  }
+  
+  .glass-card .btn:hover {
+    transform: translateY(-2px) scale(1.03);
+    box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+  }
+      
+  .glass-card .btn:active {
+    transform: translateY(0) scale(0.98);
+    transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+  
+  /* Improved spacing for all sections */
+  .mb-4 {
+    margin-bottom: 2rem !important;
+  }
+  
+  /* Section spacing adjustments */
+  .welcome-section {
+    margin-bottom: 2rem;
+  }
+  
+  /* Better responsive behavior */
+  /* Extra Small Mobile Screens */
+  @media (max-width: 480px) {
+    .container {
+      padding: 0.5rem 0.25rem;
+    }
+    
+    .glass-card {
+      padding: 0.875rem 0.625rem !important;
+      border-radius: 14px;
+      margin-bottom: 0.75rem;
+    }
+    
+    .welcome-section {
+      padding: 1rem 0.625rem !important;
+      margin-bottom: 1.5rem;
+    }
+    
+    .welcome-section h4 {
+      font-size: 1.1rem;
+    }
+    
+    h2 {
+      font-size: 1.45rem;
+    }
+    
+    h4 {
+      font-size: 1.1rem;
+    }
+    
+    h5, h6 {
+      font-size: 0.95rem;
+    }
+    
+    .btn {
+      padding: 8px 12px;
+      font-size: 0.8rem;
+      min-height: 40px;
+      border-radius: 10px;
+    }
+    
+    .btn-sm {
+      padding: 6px 10px;
+      font-size: 0.75rem;
+      min-height: 36px;
+      border-radius: 8px;
+    }
+    
+    .stats-card {
+      padding: 1.25rem 0.875rem !important;
+    }
+    
+    .stats-icon {
+      width: 50px;
+      height: 50px;
+    }
+    
+    .stats-card h3 {
+      font-size: 1.75rem;
+    }
+    
+    .clock-widget {
+      padding: 0.875rem;
+      border-radius: 14px;
+    }
+    
+    .action-icon {
+      width: 45px;
+      height: 45px;
+    }
+    
+    .quick-action-item {
+      padding: 0.875rem !important;
+      border-radius: 14px;
+    }
+    
+    .list-group-item {
+      padding: 0.75rem 0.875rem;
+      font-size: 0.8rem;
+      border-radius: 10px;
+    }
+    
+    .table {
+      font-size: 0.75rem;
+    }
+    
+    .table th,
+    .table td {
+      padding: 0.5rem 0.25rem;
+    }
+    
+    .badge {
+      padding: 0.25rem 0.5rem;
+      font-size: 0.7rem;
+      border-radius: 8px;
+    }
+  }
+  
+  /* Enhanced Stats Cards */
+  .stats-card {
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.9), rgba(248, 250, 252, 0.8));
+    border: 1px solid rgba(226, 232, 240, 0.3);
+    border-radius: 20px;
+    transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    backdrop-filter: blur(16px);
+    position: relative;
+    overflow: hidden;
+  }
+  
+  .stats-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: linear-gradient(90deg, #667eea, #764ba2);
+    transform: scaleX(0);
+    transition: transform 0.3s ease;
+  }
+  
+  .stats-card:hover::before {
+    transform: scaleX(1);
+  }
+  
+  .stats-card:hover {
+    transform: translateY(-10px) scale(1.03);
+    box-shadow: 0 20px 40px rgba(102, 126, 234, 0.15);
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.95), rgba(248, 250, 252, 0.9));
+  }
+  
+  .stats-icon {
+    padding: 1rem;
+    border-radius: 50%;
+    background: linear-gradient(135deg, rgba(240, 249, 255, 0.8), rgba(219, 234, 254, 0.6));
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 80px;
+    height: 80px;
+    margin: 0 auto;
+    transition: all 0.3s ease;
+  }
+  
+  .stats-card:hover .stats-icon {
+    transform: rotate(10deg) scale(1.1);
+    background: linear-gradient(135deg, rgba(240, 249, 255, 1), rgba(219, 234, 254, 0.8));
+  }
+  
+  .stats-card h3 {
+    font-size: 2.5rem;
+    font-weight: 800;
+    margin: 0.5rem 0;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  }
+  
+  .stats-card h6 {
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: #64748b;
+  }
+  
+  .stats-card .badge {
+    border-radius: 20px;
+    padding: 0.5rem 0.8rem;
+    font-size: 0.75rem;
+    font-weight: 600;
+  }
+  
+  /* Health Status Widget */
+  .glass-card .health-metric {
+    padding: 0.5rem;
+    background: linear-gradient(135deg, rgba(236, 254, 255, 0.5), rgba(207, 250, 254, 0.3));
+    border-radius: 12px;
+    margin: 0.25rem 0;
+    transition: all 0.3s ease;
+  }
+  
+  .glass-card .health-metric:hover {
+    background: linear-gradient(135deg, rgba(236, 254, 255, 0.8), rgba(207, 250, 254, 0.6));
+    transform: scale(1.05);
+  }
+  
+  /* Enhanced Doctor Info Display */
+  .doctor-info-card {
+    background: linear-gradient(135deg, rgba(59, 130, 246, 0.1), rgba(16, 185, 129, 0.1));
+    border: 1px solid rgba(59, 130, 246, 0.2);
+    border-radius: 15px;
+    padding: 1rem 1.5rem;
+    margin: 1rem 0;
+    backdrop-filter: blur(10px);
+    box-shadow: 0 4px 20px rgba(59, 130, 246, 0.1);
+    transition: all 0.3s ease;
+  }
+  
+  .doctor-info-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 25px rgba(59, 130, 246, 0.15);
+    background: linear-gradient(135deg, rgba(59, 130, 246, 0.15), rgba(16, 185, 129, 0.15));
+  }
+  
+  .doctor-info-card i {
+    color: #3b82f6;
+    font-size: 1.2rem;
+    margin-right: 0.5rem;
+  }
+  
+  .doctor-name {
+    font-weight: 700;
+    color: #3b82f6;
+    font-size: 1.1rem;
+  }
+  
+  .doctor-label {
+    font-weight: 600;
+    color: #4b5563;
+    margin-right: 0.5rem;
+  }
+</style>
+
+<div class="container" data-aos="fade-up" data-aos-duration="800">
+  <!-- Header -->
+  <div class="text-center mb-5">
+    <h2 class="fw-bold gradient-text animate__animated animate__fadeInDown">✨ Chronic Care AI Dashboard</h2>
+    <p class="text-muted animate__animated animate__fadeInUp">Advanced Healthcare Management System</p>
+    <hr class="w-25 mx-auto">
+  </div>
+
+  <!-- Welcome + Clock -->
+  <div class="welcome-section mb-4 card glass-card p-4">
+    <div class="row align-items-center">
+      <div class="col-md-8">
+        <h4 class="mb-1 text-primary">Welcome back, {{ user.first_name|default:"User" }} 👋</h4>
+        <!-- {% if created_by_doctor %}
+          <div class="doctor-info-card">
+            <i class="fas fa-user-md"></i>
+            <span class="doctor-label">Account created by:</span>
+            <span class="doctor-name">Dr. {{ created_by_doctor.first_name|default:created_by_doctor.username }}</span>
+          </div>
+        {% elif assigned_doctor %}
+          <div class="doctor-info-card">
+            <i class="fas fa-user-md"></i>
+            <span class="doctor-label">Assigned Doctor:</span>
+            <span class="doctor-name">Dr. {{ assigned_doctor.first_name|default:assigned_doctor.username }}</span>
+          </div>
+        {% else %}
+          <p class="text-muted mb-1">No assigned doctor yet</p>
+        {% endif %} -->
+        <p class="text-muted mb-0">Here's an overview of today's activities</p>
+      </div>
+      <div class="col-md-4 text-md-end">
+        <div class="clock-widget glass-card p-3 d-inline-block">
+          <i class="fas fa-clock fs-3 mb-2"></i>
+          <h5 id="current-time" class="mb-1"></h5>
+          <small id="current-date"></small>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Announcements + Quick Info -->
+<div class="row mb-4" data-aos="fade-up" data-aos-delay="200">
+  <!-- Announcements -->
+  <div class="col-lg-6 col-md-6 mb-4 mb-md-0">
+    <div class="glass-card p-4 h-100">
+      <h5 class="fw-semibold text-primary d-flex align-items-center mb-3">
+        <i class="fas fa-bullhorn me-2"></i> Upcoming Announcements
+      </h5>
+      <ul class="list-group">
+        {% for announcement in announcements %}
+          <a href="{% url 'admission:announcement' %}" class="text-decoration-none">
+            <li class="list-group-item d-flex justify-content-between align-items-center rounded-3 mb-2">
+              <div class="d-flex align-items-center">
+                <i class="fas fa-info-circle text-primary me-3"></i>
+                <div class="fw-semibold text-dark">{{ announcement.about }}</div>
+              </div>
+              <small class="text-muted">{{ announcement.created|timesince }} ago</small>
+            </li>
+          </a>
+        {% empty %}
+          <li class="list-group-item text-muted d-flex align-items-center">
+            <i class="fas fa-inbox me-2"></i> No upcoming announcements.
+          </li>
+        {% endfor %}
+      </ul>
+    </div>
+  </div>
+
+  <!-- Quick Actions -->
+  <div class="col-lg-6 col-md-6">
+    <div class="glass-card p-4 h-100">
+      <h5 class="fw-semibold text-primary d-flex align-items-center mb-3">
+        <i class="fas fa-bolt me-2"></i> Quick Actions
+      </h5>
+      <div class="row quick-actions-row g-2">
+        {% if request.user.is_superuser %}
+        <!-- Doctor Services -->
+        <div class="col-12 col-sm-6 col-md-6 mb-2">
+          <div class="quick-action-item d-flex align-items-center p-3 rounded-3 h-100">
+            <div class="action-icon bg-primary me-3 d-flex align-items-center justify-content-center">
+              <i class="fas fa-user-md text-white"></i>
+            </div>
+            <div class="action-content">
+              <h6 class="fw-bold text-primary mb-1">Patient Consultation</h6>
+              <p class="text-muted small mb-2">Review and manage patient cases</p>
+              <a href="{% url 'admission:viewstudents' %}" class="btn btn-primary btn-sm">
+                <i class="fas fa-stethoscope me-1"></i>View Patients
+              </a>
+            </div>
+          </div>
+        </div>
+        <div class="col-12 col-sm-6 col-md-6 mb-2">
+          <div class="quick-action-item d-flex align-items-center p-3 rounded-3 h-100">
+            <div class="action-icon bg-success me-3 d-flex align-items-center justify-content-center">
+              <i class="fas fa-calendar-check text-white"></i>
+            </div>
+            <div class="action-content">
+              <h6 class="fw-bold text-primary mb-1">Appointment Schedule</h6>
+              <p class="text-muted small mb-2">Manage your appointment schedule</p>
+              <a href="{% url 'appointments:doctor_appointments' %}" class="btn btn-success btn-sm">
+                <i class="fas fa-calendar me-1"></i>View Schedule
+              </a>
+            </div>
+          </div>
+        </div>
+        <div class="col-12 col-sm-6 col-md-6 mb-2">
+          <div class="quick-action-item d-flex align-items-center p-3 rounded-3 h-100">
+            <div class="action-icon bg-info me-3 d-flex align-items-center justify-content-center">
+              <i class="fas fa-envelope text-white"></i>
+            </div>
+            <div class="action-content">
+              <h6 class="fw-bold text-primary mb-1">Patient Messages</h6>
+              <p class="text-muted small mb-2">Review patient communications</p>
+              <a href="{% url 'messaging:doctor_patient_messages' %}" class="btn btn-info btn-sm">
+                <i class="fas fa-comments me-1"></i>Check Messages
+              </a>
+            </div>
+          </div>
+        </div>
+        <div class="col-12 col-sm-6 col-md-6 mb-2">
+          <div class="quick-action-item d-flex align-items-center p-3 rounded-3 h-100">
+            <div class="action-icon bg-warning me-3 d-flex align-items-center justify-content-center">
+              <i class="fas fa-chart-line text-white"></i>
+            </div>
+            <div class="action-content">
+              <h6 class="fw-bold text-primary mb-1">Health Analytics</h6>
+              <p class="text-muted small mb-2">Review patient health reports</p>
+              <a href="{% url 'predictor:history' %}" class="btn btn-warning btn-sm">
+                <i class="fas fa-file-medical me-1"></i>View Reports
+              </a>
+            </div>
+          </div>
+        </div>
+        {% else %}
+        <!-- Patient Services -->
+        <div class="col-12 col-sm-6 col-md-6 mb-2">
+          <div class="quick-action-item d-flex align-items-center p-3 rounded-3 h-100">
+            <div class="action-icon bg-primary me-3 d-flex align-items-center justify-content-center floating-medical-icon">
+              <i class="fas fa-heartbeat text-white"></i>
+            </div>
+            <div class="action-content">
+              <h6 class="fw-bold text-primary mb-1">Health Assessment</h6>
+              <p class="text-muted small mb-2">Get AI-powered health predictions</p>
+              <a href="{% url 'predictor:index' %}" class="btn btn-primary btn-sm">
+                <i class="fas fa-heartbeat me-1"></i>Start Assessment
+              </a>
+            </div>
+          </div>
+        </div>
+        <div class="col-12 col-sm-6 col-md-6 mb-2">
+          <div class="quick-action-item d-flex align-items-center p-3 rounded-3 h-100">
+            <div class="action-icon bg-success me-3 d-flex align-items-center justify-content-center">
+              <i class="fas fa-calendar-plus text-white"></i>
+            </div>
+            <div class="action-content">
+              <h6 class="fw-bold text-primary mb-1">Book Appointment</h6>
+              <p class="text-muted small mb-2">Schedule your next appointment</p>
+              <a href="{% url 'appointments:book_appointment' %}" class="btn btn-success btn-sm">
+                <i class="fas fa-calendar me-1"></i>Book Now
+              </a>
+            </div>
+          </div>
+        </div>
+        <div class="col-12 col-sm-6 col-md-6 mb-2">
+          <div class="quick-action-item d-flex align-items-center p-3 rounded-3 h-100">
+            <div class="action-icon bg-info me-3 d-flex align-items-center justify-content-center">
+              <i class="fas fa-robot text-white"></i>
+            </div>
+            <div class="action-content">
+              <h6 class="fw-bold text-primary mb-1">AI Assistant</h6>
+              <p class="text-muted small mb-2">Get instant help from our chatbot</p>
+              <a href="{% url 'chatbot_home' %}" class="btn btn-info btn-sm">
+                <i class="fas fa-robot me-1"></i>Chat Now
+              </a>
+            </div>
+          </div>
+        </div>
+        <div class="col-12 col-sm-6 col-md-6 mb-2">
+          <div class="quick-action-item d-flex align-items-center p-3 rounded-3 h-100">
+            <div class="action-icon bg-warning me-3 d-flex align-items-center justify-content-center medical-pulse">
+              <i class="fas fa-pills text-white"></i>
+            </div>
+            <div class="action-content">
+              <h6 class="fw-bold text-primary mb-1">Medicine Store</h6>
+              <p class="text-muted small mb-2">Order medicines and supplies</p>
+              <a href="{% url 'medicine_list' %}" class="btn btn-warning btn-sm">
+                <i class="fas fa-cart me-1"></i>Shop Now
+              </a>
+            </div>
+          </div>
+        </div>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+</div>
+
+
+
+  {% if request.user.is_superuser %}
+  <!-- Admin Stats - FIXED ALIGNMENT -->
+  <div class="glass-card mb-4" data-aos="fade-up" data-aos-delay="300">
+    <h5 class="fw-semibold text-primary mb-3"><i class="fas fa-chart-bar me-2"></i> Statistics Overview</h5>
+    <div class="row">
+      <div class="col-lg-3 col-md-6 mb-4">
+        <a href="{% url 'admission:viewstudents' %}" class="text-decoration-none">
+          <div class="glass-card stats-card h-100 text-center p-3">
+            <div class="stats-icon mb-3">
+              <i class="fas fa-users fs-1 text-primary"></i>
+            </div>
+            <h3 class="fw-bold text-primary mb-2">{{ studentcount }}</h3>
+            <h6 class="text-muted mb-0">Total Patients</h6>
+            <p class="text-muted small mt-1">Registered patients</p>
+          </div>
+        </a>
+      </div>
+      <div class="col-lg-3 col-md-6 mb-4">
+        <a href="{% url 'appointments:doctor_appointments' %}" class="text-decoration-none">
+          <div class="glass-card stats-card h-100 text-center p-3">
+            <div class="stats-icon mb-3">
+              <i class="fas fa-calendar-check fs-1 text-success"></i>
+            </div>
+            <h3 class="fw-bold text-success mb-2">{{ doctor_today_appointments|default:0 }}</h3>
+            <h6 class="text-muted mb-0">Appointments</h6>
+            <div class="small mt-2">
+              <span class="badge bg-warning text-dark me-1">Pending: {{ doctor_total_pending|default:0 }}</span>
+              <span class="badge bg-success">Confirmed: {{ doctor_total_confirmed|default:0 }}</span>
+            </div>
+          </div>
+        </a>
+      </div>
+      <div class="col-lg-3 col-md-6 mb-4">
+        <a href="{% url 'medicine_list' %}" class="text-decoration-none">
+          <div class="glass-card stats-card h-100 text-center p-3">
+            <div class="stats-icon mb-3">
+              <i class="fas fa-pills fs-1 text-info"></i>
+            </div>
+            <h3 class="fw-bold text-info mb-2">31</h3>
+            <h6 class="text-muted mb-0">Medicines</h6>
+            <p class="text-muted small mt-1">Available medicines</p>
+          </div>
+        </a>
+      </div>
+      <div class="col-lg-3 col-md-6 mb-4">
+        <div class="glass-card stats-card h-100 text-center p-3">
+          <div class="stats-icon mb-3">
+            <i class="fas fa-robot fs-1 text-warning"></i>
+          </div>
+          <h3 class="fw-bold text-warning mb-2">AI</h3>
+          <h6 class="text-muted mb-0">Assistant</h6>
+          <p class="text-muted small mt-1">AI-powered help</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Admin Quick Actions - FIXED ALIGNMENT -->
+  <div class="row mb-4" data-aos="fade-up" data-aos-delay="350">
+    <div class="col-md-8 mb-4">
+      <div class="glass-card p-4 h-100">
+        <h5 class="fw-semibold text-primary d-flex align-items-center mb-3">
+          <i class="fas fa-bolt me-2"></i> Quick Actions & Management
+        </h5>
+        <div class="row">
+          <div class="col-lg-6 col-md-12 mb-3">
+            <div class="quick-action-item d-flex align-items-center p-3 rounded-3 h-100">
+              <div class="action-icon bg-primary me-3">
+                <i class="fas fa-user-plus text-white"></i>
+              </div>
+              <div class="action-content flex-grow-1">
+                <h6 class="fw-bold text-primary mb-1">Patient Management</h6>
+                <p class="text-muted small mb-2">Add new patients and manage records</p>
+                <a href="{% url 'admission:viewstudents' %}" class="btn btn-primary btn-sm">
+                  <i class="fas fa-users me-1"></i>Manage Patients
+                </a>
+              </div>
+            </div>
+          </div>
+          <div class="col-lg-6 col-md-12 mb-3">
+            <div class="quick-action-item d-flex align-items-center p-3 rounded-3 h-100">
+              <div class="action-icon bg-success me-3">
+                <i class="fas fa-calendar-alt text-white"></i>
+              </div>
+              <div class="action-content flex-grow-1">
+                <h6 class="fw-bold text-primary mb-1">Appointments</h6>
+                <p class="text-muted small mb-2">View and manage patient appointments</p>
+                <a href="{% url 'appointments:doctor_appointments' %}" class="btn btn-success btn-sm">
+                  <i class="fas fa-calendar me-1"></i>View Schedule
+                </a>
+              </div>
+            </div>
+          </div>
+          <div class="col-lg-6 col-md-12 mb-3">
+            <div class="quick-action-item d-flex align-items-center p-3 rounded-3 h-100">
+              <div class="action-icon bg-info me-3">
+                <i class="fas fa-comments text-white"></i>
+              </div>
+              <div class="action-content flex-grow-1">
+                <h6 class="fw-bold text-primary mb-1">Patient Messages</h6>
+                <p class="text-muted small mb-2">Review and respond to patient queries</p>
+                <a href="{% url 'messaging:doctor_patient_messages' %}" class="btn btn-info btn-sm">
+                  <i class="fas fa-envelope me-1"></i>Check Messages
+                </a>
+              </div>
+            </div>
+          </div>
+          <div class="col-lg-6 col-md-12 mb-3">
+            <div class="quick-action-item d-flex align-items-center p-3 rounded-3 h-100">
+              <div class="action-icon bg-warning me-3">
+                <i class="fas fa-robot text-white"></i>
+              </div>
+              <div class="action-content flex-grow-1">
+                <h6 class="fw-bold text-primary mb-1">AI Assistant</h6>
+                <p class="text-muted small mb-2">Access AI-powered assistant features</p>
+                <a href="{% url 'chatbot_home' %}" class="btn btn-warning btn-sm">
+                  <i class="fas fa-robot me-1"></i>AI Assistant
+                </a>
+              </div>
+            </div>
+          </div>
+          <div class="col-lg-6 col-md-12 mb-3">
+            <div class="quick-action-item d-flex align-items-center p-3 rounded-3 h-100">
+              <div class="action-icon bg-danger me-3">
+                <i class="fas fa-megaphone text-white"></i>
+              </div>
+              <div class="action-content flex-grow-1">
+                <h6 class="fw-bold text-primary mb-1">Announcements</h6>
+                <p class="text-muted small mb-2">Create and manage announcements</p>
+                <a href="{% url 'admission:announcement' %}" class="btn btn-danger btn-sm">
+                  <i class="fas fa-bullhorn me-1"></i>Manage News
+                </a>
+              </div>
+            </div>
+          </div>
+          <div class="col-lg-6 col-md-12 mb-3">
+            <div class="quick-action-item d-flex align-items-center p-3 rounded-3 h-100">
+              <div class="action-icon bg-secondary me-3">
+                <i class="fas fa-user-cog text-white"></i>
+              </div>
+              <div class="action-content flex-grow-1">
+                <h6 class="fw-bold text-primary mb-1">Staff Assignments</h6>
+                <p class="text-muted small mb-2">Manage staff roles and assignments</p>
+                <a href="{% url 'admission:manage_assignments' %}" class="btn btn-secondary btn-sm">
+                  <i class="fas fa-person-gear me-1"></i>Manage Staff
+                </a>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <!-- AI Assistant Panel -->
+    <div class="col-md-4 mb-4">
+      <div class="glass-card p-4 h-100">
+        <h5 class="fw-semibold text-primary d-flex align-items-center mb-3">
+          <i class="fas fa-robot me-2"></i> AI Assistant
+        </h5>
+        <div class="mb-3">
+          <p class="text-muted small">Access powerful AI features directly from your dashboard:</p>
+          <ul class="small">
+            <li>Register new patients</li>
+            <li>View patient information</li>
+            <li>Create announcements</li>
+            <li>Manage appointments</li>
+            <li>Review patient messages</li>
+            <li>View prediction history</li>
+          </ul>
+        </div>
+        <a href="{% url 'chatbot_home' %}" class="btn btn-warning w-100">
+          <i class="fas fa-robot me-2"></i> Launch AI Assistant
+        </a>
+        <div class="mt-3">
+          <div class="alert alert-info small p-2">
+            <i class="fas fa-lightbulb me-1"></i>
+            <strong>Tip:</strong> Try asking the AI assistant to "register a new patient" or "create an announcement"
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  {% else %}
+        <!-- Additional Health Services - FIXED ALIGNMENT -->
+        <div class="row" data-aos="fade-up" data-aos-delay="400">
+          <div class="col-lg-3 col-md-6 mb-4">
+            <div class="glass-card text-center compact h-100">
+              <i class="bi bi-graph-up fs-2 text-primary mb-2"></i>
+              <h6 class="fw-bold text-primary mb-2">Health Tracker</h6>
+              <p class="text-muted small mb-3">Track your daily health metrics and progress</p>
+              <a href="{% url 'health_dashboard' %}" class="btn btn-primary btn-sm">
+                <i class="bi bi-graph-up me-1"></i>Track Health
+              </a>
+            </div>
+          </div>
+          <div class="col-lg-3 col-md-6 mb-4">
+            <div class="glass-card text-center compact h-100">
+              <i class="bi bi-clock-history fs-2 text-secondary mb-2"></i>
+              <h6 class="fw-bold text-primary mb-2">Prediction History</h6>
+              <p class="text-muted small mb-3">View your previous health predictions</p>
+              <a href="{% url 'predictor:history' %}" class="btn btn-secondary btn-sm">
+                <i class="bi bi-clock-history me-1"></i>View History
+              </a>
+            </div>
+          </div>
+          <div class="col-lg-3 col-md-6 mb-4">
+            <div class="glass-card text-center compact h-100">
+              <i class="bi bi-calendar-event fs-2 text-success mb-2"></i>
+              <h6 class="fw-bold text-primary mb-2">My Appointments</h6>
+              <p class="text-muted small mb-3">View and manage your appointments</p>
+              <a href="{% url 'appointments:my_appointments' %}" class="btn btn-success btn-sm">
+                <i class="bi bi-calendar-event me-1"></i>View Appointments
+              </a>
+            </div>
+          </div>
+          <div class="col-lg-3 col-md-6 mb-4">
+            <div class="glass-card text-center compact h-100">
+              <i class="bi bi-person-circle fs-2 text-info mb-2"></i>
+              <h6 class="fw-bold text-primary mb-2">My Profile</h6>
+              <p class="text-muted small mb-3">Update your personal information</p>
+              <a href="{% url 'userprofile:profile' %}" class="btn btn-info btn-sm">
+                <i class="bi bi-person-circle me-1"></i>View Profile
+              </a>
+            </div>
+          </div>
+        </div>
+
+        <!-- Communication & Support - FIXED ALIGNMENT -->
+        <div class="row" data-aos="fade-up" data-aos-delay="500">
+          <div class="col-lg-4 col-md-6 mb-4">
+            <div class="glass-card text-center compact h-100">
+              <i class="bi bi-chat-dots fs-2 text-primary mb-2"></i>
+              <h6 class="fw-bold text-primary mb-2">Private Messages</h6>
+              <p class="text-muted small mb-3">Send private messages to your doctor</p>
+              <a href="{% url 'messaging:private_messages' %}" class="btn btn-primary btn-sm">
+                <i class="bi bi-chat-dots me-1"></i>Send Message
+              </a>
+            </div>
+          </div>
+          <div class="col-lg-8 col-md-6 mb-4">
+            <div class="glass-card text-center compact h-100">
+              <i class="bi bi-people fs-2 text-success mb-2"></i>
+              <h6 class="fw-bold text-primary mb-2">Community Chat</h6>
+              <p class="text-muted small mb-3">Join the community chatroom</p>
+              <a href="{% url 'chatroom:index' %}" class="btn btn-success btn-sm">
+                <i class="bi bi-people me-1"></i>Join Chat
+              </a>
+            </div>
+          </div>
+        </div>
+
+  <!-- Recent Activity & Health Tips - Side by side -->
+  <div class="row mb-4" data-aos="fade-up" data-aos-delay="400">
+    <!-- Recent Activity -->
+    <div class="col-md-8 mb-4">
+      <div class="glass-card p-4 h-100">
+        <h6 class="fw-semibold text-primary mb-3">
+          <i class="fas fa-history me-2"></i>Recent Activity
+        </h6>
+        <div class="activity-list">
+          <div class="activity-item">
+            <div class="activity-icon bg-success">
+              <i class="fas fa-check"></i>
+            </div>
+            <div class="activity-content">
+              <div class="activity-title">Health Assessment Completed</div>
+              <div class="activity-time">2 hours ago</div>
+            </div>
+          </div>
+          <div class="activity-item">
+            <div class="activity-icon bg-info">
+              <i class="fas fa-calendar"></i>
+            </div>
+            <div class="activity-content">
+              <div class="activity-title">Appointment Booked</div>
+              <div class="activity-time">Yesterday</div>
+            </div>
+          </div>
+          <div class="activity-item">
+            <div class="activity-icon bg-warning">
+              <i class="fas fa-pills"></i>
+            </div>
+            <div class="activity-content">
+              <div class="activity-title">Medicine Ordered</div>
+              <div class="activity-time">3 days ago</div>
+            </div>
+          </div>
+        </div>
+        <div class="text-center mt-3">
+          <a href="{% url 'predictor:history' %}" class="btn btn-outline-primary btn-sm">View All Activity</a>
+        </div>
+      </div>
+    </div>
+    
+    <!-- Health Tips -->
+    <div class="col-md-4 mb-4">
+      <div class="glass-card p-4 h-100 d-flex flex-column">
+        <h6 class="fw-semibold text-primary mb-3">
+          <i class="fas fa-lightbulb me-2"></i>Health Tips
+        </h6>
+        <div class="health-tips flex-grow-1">
+          <div class="tip-item">
+            <i class="fas fa-heart text-danger me-2"></i>
+            <span id="health-tip">Stay hydrated! Drink at least 8 glasses of water daily.</span>
+          </div>
+        </div>
+        <div class="text-center mt-3">
+          <button class="btn btn-outline-primary btn-sm" onclick="rotateHealthTip()">Next Tip</button>
+        </div>
+      </div>
+    </div>
+  </div>
+  {% endif %}
+
+  <!-- Daily Quote -->
+  <div class="quote-card p-3 text-center mb-4" data-aos="fade-up" data-aos-delay="500">
+    <i class="fas fa-quote-left fs-2 mb-3"></i>
+    <blockquote class="blockquote mb-0">
+      <p id="daily-quote">"The greatest wealth is health."</p>
+      <footer class="blockquote-footer text-white-50">
+        <cite id="quote-author">Virgil</cite>
+      </footer>
+    </blockquote>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/aos@2.3.4/dist/aos.js"></script>
+<script>
+  AOS.init();
+
+  // Function to update time & date
+  function updateClock() {
+    const now = new Date();
+
+    // Format time
+    const timeOptions = { hour: '2-digit', minute: '2-digit', second: '2-digit' };
+    const timeString = now.toLocaleTimeString([], timeOptions);
+
+    // Format date
+    const dateOptions = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+    const dateString = now.toLocaleDateString([], dateOptions);
+
+    // Update elements
+    document.getElementById('current-time').textContent = timeString;
+    document.getElementById('current-date').textContent = dateString;
+    document.getElementById('today-date').textContent = dateString;
+  }
+
+  // Run immediately and every second
+  updateClock();
+  setInterval(updateClock, 1000);
+
+  // Health tips rotation
+  const healthTips = [
+    "Stay hydrated! Drink at least 8 glasses of water daily.",
+    "Take a 30-minute walk every day for better health.",
+    "Get 7-8 hours of sleep for optimal recovery.",
+    "Eat 5 servings of fruits and vegetables daily.",
+    "Practice deep breathing exercises for stress relief.",
+    "Limit processed foods and choose whole grains.",
+    "Take regular breaks from screens to protect your eyes.",
+    "Maintain good posture while sitting and standing.",
+    "Include strength training exercises twice a week.",
+    "Reduce sodium intake to maintain healthy blood pressure.",
+    "Practice mindfulness or meditation for mental wellness.",
+    "Eat breakfast every day to maintain energy levels."
+  ];
+
+  function rotateHealthTip() {
+    const tipElement = document.getElementById('health-tip');
+    if (tipElement) {
+      const randomTip = healthTips[Math.floor(Math.random() * healthTips.length)];
+      tipElement.textContent = randomTip;
+      // Add a subtle animation
+      tipElement.style.opacity = 0;
+      setTimeout(() => {
+        tipElement.style.transition = "opacity 0.5s ease-in-out";
+        tipElement.style.opacity = 1;
+      }, 10);
+    }
+  }
+
+  // Rotate health tip every 10 seconds
+  setInterval(rotateHealthTip, 10000);
+
+  // Daily quotes rotation
+  const dailyQuotes = [
+    { text: "The greatest wealth is health.", author: "Virgil" },
+    { text: "Health is not valued until sickness comes.", author: "Thomas Fuller" },
+    { text: "Take care of your body. It's the only place you have to live.", author: "Jim Rohn" },
+    { text: "The groundwork for all happiness is good health.", author: "Leigh Hunt" },
+    { text: "A healthy outside starts from the inside.", author: "Robert Urich" },
+    { text: "Health is a state of complete harmony of the body, mind and spirit.", author: "B.K.S. Iyengar" },
+    { text: "The first wealth is health.", author: "Ralph Waldo Emerson" },
+    { text: "Your health is an investment, not an expense.", author: "Unknown" }
+  ];
+
+  function rotateDailyQuote() {
+    const quoteElement = document.getElementById('daily-quote');
+    const authorElement = document.getElementById('quote-author');
+    
+    if (quoteElement && authorElement) {
+      const randomQuote = dailyQuotes[Math.floor(Math.random() * dailyQuotes.length)];
+      quoteElement.textContent = `"${randomQuote.text}"`;
+      authorElement.textContent = randomQuote.author;
+    }
+  }
+
+  // Rotate daily quote every 15 seconds
+  setInterval(rotateDailyQuote, 15000);
+
+  // Add click animations to cards
+  document.addEventListener('DOMContentLoaded', function() {
+    const cards = document.querySelectorAll('.glass-card, .stat-card');
+    cards.forEach(card => {
+      card.addEventListener('click', function() {
+        this.style.transform = 'scale(0.98)';
+        setTimeout(() => {
+          this.style.transform = '';
+        }, 150);
+      });
+    });
+  });
+
+  // Simulate real-time health metrics updates
+  function updateHealthMetrics() {
+    const bpmElement = document.querySelector('.metric-value.text-warning');
+    const bpElement = document.querySelector('.metric-value.text-info');
+    
+    if (bpmElement && bpElement) {
+      // Simulate slight variations in BPM (70-75)
+      const bpm = Math.floor(Math.random() * 6) + 70;
+      bpmElement.textContent = bpm;
+      
+      // Simulate slight variations in BP (115-125/75-85)
+      const systolic = Math.floor(Math.random() * 11) + 115;
+      const diastolic = Math.floor(Math.random() * 11) + 75;
+      bpElement.textContent = `${systolic}/${diastolic}`;
+    }
+  }
+
+  // Update health metrics every 30 seconds
+  setInterval(updateHealthMetrics, 30000);
+</script>
+
+{% endblock content %}

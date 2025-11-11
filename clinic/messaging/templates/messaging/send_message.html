@@ -1,0 +1,256 @@
+{% extends "base.html" %}
+{% block content %}
+<style>
+    body {
+        background: linear-gradient(135deg, #ffffff 0%, #f8fafc 50%, #e2e8f0 100%);
+        background-attachment: fixed;
+        font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    }
+
+    .message-container {
+        backdrop-filter: blur(20px) saturate(180%);
+        background: rgba(255, 255, 255, 0.85);
+        border-radius: 25px;
+        border: 1px solid rgba(255, 255, 255, 0.18);
+        box-shadow: 0 25px 50px rgba(31, 38, 135, 0.15);
+        transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        animation: fadeInUp 0.8s ease-out;
+        position: relative;
+        overflow: hidden;
+    }
+    
+    .message-container::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 6px;
+        background: linear-gradient(90deg, #e6f3ff 0%, #f0f9ff 50%, #fef7f7 100%);
+        background-size: 200% 100%;
+        animation: gradientShift 3s ease-in-out infinite;
+    }
+    
+    @keyframes gradientShift {
+        0%, 100% { background-position: 0% 50%; }
+        50% { background-position: 100% 50%; }
+    }
+    
+    .message-container:hover {
+        transform: translateY(-5px) scale(1.01);
+        box-shadow: 0 35px 70px rgba(31, 38, 135, 0.2);
+        background: rgba(255, 255, 255, 0.95);
+    }
+
+    .message-header {
+        background: linear-gradient(135deg, #e6f3ff 0%, #f0f9ff 100%);
+        padding: 3rem;
+        text-align: left;
+        border-bottom: none;
+        position: relative;
+        overflow: hidden;
+        border-radius: 25px 25px 0 0;
+    }
+
+    .message-header::before {
+        content: '';
+        position: absolute;
+        top: -50%;
+        left: -50%;
+        width: 200%;
+        height: 200%;
+        background: linear-gradient(45deg, transparent, rgba(30, 64, 175, 0.05), transparent);
+        animation: shimmer 3s infinite;
+    }
+
+    @keyframes shimmer {
+        0% { transform: translateX(-100%) translateY(-100%) rotate(45deg); }
+        100% { transform: translateX(100%) translateY(100%) rotate(45deg); }
+    }
+
+    .message-title {
+        color: #1e40af;
+        font-size: 2.5rem;
+        font-weight: 900;
+        margin-bottom: 10px;
+        background: linear-gradient(135deg, #e6f3ff 0%, #f0f9ff 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        position: relative;
+        z-index: 1;
+    }
+
+    .message-subtitle {
+        color: #6b7280;
+        font-size: 1.1rem;
+        margin: 0;
+        font-weight: 500;
+        position: relative;
+        z-index: 1;
+    }
+
+    @keyframes fadeInUp {
+        from {
+            opacity: 0;
+            transform: translateY(40px) scale(0.95);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0) scale(1);
+        }
+    }
+</style>
+
+<div class="container mt-4">
+  <div class="row justify-content-center">
+    <div class="col-lg-8">
+      <div class="message-container">
+        <div class="message-header">
+          <div class="d-flex align-items-center">
+            <i class="bi bi-envelope-plus me-3" style="font-size: 3rem; color: #3b82f6;"></i>
+            <div>
+              <h3 class="message-title mb-0">Send Private Message</h3>
+              <p class="message-subtitle">Secure communication with {% if request.user.is_superuser %}patients{% else %}doctors{% endif %}</p>
+            </div>
+          </div>
+        </div>
+        <div class="card-body p-4" style="padding: 3rem !important; background: rgba(255, 255, 255, 0.3); backdrop-filter: blur(10px);">
+          <form method="post" novalidate>
+            {% csrf_token %}
+            <div class="row g-4">
+              <div class="col-12">
+                <label class="form-label" style="font-weight: 700; color: #4a5568; margin-bottom: 0.75rem; display: flex; align-items: center; font-size: 0.95rem;">
+                  <i class="bi bi-person-fill me-2" style="color: #3b82f6; font-size: 1.1rem;"></i>To
+                </label>
+                <div style="position: relative;">
+                  {{ form.recipient }}
+                  {% if form.recipient.errors %}
+                    <div class="text-danger small mt-1">
+                      {% for error in form.recipient.errors %}{{ error }}{% endfor %}
+                    </div>
+                  {% endif %}
+                </div>
+              </div>
+              
+              <div class="col-12">
+                <label class="form-label" style="font-weight: 700; color: #4a5568; margin-bottom: 0.75rem; display: flex; align-items: center; font-size: 0.95rem;">
+                  <i class="bi bi-tag-fill me-2" style="color: #3b82f6; font-size: 1.1rem;"></i>Subject
+                </label>
+                <div style="position: relative;">
+                  {{ form.subject }}
+                  {% if form.subject.errors %}
+                    <div class="text-danger small mt-1">
+                      {% for error in form.subject.errors %}{{ error }}{% endfor %}
+                    </div>
+                  {% endif %}
+                </div>
+              </div>
+              
+              <div class="col-12">
+                <label class="form-label" style="font-weight: 700; color: #4a5568; margin-bottom: 0.75rem; display: flex; align-items: center; font-size: 0.95rem;">
+                  <i class="bi bi-chat-text-fill me-2" style="color: #3b82f6; font-size: 1.1rem;"></i>Message
+                </label>
+                <div style="position: relative;">
+                  {{ form.message }}
+                  {% if form.message.errors %}
+                    <div class="text-danger small mt-1">
+                      {% for error in form.message.errors %}{{ error }}{% endfor %}
+                    </div>
+                  {% endif %}
+                </div>
+              </div>
+            </div>
+            
+            <div class="mt-4 d-flex justify-content-center gap-3">
+              <button class="btn btn-primary" type="submit" style="
+                border-radius: 18px;
+                font-weight: 700;
+                padding: 14px 32px;
+                transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+                position: relative;
+                overflow: hidden;
+                box-shadow: 0 8px 20px rgba(30, 64, 175, 0.2);
+                background: linear-gradient(135deg, #e6f3ff 0%, #f0f9ff 100%);
+                border: none;
+                color: #1e40af;
+                ">
+                <i class="bi bi-send me-2"></i>Send Message
+              </button>
+              <a class="btn btn-outline-secondary" href="{% url 'messaging:private_messages' %}" style="
+                border-radius: 18px;
+                font-weight: 700;
+                padding: 14px 24px;
+                transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+                border: 2px solid rgba(108, 117, 125, 0.3);
+                background: rgba(248, 249, 250, 0.8);
+                color: #6c757d;
+                backdrop-filter: blur(10px);
+                ">
+                <i class="bi bi-arrow-left me-2"></i>Back to Messages
+              </a>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<style>
+/* Enhanced form controls */
+.form-control, .form-select {
+    border-radius: 15px !important;
+    border: 2px solid rgba(226, 232, 240, 0.8) !important;
+    padding: 14px 20px !important;
+    transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) !important;
+    background: rgba(255, 255, 255, 0.9) !important;
+    font-weight: 500 !important;
+    backdrop-filter: blur(10px) !important;
+    min-height: 48px !important;
+    font-size: 0.9rem !important;
+}
+
+.form-control:focus, .form-select:focus {
+    border-color: #3b82f6 !important;
+    box-shadow: 0 0 0 0.25rem rgba(59, 130, 246, 0.15), 0 8px 25px rgba(59, 130, 246, 0.1) !important;
+    background: rgba(255, 255, 255, 1) !important;
+    transform: translateY(-2px) !important;
+}
+
+/* Button hover effects */
+.btn:hover {
+    transform: translateY(-3px) scale(1.05) !important;
+    box-shadow: 0 15px 35px rgba(0, 0, 0, 0.2) !important;
+}
+
+.btn-primary:hover {
+    background: linear-gradient(135deg, #dbeafe 0%, #eff6ff 100%) !important;
+    color: #1e40af !important;
+    box-shadow: 0 15px 35px rgba(30, 64, 175, 0.3) !important;
+}
+
+.btn-outline-secondary:hover {
+    background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%) !important;
+    color: #495057 !important;
+    border-color: rgba(108, 117, 125, 0.5) !important;
+}
+
+/* Button shine effect */
+.btn::before {
+    content: '' !important;
+    position: absolute !important;
+    top: 0 !important;
+    left: -100% !important;
+    width: 100% !important;
+    height: 100% !important;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent) !important;
+    transition: left 0.6s !important;
+}
+
+.btn:hover::before {
+    left: 100% !important;
+}
+</style>
+{% endblock %}
+

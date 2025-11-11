@@ -1,0 +1,194 @@
+{
+  "medical_conditions": {
+    "heart_disease": {
+      "description": "Heart disease refers to various conditions affecting the heart, including coronary artery disease, heart rhythm problems (arrhythmias), and congenital heart defects.",
+      "symptoms": [
+        "Chest pain or discomfort",
+        "Shortness of breath",
+        "Fatigue",
+        "Irregular heartbeat",
+        "Swelling in legs, ankles, and feet"
+      ],
+      "risk_factors": [
+        "High blood pressure",
+        "High cholesterol",
+        "Smoking",
+        "Diabetes",
+        "Family history",
+        "Age",
+        "Lack of physical activity"
+      ],
+      "prevention": [
+        "Eat a healthy diet",
+        "Exercise regularly",
+        "Maintain a healthy weight",
+        "Quit smoking",
+        "Control blood pressure and cholesterol",
+        "Manage stress"
+      ]
+    },
+    "diabetes": {
+      "description": "Diabetes is a chronic condition that affects how your body processes blood sugar (glucose). There are two main types: Type 1 and Type 2 diabetes.",
+      "symptoms": [
+        "Increased thirst",
+        "Frequent urination",
+        "Extreme fatigue",
+        "Blurred vision",
+        "Slow-healing wounds",
+        "Frequent infections"
+      ],
+      "risk_factors": [
+        "Family history",
+        "Being overweight",
+        "Physical inactivity",
+        "Age",
+        "History of gestational diabetes",
+        "High blood pressure"
+      ],
+      "prevention": [
+        "Maintain a healthy weight",
+        "Eat a balanced diet",
+        "Exercise regularly",
+        "Limit sugar and refined carbohydrates",
+        "Manage stress",
+        "Get regular checkups"
+      ]
+    },
+    "hypertension": {
+      "description": "Hypertension, or high blood pressure, is a common condition in which the force of the blood against your artery walls is too high, potentially leading to health problems.",
+      "symptoms": [
+        "Often has no symptoms",
+        "Severe headache",
+        "Nosebleeds",
+        "Fatigue or confusion",
+        "Vision problems",
+        "Chest pain",
+        "Difficulty breathing"
+      ],
+      "risk_factors": [
+        "Age",
+        "Race",
+        "Family history",
+        "Being overweight or obese",
+        "Lack of physical activity",
+        "Tobacco use",
+        "High sodium intake"
+      ],
+      "prevention": [
+        "Eat a heart-healthy diet",
+        "Reduce sodium in your diet",
+        "Maintain a healthy weight",
+        "Increase physical activity",
+        "Limit alcohol",
+        "Quit smoking",
+        "Manage stress"
+      ]
+    },
+    "kidney_disease": {
+      "description": "Kidney disease refers to the gradual loss of kidney function, where your kidneys are no longer able to filter waste products from your blood effectively.",
+      "symptoms": [
+        "Nausea",
+        "Loss of appetite",
+        "Fatigue and weakness",
+        "Sleep problems",
+        "Changes in urination",
+        "Decreased mental sharpness",
+        "Muscle cramps"
+      ],
+      "risk_factors": [
+        "Diabetes",
+        "High blood pressure",
+        "Family history",
+        "Age",
+        "Ethnicity",
+        "Obesity",
+        "Smoking"
+      ],
+      "prevention": [
+        "Control diabetes",
+        "Monitor blood pressure",
+        "Follow a healthy diet",
+        "Maintain a healthy weight",
+        "Don't smoke",
+        "Limit alcohol",
+        "Exercise regularly"
+      ]
+    }
+  },
+  "general_health_tips": {
+    "nutrition": [
+      "Eat a variety of colorful fruits and vegetables",
+      "Choose whole grains over refined grains",
+      "Include lean proteins in your meals",
+      "Limit processed foods and added sugars",
+      "Stay hydrated by drinking plenty of water"
+    ],
+    "exercise": [
+      "Aim for at least 150 minutes of moderate aerobic activity per week",
+      "Include strength training exercises twice a week",
+      "Find activities you enjoy to stay motivated",
+      "Start slowly and gradually increase intensity",
+      "Listen to your body and rest when needed"
+    ],
+    "mental_health": [
+      "Practice stress management techniques like meditation or deep breathing",
+      "Maintain social connections with friends and family",
+      "Get adequate sleep (7-9 hours for most adults)",
+      "Engage in activities you enjoy",
+      "Seek professional help when needed"
+    ],
+    "preventive_care": [
+      "Schedule regular checkups with your healthcare provider",
+      "Stay up to date with vaccinations",
+      "Get recommended screenings based on your age and risk factors",
+      "Monitor your vital signs at home when possible",
+      "Keep track of medications and follow prescriptions"
+    ]
+  },
+  "emergency_situations": {
+    "heart_attack": {
+      "symptoms": [
+        "Chest pain or pressure",
+        "Pain or discomfort in arms, back, neck, jaw, or stomach",
+        "Shortness of breath",
+        "Cold sweat, nausea, or lightheadedness"
+      ],
+      "immediate_actions": [
+        "Call emergency services immediately",
+        "Take aspirin if not allergic",
+        "Rest while waiting for help",
+        "Perform CPR if trained and person is unresponsive"
+      ]
+    },
+    "stroke": {
+      "symptoms": [
+        "Sudden numbness or weakness in face, arm, or leg (especially one side)",
+        "Sudden confusion or trouble speaking",
+        "Sudden trouble seeing",
+        "Sudden trouble walking or loss of balance",
+        "Sudden severe headache with no known cause"
+      ],
+      "immediate_actions": [
+        "Call emergency services immediately",
+        "Note the time when symptoms first appeared",
+        "Do not give the person anything to eat or drink",
+        "Keep the person comfortable and still"
+      ]
+    }
+  },
+  "medication_guidance": {
+    "general_tips": [
+      "Always follow your doctor's instructions",
+      "Take medications at the same time each day",
+      "Never share prescription medications",
+      "Store medications properly according to instructions",
+      "Keep an updated list of all your medications"
+    ],
+    "side_effects": [
+      "Contact your doctor if you experience severe or persistent side effects",
+      "Don't stop taking medications without consulting your doctor",
+      "Report any unusual symptoms to your healthcare provider",
+      "Keep track of side effects to discuss with your doctor"
+    ]
+  }
+}

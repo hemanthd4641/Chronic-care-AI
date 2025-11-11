@@ -1,0 +1,371 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="container mt-4">
+  <div class="row justify-content-center">
+    <div class="col-lg-10">
+      <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+          <h1 class="display-5 fw-bold text-primary mb-2">
+            <i class="bi bi-calendar-check me-3"></i>Patient Appointments
+          </h1>
+          <p class="text-muted">Manage your scheduled appointments with patients</p>
+        </div>
+        <div class="text-end">
+          <span class="badge bg-primary fs-6">{{ appointments.count }} Total Appointments</span>
+        </div>
+      </div>
+
+      {% if appointments %}
+        <div class="row g-3 align-items-stretch">
+          {% for appt in appointments %}
+            <div class="col-md-6 col-lg-4">
+              <div class="card shadow-sm border-0 h-100">
+                <div class="card-header d-flex justify-content-between align-items-center" style="background: linear-gradient(135deg, #e6f3ff 0%, #f0f9ff 100%); color: #1e40af;">
+                  <h6 class="mb-0 fw-bold">
+                    <i class="bi bi-person-circle me-2"></i>{{ appt.patient.get_full_name|default:appt.patient.username }}
+                  </h6>
+                  <span class="badge {% if appt.status == 'Confirmed' %}bg-success{% elif appt.status == 'Pending' %}bg-warning text-dark{% elif appt.status == 'Cancelled' %}bg-danger{% else %}bg-light text-dark{% endif %}">{{ appt.status }}</span>
+                </div>
+                <div class="card-body">
+                  <div class="mb-3">
+                    <h6 class="fw-bold text-primary mb-2">
+                      <i class="bi bi-calendar-event me-2"></i>Appointment Details
+                    </h6>
+                    <div class="row g-2">
+                      <div class="col-6">
+                        <strong>Date:</strong><br>
+                        <span class="text-muted">{{ appt.date|date:"M d, Y" }}</span>
+                      </div>
+                      <div class="col-6">
+                        <strong>Time:</strong><br>
+                        <span class="text-muted">{{ appt.time|time:"H:i" }}</span>
+                      </div>
+                    </div>
+                  </div>
+                  
+                  <div class="mb-3">
+                    <h6 class="fw-bold text-primary mb-2">
+                      <i class="bi bi-chat-text me-2"></i>Reason
+                    </h6>
+                    <p class="small text-muted mb-0">{{ appt.reason|truncatechars:100 }}</p>
+                  </div>
+                  
+                  <div class="mb-3">
+                    <h6 class="fw-bold text-primary mb-2">
+                      <i class="bi bi-person me-2"></i>Patient Info
+                    </h6>
+                    <div class="small text-muted">
+                      <div><strong>Username:</strong> {{ appt.patient.username }}</div>
+                      <div><strong>Email:</strong> {{ appt.patient.email|default:"Not provided" }}</div>
+                      <div><strong>Joined:</strong> {{ appt.patient.date_joined|date:"M d, Y" }}</div>
+                    </div>
+                  </div>
+                </div>
+                <div class="card-footer bg-transparent">
+                  <div class="d-flex justify-content-between align-items-center">
+                    <small class="text-muted">
+                      <i class="bi bi-clock me-1"></i>Booked {{ appt.created_at|timesince }} ago
+                    </small>
+                    <div class="btn-group btn-group-sm">
+                      <button class="btn btn-outline-success btn-sm" onclick="updateStatus({{ appt.id }}, 'Confirmed')">
+                        <i class="bi bi-check-circle"></i>
+                      </button>
+                      <button class="btn btn-outline-warning btn-sm" onclick="updateStatus({{ appt.id }}, 'Pending')">
+                        <i class="bi bi-clock"></i>
+                      </button>
+                      <button class="btn btn-outline-danger btn-sm" onclick="updateStatus({{ appt.id }}, 'Cancelled')">
+                        <i class="bi bi-x-circle"></i>
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          {% endfor %}
+        </div>
+        
+        <!-- Summary Statistics -->
+        <div class="row mt-4">
+          <div class="col-md-3">
+            <div class="card text-center" style="background: linear-gradient(135deg, #e6f3ff 0%, #f0f9ff 100%); color: #1e40af;">
+              <div class="card-body">
+                <h5 class="card-title">{{ stats.total }}</h5>
+                <p class="card-text">Total Appointments</p>
+              </div>
+            </div>
+          </div>
+          <div class="col-md-3">
+            <div class="card text-center" style="background: linear-gradient(135deg, #fffbeb 0%, #fef3c7 100%); color: #92400e;">
+              <div class="card-body">
+                <h5 class="card-title">{{ stats.pending }}</h5>
+                <p class="card-text">Pending</p>
+              </div>
+            </div>
+          </div>
+          <div class="col-md-3">
+            <div class="card text-center" style="background: linear-gradient(135deg, #f0fdf4 0%, #f7fee7 100%); color: #166534;">
+              <div class="card-body">
+                <h5 class="card-title">{{ stats.confirmed }}</h5>
+                <p class="card-text">Confirmed</p>
+              </div>
+            </div>
+          </div>
+          <div class="col-md-3">
+            <div class="card text-center" style="background: linear-gradient(135deg, #fef2f2 0%, #fee2e2 100%); color: #991b1b;">
+              <div class="card-body">
+                <h5 class="card-title">{{ stats.cancelled }}</h5>
+                <p class="card-text">Cancelled</p>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+      {% else %}
+        <div class="text-center py-5">
+          <div class="mb-4">
+            <i class="bi bi-calendar-x display-1 text-muted"></i>
+          </div>
+          <h3 class="text-muted mb-3">No Appointments Scheduled</h3>
+          <p class="text-muted mb-4">You don't have any appointments scheduled yet. Patients can book appointments with you through the appointment booking system.</p>
+          <div class="alert alert-info" role="alert">
+            <h5 class="alert-heading"><i class="bi bi-info-circle-fill me-2"></i>How it works</h5>
+            <p class="mb-0">Patients can book appointments with you by selecting you as their doctor. Once they book an appointment, it will appear here for you to manage.</p>
+          </div>
+        </div>
+      {% endif %}
+    </div>
+  </div>
+</div>
+
+<script>
+function updateStatus(appointmentId, status) {
+    if (confirm(`Are you sure you want to change the status to ${status}?`)) {
+        const toast = document.createElement('div');
+        toast.className = 'position-fixed bottom-0 end-0 m-3 alert alert-info py-2 px-3';
+        toast.innerText = 'Updating status...';
+        document.body.appendChild(toast);
+        fetch("{% url 'appointments:update_status' %}", {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/x-www-form-urlencoded',
+            'X-CSRFToken': '{{ csrf_token }}'
+          },
+          body: new URLSearchParams({ id: appointmentId, status })
+        }).then(r => r.json()).then(data => {
+          if (data.ok) {
+            toast.classList.remove('alert-info');
+            toast.classList.add('alert-success');
+            toast.innerText = 'Status updated to ' + data.status;
+            setTimeout(() => location.reload(), 600);
+          } else {
+            toast.classList.remove('alert-info');
+            toast.classList.add('alert-danger');
+            toast.innerText = data.error || 'Failed to update status';
+            setTimeout(() => toast.remove(), 1200);
+          }
+        }).catch(() => alert('Failed to update status'));
+    }
+}
+</script>
+
+<style>
+/* Modern light gradient design for doctor appointments */
+.container {
+  background: linear-gradient(135deg, #ffffff 0%, #f8fafc 50%, #e2e8f0 100%);
+  background-attachment: fixed;
+  min-height: 100vh;
+  padding: 2rem 1rem;
+}
+
+.text-primary {
+  color: #1e40af !important;
+}
+
+.badge {
+  border-radius: 12px;
+  padding: 8px 12px;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.bg-primary {
+  background: linear-gradient(135deg, #e6f3ff 0%, #f0f9ff 100%) !important;
+  color: #1e40af !important;
+}
+
+.bg-success {
+  background: linear-gradient(135deg, #f0fdf4 0%, #f7fee7 100%) !important;
+  color: #166534 !important;
+}
+
+.bg-warning {
+  background: linear-gradient(135deg, #fffbeb 0%, #fef3c7 100%) !important;
+  color: #92400e !important;
+}
+
+.bg-danger {
+  background: linear-gradient(135deg, #fef2f2 0%, #fee2e2 100%) !important;
+  color: #991b1b !important;
+}
+
+.card {
+  backdrop-filter: blur(16px) saturate(180%);
+  background: rgba(255, 255, 255, 0.85);
+  border-radius: 25px;
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  box-shadow: 0 25px 50px rgba(31, 38, 135, 0.15);
+  transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  position: relative;
+  overflow: hidden;
+}
+
+.card::before {
+  content: '';
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background: linear-gradient(45deg, transparent, rgba(30, 64, 175, 0.05), transparent);
+  animation: shimmer 3s infinite;
+  pointer-events: none;
+}
+
+@keyframes shimmer {
+  0% { transform: translateX(-100%) translateY(-100%) rotate(45deg); }
+  100% { transform: translateX(100%) translateY(100%) rotate(45deg); }
+}
+
+.card:hover {
+  transform: translateY(-8px) scale(1.02);
+  box-shadow: 0 35px 70px rgba(31, 38, 135, 0.2);
+  background: rgba(255, 255, 255, 0.95);
+}
+
+.card:hover::before {
+  opacity: 1;
+}
+
+.card-header {
+  border-radius: 25px 25px 0 0;
+  border-bottom: 2px solid rgba(30, 64, 175, 0.1);
+  position: relative;
+  overflow: hidden;
+}
+
+.card-header::before {
+  content: '';
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background: linear-gradient(45deg, transparent, rgba(30, 64, 175, 0.1), transparent);
+  animation: headerShimmer 2s infinite;
+}
+
+@keyframes headerShimmer {
+  0% { transform: translateX(-100%) translateY(-100%) rotate(45deg); }
+  100% { transform: translateX(100%) translateY(100%) rotate(45deg); }
+}
+
+.card-body {
+  padding: 2rem;
+  position: relative;
+  z-index: 1;
+}
+
+.card-footer {
+  background: transparent;
+  border-top: 1px solid rgba(226, 232, 240, 0.3);
+  padding: 1.5rem 2rem;
+  position: relative;
+  z-index: 1;
+}
+
+.btn-outline-success {
+  border: 2px solid rgba(22, 101, 52, 0.3);
+  color: #166534;
+  background: rgba(240, 253, 244, 0.3);
+  border-radius: 12px;
+  transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  backdrop-filter: blur(10px);
+}
+
+.btn-outline-success:hover {
+  background: linear-gradient(135deg, #f0fdf4 0%, #f7fee7 100%);
+  color: #166534;
+  border-color: rgba(22, 101, 52, 0.5);
+  transform: scale(1.1);
+  box-shadow: 0 8px 25px rgba(22, 101, 52, 0.2);
+}
+
+.btn-outline-warning {
+  border: 2px solid rgba(146, 64, 14, 0.3);
+  color: #92400e;
+  background: rgba(255, 251, 235, 0.3);
+  border-radius: 12px;
+  transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  backdrop-filter: blur(10px);
+}
+
+.btn-outline-warning:hover {
+  background: linear-gradient(135deg, #fffbeb 0%, #fef3c7 100%);
+  color: #92400e;
+  border-color: rgba(146, 64, 14, 0.5);
+  transform: scale(1.1);
+  box-shadow: 0 8px 25px rgba(146, 64, 14, 0.2);
+}
+
+.btn-outline-danger {
+  border: 2px solid rgba(153, 27, 27, 0.3);
+  color: #991b1b;
+  background: rgba(254, 242, 242, 0.3);
+  border-radius: 12px;
+  transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  backdrop-filter: blur(10px);
+}
+
+.btn-outline-danger:hover {
+  background: linear-gradient(135deg, #fef2f2 0%, #fee2e2 100%);
+  color: #991b1b;
+  border-color: rgba(153, 27, 27, 0.5);
+  transform: scale(1.1);
+  box-shadow: 0 8px 25px rgba(153, 27, 27, 0.2);
+}
+
+.alert {
+  border-radius: 20px;
+  border: none;
+  backdrop-filter: blur(10px);
+  font-weight: 600;
+}
+
+.alert-info {
+  background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
+  color: #1e40af;
+}
+
+/* Enhanced mobile responsiveness */
+@media (max-width: 768px) {
+  .container {
+    padding: 1rem 0.5rem;
+  }
+  
+  .card {
+    border-radius: 20px;
+    margin-bottom: 1rem;
+  }
+  
+  .card-body {
+    padding: 1.5rem;
+  }
+  
+  .card-footer {
+    padding: 1rem 1.5rem;
+  }
+}
+</style>
+{% endblock %}

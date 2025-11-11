@@ -1,0 +1,900 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Assistant - Chronic Care AI</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary: #4361ee;
+            --secondary: #3f37c9;
+            --success: #4cc9f0;
+            --info: #4895ef;
+            --warning: #f72585;
+            --light: #f8f9fa;
+            --dark: #212529;
+            --glass-bg: rgba(255, 255, 255, 0.15);
+            --glass-border: rgba(255, 255, 255, 0.2);
+            --glass-shadow: 0 8px 32px rgba(31, 38, 135, 0.37);
+            --gradient-start: #667eea;
+            --gradient-end: #764ba2;
+            --neon-glow: 0 0 15px rgba(102, 126, 234, 0.5);
+        }
+
+        body {
+            background: linear-gradient(135deg, var(--gradient-start) 0%, var(--gradient-end) 100%);
+            min-height: 100vh;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            padding: 20px;
+            margin: 0;
+            overflow-x: hidden;
+        }
+
+        /* Enhanced Glass Container with Neon Glow */
+        .glass-container {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(12px) saturate(180%);
+            -webkit-backdrop-filter: blur(12px) saturate(180%);
+            border-radius: 24px;
+            border: 1px solid rgba(255, 255, 255, 0.18);
+            box-shadow: 0 25px 50px rgba(31, 38, 135, 0.37);
+            overflow: hidden;
+            position: relative;
+            animation: fadeIn 0.6s ease-out;
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        .glass-container:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 35px 70px rgba(31, 38, 135, 0.45), var(--neon-glow);
+        }
+
+        .glass-container::before {
+            content: '';
+            position: absolute;
+            top: -2px;
+            left: -2px;
+            right: -2px;
+            bottom: -2px;
+            background: linear-gradient(45deg, 
+                rgba(255,255,255,0.1), 
+                rgba(255,255,255,0.01), 
+                rgba(255,255,255,0.1));
+            border-radius: 26px;
+            z-index: -1;
+        }
+
+        /* Enhanced Chat Header */
+        .chat-header {
+            background: linear-gradient(135deg, rgba(67, 97, 238, 0.25) 0%, rgba(63, 55, 201, 0.25) 100%);
+            border-radius: 24px 24px 0 0;
+            padding: 25px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .chat-header::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: linear-gradient(45deg, transparent, rgba(255,255,255,0.1), transparent);
+            animation: shimmer 3s infinite;
+        }
+
+        @keyframes shimmer {
+            0% { transform: translateX(-100%) translateY(-100%) rotate(45deg); }
+            100% { transform: translateX(100%) translateY(100%) rotate(45deg); }
+        }
+
+        .chat-header h3 {
+            color: white;
+            text-shadow: 0 2px 10px rgba(0,0,0,0.2);
+            font-weight: 700;
+            letter-spacing: 0.5px;
+            margin-bottom: 8px;
+        }
+
+        .chat-header p {
+            color: rgba(255, 255, 255, 0.85);
+            font-weight: 500;
+            margin-bottom: 0;
+        }
+
+        /* Medical Disclaimer */
+        .medical-disclaimer {
+            background: rgba(255, 100, 100, 0.2);
+            border: 1px solid rgba(255, 100, 100, 0.3);
+            border-radius: 15px;
+            padding: 15px;
+            margin: 15px 25px;
+            color: #fff;
+            font-size: 14px;
+            backdrop-filter: blur(5px);
+        }
+
+        .medical-disclaimer i {
+            color: #ff6b6b;
+            margin-right: 8px;
+        }
+
+        /* Enhanced Quick Actions */
+        .quick-actions {
+            padding: 20px 25px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.15);
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+            background: rgba(255, 255, 255, 0.05);
+        }
+
+        .quick-btn {
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.2) 0%, rgba(255, 255, 255, 0.1) 100%);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 50px;
+            padding: 10px 20px;
+            font-size: 14px;
+            color: white;
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            backdrop-filter: blur(5px);
+            position: relative;
+            overflow: hidden;
+            font-weight: 600;
+            letter-spacing: 0.3px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .quick-btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+            transition: left 0.6s;
+        }
+
+        .quick-btn:hover::before {
+            left: 100%;
+        }
+
+        .quick-btn:hover {
+            background: linear-gradient(135deg, rgba(67, 97, 238, 0.35) 0%, rgba(63, 55, 201, 0.35) 100%);
+            transform: translateY(-3px) scale(1.05);
+            box-shadow: 0 10px 25px rgba(67, 97, 238, 0.3);
+            border-color: rgba(255, 255, 255, 0.3);
+        }
+
+        /* Enhanced Chat Messages */
+        .chat-messages {
+            height: 450px;
+            overflow-y: auto;
+            padding: 25px;
+            background: rgba(255, 255, 255, 0.03);
+            backdrop-filter: blur(5px);
+        }
+
+        .message {
+            margin-bottom: 20px;
+            animation: fadeIn 0.4s ease-in;
+            display: flex;
+            flex-direction: column;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(15px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .user-message {
+            align-items: flex-end;
+        }
+
+        .bot-message {
+            align-items: flex-start;
+        }
+
+        .message-bubble {
+            display: inline-block;
+            padding: 16px 22px;
+            border-radius: 22px;
+            max-width: 85%;
+            word-wrap: break-word;
+            position: relative;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+            backdrop-filter: blur(10px);
+            animation: bubbleAppear 0.3s ease-out;
+            line-height: 1.5;
+        }
+
+        @keyframes bubbleAppear {
+            0% { opacity: 0; transform: scale(0.8); }
+            100% { opacity: 1; transform: scale(1); }
+        }
+
+        .user-message .message-bubble {
+            background: linear-gradient(135deg, rgba(67, 97, 238, 0.4) 0%, rgba(63, 55, 201, 0.4) 100%);
+            color: white;
+            border-bottom-right-radius: 8px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .bot-message .message-bubble {
+            background: rgba(255, 255, 255, 0.25);
+            color: #333;
+            border-bottom-left-radius: 8px;
+            border: 1px solid rgba(255, 255, 255, 0.15);
+        }
+
+        .message-bubble strong {
+            font-weight: 700;
+            display: block;
+            margin-bottom: 8px;
+        }
+
+        .message-bubble ul {
+            padding-left: 20px;
+            margin: 10px 0;
+        }
+
+        .message-bubble li {
+            margin-bottom: 5px;
+        }
+
+        /* Enhanced Chat Input */
+        .chat-input {
+            padding: 25px;
+            border-top: 1px solid rgba(255, 255, 255, 0.15);
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 0 0 24px 24px;
+        }
+
+        .input-group {
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 50px;
+            overflow: hidden;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);
+            border: 1px solid rgba(255, 255, 255, 0.25);
+            transition: all 0.3s ease;
+        }
+
+        .input-group:focus-within {
+            background: rgba(255, 255, 255, 0.25);
+            box-shadow: 0 12px 30px rgba(0, 0, 0, 0.25);
+            transform: translateY(-2px);
+        }
+
+        .form-control {
+            background: transparent;
+            border: none;
+            color: white;
+            padding: 16px 25px;
+            font-size: 16px;
+            font-weight: 500;
+        }
+
+        .form-control::placeholder {
+            color: rgba(255, 255, 255, 0.7);
+        }
+
+        .form-control:focus {
+            box-shadow: none;
+            background: rgba(255, 255, 255, 0.3);
+        }
+
+        .btn-send {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+            border: none;
+            border-radius: 50%;
+            width: 55px;
+            height: 55px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            box-shadow: 0 8px 25px rgba(67, 97, 238, 0.4);
+        }
+
+        .btn-send:hover {
+            background: linear-gradient(135deg, var(--secondary) 0%, var(--primary) 100%);
+            transform: scale(1.1) rotate(10deg);
+            box-shadow: 0 12px 30px rgba(67, 97, 238, 0.5);
+        }
+
+        .btn-send:active {
+            transform: scale(0.95);
+        }
+
+        /* Enhanced Modal Styles */
+        .modal-content {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px);
+            border-radius: 24px;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            box-shadow: 0 30px 60px rgba(0, 0, 0, 0.3);
+        }
+
+        .modal-header {
+            border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+            padding: 20px 25px;
+            background: linear-gradient(135deg, rgba(67, 97, 238, 0.05) 0%, rgba(63, 55, 201, 0.05) 100%);
+            border-radius: 24px 24px 0 0;
+        }
+
+        .modal-title {
+            font-weight: 700;
+            color: #333;
+        }
+
+        .modal-body {
+            padding: 25px;
+        }
+
+        .modal-footer {
+            border-top: 1px solid rgba(0, 0, 0, 0.1);
+            padding: 20px 25px;
+            background: rgba(0, 0, 0, 0.02);
+            border-radius: 0 0 24px 24px;
+        }
+
+        /* Form Elements */
+        .form-label {
+            font-weight: 600;
+            color: #555;
+            margin-bottom: 8px;
+        }
+
+        .form-control, .form-select {
+            border-radius: 15px;
+            border: 2px solid rgba(0, 0, 0, 0.1);
+            padding: 14px 18px;
+            transition: all 0.3s ease;
+            background: rgba(255, 255, 255, 0.9);
+            font-weight: 500;
+        }
+
+        .form-control:focus, .form-select:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 0.25rem rgba(67, 97, 238, 0.25);
+            background: white;
+        }
+
+        .btn {
+            border-radius: 15px;
+            padding: 12px 24px;
+            font-weight: 600;
+            letter-spacing: 0.5px;
+            transition: all 0.3s ease;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+            border: none;
+            box-shadow: 0 8px 20px rgba(67, 97, 238, 0.3);
+        }
+
+        .btn-primary:hover {
+            background: linear-gradient(135deg, var(--secondary) 0%, var(--primary) 100%);
+            transform: translateY(-2px);
+            box-shadow: 0 12px 25px rgba(67, 97, 238, 0.4);
+        }
+
+        .btn-secondary {
+            background: linear-gradient(135deg, #6c757d 0%, #495057 100%);
+            border: none;
+            box-shadow: 0 8px 20px rgba(108, 117, 125, 0.3);
+        }
+
+        .btn-secondary:hover {
+            background: linear-gradient(135deg, #495057 0%, #343a40 100%);
+            transform: translateY(-2px);
+            box-shadow: 0 12px 25px rgba(108, 117, 125, 0.4);
+        }
+
+        /* Typing Indicator */
+        .typing-indicator {
+            display: inline-block;
+            padding: 16px 22px;
+            background: rgba(255, 255, 255, 0.25);
+            border-radius: 22px;
+            color: #333;
+            border-bottom-left-radius: 8px;
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            backdrop-filter: blur(10px);
+        }
+
+        .typing-indicator span {
+            height: 10px;
+            width: 10px;
+            float: left;
+            margin: 0 2px;
+            background-color: #9E9EA1;
+            display: block;
+            border-radius: 50%;
+            opacity: 0.4;
+        }
+
+        .typing-indicator span:nth-of-type(1) {
+            animation: typing 1s infinite;
+        }
+
+        .typing-indicator span:nth-of-type(2) {
+            animation: typing 1s infinite 0.2s;
+        }
+
+        .typing-indicator span:nth-of-type(3) {
+            animation: typing 1s infinite 0.4s;
+        }
+
+        @keyframes typing {
+            0% { transform: translateY(0px); }
+            50% { transform: translateY(-5px); }
+            100% { transform: translateY(0px); }
+        }
+
+        /* Scrollbar */
+        .chat-messages::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        .chat-messages::-webkit-scrollbar-track {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+        }
+
+        .chat-messages::-webkit-scrollbar-thumb {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+            border-radius: 10px;
+        }
+
+        .chat-messages::-webkit-scrollbar-thumb:hover {
+            background: linear-gradient(135deg, var(--secondary) 0%, var(--primary) 100%);
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            body {
+                padding: 10px;
+            }
+            
+            .chat-messages {
+                height: 350px;
+                padding: 15px;
+            }
+            
+            .message-bubble {
+                max-width: 90%;
+                padding: 14px 18px;
+                font-size: 14px;
+            }
+            
+            .chat-header {
+                padding: 20px 15px;
+            }
+            
+            .chat-header h3 {
+                font-size: 1.4rem;
+            }
+            
+            .quick-actions {
+                padding: 15px;
+                gap: 8px;
+            }
+            
+            .quick-btn {
+                padding: 8px 16px;
+                font-size: 13px;
+            }
+            
+            .chat-input {
+                padding: 20px 15px;
+            }
+            
+            .form-control {
+                padding: 14px 20px;
+                font-size: 15px;
+            }
+            
+            .btn-send {
+                width: 50px;
+                height: 50px;
+            }
+        }
+
+        @media (max-width: 576px) {
+            .glass-container {
+                border-radius: 20px;
+            }
+            
+            .chat-header {
+                border-radius: 20px 20px 0 0;
+                padding: 18px 15px;
+            }
+            
+            .message-bubble {
+                max-width: 95%;
+                padding: 12px 16px;
+                font-size: 13px;
+                border-radius: 18px;
+            }
+            
+            .chat-messages {
+                height: 300px;
+            }
+            
+            .quick-btn {
+                padding: 6px 12px;
+                font-size: 12px;
+            }
+            
+            .form-control {
+                padding: 12px 16px;
+                font-size: 14px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-lg-8 col-md-10">
+                <div class="glass-container">
+                    <div class="chat-header text-center">
+                        <h3><i class="fas fa-robot me-2"></i>AI Health Assistant</h3>
+                        <p class="mb-0">Your personal healthcare companion</p>
+                    </div>
+                    
+                    <div class="medical-disclaimer">
+                        <i class="fas fa-exclamation-triangle"></i><strong>Medical Disclaimer:</strong> This AI assistant provides educational information only and is not a substitute for professional medical advice, diagnosis, or treatment. Always seek the advice of your physician or other qualified health provider with any questions you may have regarding a medical condition.
+                    </div>
+                    
+                    <div class="quick-actions">
+                        <button class="quick-btn" onclick="sendQuickAction('View my profile')">
+                            <i class="fas fa-user me-1"></i> Profile
+                        </button>
+                        <button class="quick-btn" onclick="sendQuickAction('View prediction history')">
+                            <i class="fas fa-heartbeat me-1"></i> Health Reports
+                        </button>
+                        <button class="quick-btn" onclick="sendQuickAction('View my appointments')">
+                            <i class="fas fa-calendar-check me-1"></i> Appointments
+                        </button>
+                        <button class="quick-btn" onclick="sendQuickAction('View my messages')">
+                            <i class="fas fa-envelope me-1"></i> Messages
+                        </button>
+                        {% if user.is_superuser %}
+                        <button class="quick-btn" onclick="openModal('registerPatientModal')">
+                            <i class="fas fa-user-plus me-1"></i> Register Patient
+                        </button>
+                        <button class="quick-btn" onclick="openModal('createAnnouncementModal')">
+                            <i class="fas fa-bullhorn me-1"></i> Announcement
+                        </button>
+                        {% endif %}
+                    </div>
+                    
+                    <div class="chat-messages" id="chat-messages">
+                        <div class="message bot-message">
+                            <div class="message-bubble">
+                                <strong>Hello {{ user.first_name|default:user.username }}!</strong> 👋<br>
+                                I'm your AI Health Assistant. How can I help you today?<br><br>
+                                You can ask me about:
+                                <ul class="mb-0">
+                                    <li>Your health reports and predictions</li>
+                                    <li>Appointment scheduling</li>
+                                    <li>Medical information and health tips</li>
+                                    <li>Your profile details</li>
+                                    {% if user.is_superuser %}
+                                    <li>Registering new patients</li>
+                                    <li>Creating announcements</li>
+                                    {% endif %}
+                                </ul>
+                                <br>
+                                <strong>⚕️ Remember:</strong> I provide educational information only. For medical concerns, please consult with a healthcare professional.
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="chat-input">
+                        <form id="chat-form" class="d-flex gap-2">
+                            <div class="input-group flex-grow-1">
+                                <input type="text" id="user-msg" class="form-control" placeholder="Ask about medical conditions, health tips, appointments..." autocomplete="off" required>
+                            </div>
+                            <button type="submit" class="btn btn-send">
+                                <i class="fas fa-paper-plane"></i>
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Register Patient Modal -->
+    <div class="modal fade" id="registerPatientModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title"><i class="fas fa-user-plus me-2"></i>Register New Patient</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="register-patient-form">
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">First Name</label>
+                                <input type="text" class="form-control" id="first_name" required>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Last Name</label>
+                                <input type="text" class="form-control" id="last_name" required>
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Username</label>
+                            <input type="text" class="form-control" id="username" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Email</label>
+                            <input type="email" class="form-control" id="email" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Password</label>
+                            <input type="password" class="form-control" id="password" required>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Date of Birth</label>
+                                <input type="date" class="form-control" id="dob" required>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Gender</label>
+                                <select class="form-control" id="gender" required>
+                                    <option value="">Select Gender</option>
+                                    <option value="Male">Male</option>
+                                    <option value="Female">Female</option>
+                                    <option value="Other">Other</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Phone Number</label>
+                            <input type="tel" class="form-control" id="phone_number" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Address</label>
+                            <textarea class="form-control" id="address" rows="3" required></textarea>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-primary" onclick="registerPatient()">Register</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Create Announcement Modal -->
+    <div class="modal fade" id="createAnnouncementModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title"><i class="fas fa-bullhorn me-2"></i>Create Announcement</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="create-announcement-form">
+                        <div class="mb-3">
+                            <label class="form-label">Title</label>
+                            <input type="text" class="form-control" id="announcement_title" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Content</label>
+                            <textarea class="form-control" id="announcement_content" rows="4" required></textarea>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-primary" onclick="createAnnouncement()">Create</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        const chatMessages = document.getElementById('chat-messages');
+        const chatForm = document.getElementById('chat-form');
+        const userMsgInput = document.getElementById('user-msg');
+
+        // Add message to chat
+        function addMessage(text, isUser = false) {
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `message ${isUser ? 'user-message' : 'bot-message'}`;
+            
+            const bubbleDiv = document.createElement('div');
+            bubbleDiv.className = 'message-bubble';
+            bubbleDiv.innerHTML = text;
+            
+            messageDiv.appendChild(bubbleDiv);
+            chatMessages.appendChild(messageDiv);
+            
+            // Scroll to bottom
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+        }
+
+        // Show typing indicator
+        function showTyping() {
+            const typingDiv = document.createElement('div');
+            typingDiv.className = 'message bot-message';
+            typingDiv.id = 'typing-indicator';
+            typingDiv.innerHTML = `
+                <div class="typing-indicator">
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                </div>
+            `;
+            chatMessages.appendChild(typingDiv);
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+        }
+
+        // Hide typing indicator
+        function hideTyping() {
+            const typingIndicator = document.getElementById('typing-indicator');
+            if (typingIndicator) {
+                typingIndicator.remove();
+            }
+        }
+
+        // Send quick action
+        function sendQuickAction(action) {
+            addMessage(action, true);
+            processMessage(action);
+        }
+
+        // Open modal
+        function openModal(modalId) {
+            const modal = new bootstrap.Modal(document.getElementById(modalId));
+            modal.show();
+        }
+
+        // Process message
+        async function processMessage(message) {
+            showTyping();
+            
+            try {
+                const response = await fetch('/chatbot/ask/', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': getCookie('csrftoken')
+                    },
+                    body: JSON.stringify({ message: message })
+                });
+                
+                const data = await response.json();
+                hideTyping();
+                addMessage(data.reply);
+            } catch (error) {
+                hideTyping();
+                addMessage("Sorry, I'm having trouble connecting. Please try again.");
+            }
+        }
+
+        // Get CSRF token
+        function getCookie(name) {
+            let cookieValue = null;
+            if (document.cookie && document.cookie !== '') {
+                const cookies = document.cookie.split(';');
+                for (let i = 0; i < cookies.length; i++) {
+                    const cookie = cookies[i].trim();
+                    if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                        break;
+                    }
+                }
+            }
+            return cookieValue;
+        }
+
+        // Handle form submission
+        chatForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const message = userMsgInput.value.trim();
+            
+            if (message) {
+                addMessage(message, true);
+                userMsgInput.value = '';
+                await processMessage(message);
+            }
+        });
+
+        // Register patient
+        async function registerPatient() {
+            const patientData = {
+                first_name: document.getElementById('first_name').value,
+                last_name: document.getElementById('last_name').value,
+                username: document.getElementById('username').value,
+                email: document.getElementById('email').value,
+                password: document.getElementById('password').value,
+                dob: document.getElementById('dob').value,
+                gender: document.getElementById('gender').value,
+                phone_number: document.getElementById('phone_number').value,
+                address: document.getElementById('address').value
+            };
+
+            try {
+                const response = await fetch('/chatbot/agent-action/', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': getCookie('csrftoken')
+                    },
+                    body: JSON.stringify({
+                        action: 'register_patient',
+                        payload: patientData
+                    })
+                });
+
+                const data = await response.json();
+                addMessage(`Patient Registration: ${data.message}`);
+                
+                if (data.success) {
+                    bootstrap.Modal.getInstance(document.getElementById('registerPatientModal')).hide();
+                    document.getElementById('register-patient-form').reset();
+                }
+            } catch (error) {
+                addMessage("Error registering patient. Please try again.");
+            }
+        }
+
+        // Create announcement
+        async function createAnnouncement() {
+            const title = document.getElementById('announcement_title').value;
+            const content = document.getElementById('announcement_content').value;
+
+            try {
+                const response = await fetch('/chatbot/agent-action/', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': getCookie('csrftoken')
+                    },
+                    body: JSON.stringify({
+                        action: 'create_announcement',
+                        payload: {
+                            title: title,
+                            content: content
+                        }
+                    })
+                });
+
+                const data = await response.json();
+                addMessage(`Announcement: ${data.message}`);
+                
+                if (data.success) {
+                    bootstrap.Modal.getInstance(document.getElementById('createAnnouncementModal')).hide();
+                    document.getElementById('create-announcement-form').reset();
+                }
+            } catch (error) {
+                addMessage("Error creating announcement. Please try again.");
+            }
+        }
+
+        // Focus input on load
+        window.addEventListener('load', () => {
+            userMsgInput.focus();
+        });
+    </script>
+</body>
+</html>

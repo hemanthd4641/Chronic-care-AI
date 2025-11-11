@@ -1,0 +1,33 @@
+{
+  "name": "BCM Postmetric Boys Hostel",
+  "location": "Siddapura, Whitefield, Bengaluru, Karnataka, 560066",
+  "address": "Nallurahalli Main Road, Siddapura Varthur Main Road, Whitefield",
+  "bus_lines": [
+    "327", "327A", "329M", "500-FB", "V-500F", "333-G", "304R", "322", "323", "323‑AK"
+  ],
+  "nearest_bus_stop": "Siddapura (about 4 min walk, ~246 m)",
+  "metro_line": "Purple Line",
+  "nearest_metro_station": "Nallur Halli (around 37 min walk, ~2.9 km)",
+  "mess_timings": "Breakfast: 7:30–9:00, Lunch: 12:30–2:00, Dinner: 7:30–9:00",
+  "room_types": "Dormitory-style rooms for post-metric boys",
+  "warden": "Warden name is Jagadeesh contact not publicly listed (check hostel office)",
+  "wifi": "Wi‑Fi generally available in common areas; confirm with management",
+  "gate_close_time": "Typically around 10 PM (confirm with hostel office)",
+  "admission-process":"https://bcwd.karnataka.gov.in/74/online--application/en",
+  "college-students":"CMRIT,NHCE,SEA Collge,Gopalan",
+  "facilities": [
+    "Shared bathrooms",
+    "Mess with routine meals",
+    "Common room",
+    "Basic furniture (bed, study table)",
+    "Limited parking space"
+  ],
+  "nearby_landmarks": [
+    "Holiday Inn & Suites (Siddapura)",
+    "Prestige Laughing Waters",
+    "The Farmhouse Kitchen & Bakery",
+    "Silicon Pride Apartment",
+    "Siddapura Lake"
+  ],
+  "notes": "Operated by the Karnataka Backward Classes Welfare Dept. as a post-metric boys hostel. Facilities are basic; confirm gate timings and contact details directly from office."
+}

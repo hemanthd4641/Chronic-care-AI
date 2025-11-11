@@ -1,0 +1,1043 @@
+{% extends "base.html" %}
+{% load form_extras %}
+{% block content %}
+<style>
+    body {
+        background: linear-gradient(135deg, #ffffff 0%, #f8fafc 50%, #fffbeb 100%);
+        background-attachment: fixed;
+        font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    }
+
+    .prediction-container {
+        backdrop-filter: blur(20px) saturate(180%);
+        background: rgba(255, 255, 255, 0.85);
+        border-radius: 25px;
+        border: 1px solid rgba(255, 255, 255, 0.18);
+        box-shadow: 0 25px 50px rgba(31, 38, 135, 0.15);
+        transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        animation: fadeInUp 0.8s ease-out;
+        position: relative;
+        overflow: hidden;
+    }
+    
+    .prediction-container::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 6px;
+        background: linear-gradient(90deg, #fef3c7 0%, #fde68a 50%, #f59e0b 100%);
+        background-size: 200% 100%;
+        animation: gradientShift 3s ease-in-out infinite;
+    }
+    
+    @keyframes gradientShift {
+        0%, 100% { background-position: 0% 50%; }
+        50% { background-position: 100% 50%; }
+    }
+    
+    .prediction-container:hover {
+        transform: translateY(-5px) scale(1.01);
+        box-shadow: 0 35px 70px rgba(31, 38, 135, 0.2);
+        background: rgba(255, 255, 255, 0.95);
+    }
+
+    .prediction-header {
+        background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+        padding: 3rem;
+        text-align: left;
+        border-bottom: none;
+        position: relative;
+        overflow: hidden;
+        border-radius: 25px 25px 0 0;
+    }
+
+    .prediction-header::before {
+        content: '';
+        position: absolute;
+        top: -50%;
+        left: -50%;
+        width: 200%;
+        height: 200%;
+        background: linear-gradient(45deg, transparent, rgba(245, 158, 11, 0.05), transparent);
+        animation: shimmer 3s infinite;
+    }
+
+    @keyframes shimmer {
+        0% { transform: translateX(-100%) translateY(-100%) rotate(45deg); }
+        100% { transform: translateX(100%) translateY(100%) rotate(45deg); }
+    }
+
+    .prediction-title {
+        color: #d97706;
+        font-size: 2rem;
+        font-weight: 900;
+        margin-bottom: 10px;
+        position: relative;
+        z-index: 1;
+    }
+
+    .prediction-subtitle {
+        color: #b45309;
+        font-size: 1rem;
+        margin: 0;
+        font-weight: 500;
+        position: relative;
+        z-index: 1;
+    }
+
+    .form-container {
+        padding: 3rem;
+        background: rgba(255, 255, 255, 0.9);
+        backdrop-filter: blur(15px);
+        border-radius: 0 0 25px 25px;
+    }
+
+    .form-group {
+        margin-bottom: 1.5rem;
+    }
+
+    .form-label {
+        color: #374151;
+        font-weight: 700;
+        margin-bottom: 0.75rem;
+        display: block;
+        font-size: 0.95rem;
+    }
+
+    .form-control, .form-select {
+        border: 2px solid rgba(245, 158, 11, 0.1);
+        border-radius: 15px;
+        padding: 12px 16px;
+        font-size: 0.95rem;
+        transition: all 0.3s ease;
+        background: rgba(255, 255, 255, 0.9);
+        backdrop-filter: blur(10px);
+        position: relative;
+    }
+
+    .form-control:focus, .form-select:focus {
+        border-color: rgba(245, 158, 11, 0.4);
+        box-shadow: 0 0 0 3px rgba(245, 158, 11, 0.1);
+        background: rgba(255, 255, 255, 1);
+        outline: none;
+        transform: translateY(-1px);
+    }
+    
+    .form-control.is-invalid {
+        border-color: #dc3545;
+        box-shadow: 0 0 0 3px rgba(220, 53, 69, 0.1);
+    }
+    
+    .form-control.is-valid {
+        border-color: #28a745;
+        box-shadow: 0 0 0 3px rgba(40, 167, 69, 0.1);
+    }
+    
+    .input-group {
+        position: relative;
+    }
+    
+    .input-tooltip {
+        position: absolute;
+        top: -8px;
+        right: 10px;
+        background: linear-gradient(135deg, #667eea, #764ba2);
+        color: white;
+        border-radius: 50%;
+        width: 20px;
+        height: 20px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 12px;
+        cursor: help;
+        z-index: 10;
+    }
+    
+    .progress-bar-custom {
+        height: 6px;
+        background: linear-gradient(90deg, #dc3545 0%, #ffc107 50%, #28a745 100%);
+        border-radius: 3px;
+        margin: 10px 0;
+    }
+    
+    .form-validation-message {
+        background: linear-gradient(135deg, rgba(220, 53, 69, 0.1), rgba(220, 53, 69, 0.05));
+        border: 1px solid rgba(220, 53, 69, 0.2);
+        border-radius: 8px;
+        padding: 8px 12px;
+        margin-top: 5px;
+        font-size: 0.8rem;
+        color: #721c24;
+    }
+
+    .form-text {
+        color: #6b7280;
+        font-size: 0.85rem;
+        margin-top: 0.5rem;
+        font-style: italic;
+    }
+
+    .btn {
+        border-radius: 18px;
+        font-weight: 700;
+        padding: 14px 24px;
+        transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        position: relative;
+        overflow: hidden;
+        backdrop-filter: blur(10px);
+    }
+
+    .btn::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+        transition: left 0.6s;
+    }
+
+    .btn:hover::before {
+        left: 100%;
+    }
+
+    .btn:hover {
+        transform: translateY(-3px) scale(1.05);
+        box-shadow: 0 15px 35px rgba(0, 0, 0, 0.2);
+    }
+
+    .btn-warning {
+        background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+        border: none;
+        color: #d97706;
+        box-shadow: 0 8px 20px rgba(245, 158, 11, 0.2);
+    }
+
+    .btn-warning:hover {
+        background: linear-gradient(135deg, #fde68a 0%, #f59e0b 100%);
+        color: #d97706;
+        box-shadow: 0 15px 35px rgba(245, 158, 11, 0.3);
+    }
+
+    .alert {
+        border-radius: 15px;
+        border: none;
+        backdrop-filter: blur(10px);
+        position: relative;
+        overflow: hidden;
+    }
+
+    .alert::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 4px;
+        height: 100%;
+        background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+    }
+
+    @keyframes fadeInUp {
+        from {
+            opacity: 0;
+            transform: translateY(30px) scale(0.9);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0) scale(1);
+        }
+    }
+    
+    /* Comprehensive Mobile Responsiveness */
+    @media (max-width: 992px) {
+        .prediction-container {
+            margin: 1.5rem 0.75rem;
+            border-radius: 22px;
+        }
+        
+        .prediction-header {
+            padding: 2.5rem 2rem;
+            border-radius: 22px 22px 0 0;
+        }
+        
+        .prediction-title {
+            font-size: 1.75rem;
+        }
+        
+        .prediction-subtitle {
+            font-size: 0.95rem;
+        }
+        
+        .form-container {
+            padding: 2.5rem 2rem;
+        }
+        
+        .form-control,
+        .form-select {
+            min-height: 50px;
+            padding: 14px 18px;
+            font-size: 0.95rem;
+            border-radius: 13px;
+            touch-action: manipulation;
+            -webkit-tap-highlight-color: transparent;
+        }
+        
+        .btn {
+            min-height: 50px;
+            padding: 15px 28px;
+            font-size: 0.95rem;
+            border-radius: 16px;
+            touch-action: manipulation;
+        }
+        
+        .form-label {
+            font-size: 0.9rem;
+            margin-bottom: 0.625rem;
+        }
+        
+        .form-text {
+            font-size: 0.8rem;
+        }
+        
+        .input-tooltip {
+            width: 22px;
+            height: 22px;
+            font-size: 13px;
+        }
+        
+        .col-md-6,
+        .col-lg-4 {
+            margin-bottom: 1.25rem;
+        }
+    }
+    
+    @media (max-width: 768px) {
+        .prediction-container {
+            margin: 1.25rem 0.5rem;
+            border-radius: 20px;
+        }
+        
+        .prediction-header {
+            padding: 2rem 1.5rem;
+            border-radius: 20px 20px 0 0;
+            text-align: center;
+        }
+        
+        .prediction-title {
+            font-size: 1.6rem;
+        }
+        
+        .prediction-subtitle {
+            font-size: 0.9rem;
+        }
+        
+        .form-container {
+            padding: 2rem 1.5rem;
+        }
+        
+        .form-control,
+        .form-select {
+            min-height: 48px;
+            padding: 13px 16px;
+            font-size: 0.9rem;
+            border-radius: 12px;
+        }
+        
+        .btn {
+            min-height: 48px;
+            padding: 14px 26px;
+            font-size: 0.9rem;
+            border-radius: 14px;
+            width: 100%;
+        }
+        
+        .form-label {
+            font-size: 0.85rem;
+            margin-bottom: 0.5rem;
+        }
+        
+        .form-text {
+            font-size: 0.75rem;
+        }
+        
+        .small {
+            font-size: 0.7rem !important;
+        }
+        
+        .input-tooltip {
+            width: 20px;
+            height: 20px;
+            font-size: 11px;
+        }
+        
+        .col-md-6,
+        .col-lg-4 {
+            width: 100% !important;
+            max-width: 100% !important;
+            flex: 0 0 100% !important;
+            margin-bottom: 1rem;
+        }
+        
+        .row.g-4 {
+            gap: 0.75rem !important;
+        }
+        
+        /* Stack form elements vertically */
+        .d-flex {
+            flex-direction: column;
+            align-items: stretch !important;
+        }
+        
+        .d-flex.gap-3 {
+            gap: 0.75rem !important;
+        }
+        
+        .alert {
+            border-radius: 12px;
+            padding: 1rem 1.25rem;
+            font-size: 0.85rem;
+        }
+    }
+    
+    @media (max-width: 576px) {
+        .prediction-container {
+            margin: 1rem 0.375rem;
+            border-radius: 18px;
+        }
+        
+        .prediction-header {
+            padding: 1.75rem 1.25rem;
+            border-radius: 18px 18px 0 0;
+        }
+        
+        .prediction-title {
+            font-size: 1.45rem;
+        }
+        
+        .prediction-subtitle {
+            font-size: 0.85rem;
+        }
+        
+        .form-container {
+            padding: 1.75rem 1.25rem;
+        }
+        
+        .form-control,
+        .form-select {
+            min-height: 46px;
+            padding: 12px 15px;
+            font-size: 0.85rem;
+            border-radius: 11px;
+        }
+        
+        .btn {
+            min-height: 46px;
+            padding: 13px 24px;
+            font-size: 0.85rem;
+            border-radius: 13px;
+        }
+        
+        .form-label {
+            font-size: 0.8rem;
+            margin-bottom: 0.4rem;
+        }
+        
+        .form-text {
+            font-size: 0.7rem;
+        }
+        
+        .small {
+            font-size: 0.65rem !important;
+        }
+        
+        .input-tooltip {
+            width: 18px;
+            height: 18px;
+            font-size: 10px;
+        }
+        
+        .col-md-6,
+        .col-lg-4 {
+            margin-bottom: 0.875rem;
+        }
+        
+        .row.g-4 {
+            gap: 0.5rem !important;
+            margin: 0 !important;
+        }
+        
+        .alert {
+            border-radius: 10px;
+            padding: 0.875rem 1rem;
+            font-size: 0.8rem;
+        }
+        
+        .bi {
+            font-size: 1.1rem;
+        }
+        
+        .mt-5 {
+            margin-top: 2rem !important;
+        }
+    }
+    
+    @media (max-width: 480px) {
+        .prediction-container {
+            margin: 0.75rem 0.25rem;
+            border-radius: 16px;
+        }
+        
+        .prediction-header {
+            padding: 1.5rem 1rem;
+            border-radius: 16px 16px 0 0;
+        }
+        
+        .prediction-title {
+            font-size: 1.3rem;
+        }
+        
+        .prediction-subtitle {
+            font-size: 0.8rem;
+        }
+        
+        .form-container {
+            padding: 1.5rem 1rem;
+        }
+        
+        .form-control,
+        .form-select {
+            min-height: 44px;
+            padding: 11px 14px;
+            font-size: 0.8rem;
+            border-radius: 10px;
+        }
+        
+        .btn {
+            min-height: 44px;
+            padding: 12px 22px;
+            font-size: 0.8rem;
+            border-radius: 12px;
+        }
+        
+        .form-label {
+            font-size: 0.75rem;
+            margin-bottom: 0.3rem;
+        }
+        
+        .form-text {
+            font-size: 0.65rem;
+        }
+        
+        .small {
+            font-size: 0.6rem !important;
+        }
+        
+        .input-tooltip {
+            width: 16px;
+            height: 16px;
+            font-size: 9px;
+        }
+        
+        .col-md-6,
+        .col-lg-4 {
+            margin-bottom: 0.75rem;
+        }
+        
+        .row.g-4 {
+            gap: 0.375rem !important;
+        }
+        
+        .alert {
+            border-radius: 8px;
+            padding: 0.75rem 0.875rem;
+            font-size: 0.75rem;
+        }
+        
+        .bi {
+            font-size: 1rem;
+        }
+        
+        /* Ultra-compact form layout */
+        .form-group {
+            margin-bottom: 1rem;
+        }
+        
+        .progress-bar-custom {
+            height: 4px;
+        }
+        
+        .mt-5 {
+            margin-top: 1.5rem !important;
+        }
+    }
+    
+    /* Touch device optimizations */
+    .touch-device .prediction-container:hover {
+        transform: none;
+    }
+    
+    .touch-device .btn:hover {
+        transform: none;
+    }
+    
+    .touch-device .form-control:focus,
+    .touch-device .form-select:focus {
+        transform: none;
+    }
+    
+    /* Enhanced accessibility for mobile */
+    @media (max-width: 768px) {
+        .form-control:focus,
+        .form-select:focus,
+        .btn:focus {
+            outline: 3px solid rgba(245, 158, 11, 0.6);
+            outline-offset: 2px;
+        }
+        
+        /* Better text legibility */
+        .prediction-container {
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+            text-rendering: optimizeLegibility;
+        }
+        
+        /* Improved form accessibility */
+        .form-control,
+        .form-select {
+            -webkit-appearance: none;
+            -moz-appearance: textfield;
+        }
+    }
+    
+    /* Landscape orientation adjustments for mobile */
+    @media (max-width: 992px) and (orientation: landscape) {
+        .prediction-container {
+            margin: 1rem 2rem;
+        }
+        
+        .prediction-header {
+            padding: 1.75rem 2rem;
+        }
+        
+        .prediction-title {
+            font-size: 1.5rem;
+        }
+        
+        .form-container {
+            padding: 1.75rem 2rem;
+        }
+        
+        .col-md-6,
+        .col-lg-4 {
+            flex: 0 0 50% !important;
+            max-width: 50% !important;
+            width: 50% !important;
+        }
+    }
+</style>
+
+<div class="container mt-4" style="max-width: 1000px;">
+  <div class="row justify-content-center">
+    <div class="col-12">
+      <div class="prediction-container">
+        <div class="prediction-header">
+          <div class="d-flex align-items-center">
+            <i class="bi bi-droplet-fill me-3 fs-4"></i>
+            <div>
+              <h3 class="prediction-title mb-0">Hypertension Risk Assessment</h3>
+              <small class="prediction-subtitle">AI-Powered Blood Pressure Health Analysis</small>
+            </div>
+          </div>
+        </div>
+        <div class="form-container">
+          {% if not done %}
+            <div class="alert alert-info" role="alert">
+              <i class="bi bi-info-circle-fill me-2"></i>
+              <strong>Instructions:</strong> Please fill in all the required information about your blood pressure and lifestyle factors. This assessment helps evaluate your risk of hypertension.
+            </div>
+          {% endif %}
+          
+          {% if error_message %}
+            <div class="alert alert-danger" role="alert">
+              <i class="bi bi-exclamation-triangle-fill me-2"></i>
+              <strong>Error:</strong> {{ error_message }}
+            </div>
+          {% endif %}
+          
+          {% if form.errors %}
+            <div class="alert alert-warning" role="alert">
+              <i class="bi bi-exclamation-triangle-fill me-2"></i>
+              <strong>Please fix the following errors:</strong>
+              <ul class="mb-0 mt-2">
+                {% for field, errors in form.errors.items %}
+                  {% for error in errors %}
+                    <li>{{ field|title }}: {{ error }}</li>
+                  {% endfor %}
+                {% endfor %}
+              </ul>
+            </div>
+          {% endif %}
+
+          <form method="post" novalidate>
+            {% csrf_token %}
+            <div class="row g-4">
+              <div class="col-md-6 col-lg-4">
+                <div class="form-group">
+                  <label class="form-label fw-semibold">Age</label>
+                  <div class="input-group">
+                    {{ form.age|add_class:"form-control" }}
+                    <span class="input-tooltip" data-bs-toggle="tooltip" title="Enter your current age in years">?</span>
+                  </div>
+                  <div class="form-text text-muted">Your current age (18-80 years)</div>
+                  <div class="progress-bar-custom d-none" id="age-progress"></div>
+                </div>
+              </div>
+              <div class="col-md-6 col-lg-4">
+                <div class="form-group">
+                  <label class="form-label fw-semibold">Gender</label>
+                  <div class="input-group">
+                    {{ form.gender|add_class:"form-select" }}
+                    <span class="input-tooltip" data-bs-toggle="tooltip" title="Select your biological gender">?</span>
+                  </div>
+                  <div class="form-text text-muted">Biological gender affects hypertension risk</div>
+                </div>
+              </div>
+              <div class="col-md-6 col-lg-4">
+                <div class="form-group">
+                  <label class="form-label fw-semibold">BMI</label>
+                  <div class="input-group">
+                    {{ form.bmi|add_class:"form-control" }}
+                    <span class="input-tooltip" data-bs-toggle="tooltip" title="Body Mass Index: weight(kg) / height(m)²">?</span>
+                  </div>
+                  <div class="form-text text-muted">Body Mass Index (15.0-50.0 kg/m²)</div>
+                  <div class="small text-info mt-1">💡 Normal BMI: 18.5-24.9, Overweight: 25-29.9, Obese: ≥30</div>
+                </div>
+              </div>
+              <div class="col-md-6 col-lg-4">
+                <div class="form-group">
+                  <label class="form-label fw-semibold">Systolic BP</label>
+                  <div class="input-group">
+                    {{ form.systolic_bp|add_class:"form-control" }}
+                    <span class="input-tooltip" data-bs-toggle="tooltip" title="The top number in blood pressure reading">?</span>
+                  </div>
+                  <div class="form-text text-muted">Upper blood pressure reading (90-200 mmHg)</div>
+                  <div class="small text-info mt-1">💡 Normal: <120, High: ≥140</div>
+                </div>
+              </div>
+              <div class="col-md-6 col-lg-4">
+                <div class="form-group">
+                  <label class="form-label fw-semibold">Diastolic BP</label>
+                  <div class="input-group">
+                    {{ form.diastolic_bp|add_class:"form-control" }}
+                    <span class="input-tooltip" data-bs-toggle="tooltip" title="The bottom number in blood pressure reading">?</span>
+                  </div>
+                  <div class="form-text text-muted">Lower blood pressure reading (60-120 mmHg)</div>
+                  <div class="small text-info mt-1">💡 Normal: <80, High: ≥90</div>
+                </div>
+              </div>
+              <div class="col-md-6 col-lg-4">
+                <div class="form-group">
+                  <label class="form-label fw-semibold">Smoker</label>
+                  <div class="input-group">
+                    {{ form.smoker|add_class:"form-select" }}
+                    <span class="input-tooltip" data-bs-toggle="tooltip" title="Current smoking status significantly affects blood pressure">?</span>
+                  </div>
+                  <div class="form-text text-muted">Smoking increases hypertension risk</div>
+                </div>
+              </div>
+              <div class="col-md-6 col-lg-4">
+                <div class="form-group">
+                  <label class="form-label fw-semibold">Alcohol Consumer</label>
+                  <div class="input-group">
+                    {{ form.alcohol|add_class:"form-select" }}
+                    <span class="input-tooltip" data-bs-toggle="tooltip" title="Regular alcohol consumption status">?</span>
+                  </div>
+                  <div class="form-text text-muted">Regular alcohol consumption</div>
+                </div>
+              </div>
+              <div class="col-md-6 col-lg-4">
+                <div class="form-group">
+                  <label class="form-label fw-semibold">Physical Activity</label>
+                  <div class="input-group">
+                    {{ form.physical_activity|add_class:"form-select" }}
+                    <span class="input-tooltip" data-bs-toggle="tooltip" title="Low: <30min/week, Moderate: 30-150min/week, High: >150min/week">?</span>
+                  </div>
+                  <div class="form-text text-muted">Level of physical activity</div>
+                  <div class="small text-success mt-1">💡 Regular exercise reduces hypertension risk</div>
+                </div>
+              </div>
+            </div>
+            
+            <div class="mt-5 d-flex justify-content-center gap-3">
+              <button class="btn btn-warning btn-lg rounded-pill px-5" type="submit">
+                <i class="bi bi-droplet me-2"></i>Assess Hypertension Risk
+              </button>
+              <a class="btn btn-outline-secondary btn-lg rounded-pill px-4" href="{% url 'predictor:index' %}">
+                <i class="bi bi-arrow-left me-2"></i>Back to Menu
+              </a>
+            </div>
+          </form>
+
+          {% if done %}
+            <hr class="my-5">
+            <div class="text-center">
+              <div class="alert {% if pred == 1 %}alert-danger{% else %}alert-success{% endif %} shadow-sm border-0">
+                <div class="d-flex align-items-center justify-content-center gap-3 mb-3">
+                  <i class="bi {% if pred == 1 %}bi-exclamation-triangle-fill{% else %}bi-check-circle-fill{% endif %} display-4"></i>
+                  <div>
+                    <h4 class="mb-1 fw-bold">
+                      {% if pred == 1 %}⚠️ High Hypertension Risk{% else %}✅ Low Hypertension Risk{% endif %}
+                    </h4>
+                    {% if proba %}
+                      <span class="badge bg-dark fs-6">{{ proba }} Confidence</span>
+                    {% endif %}
+                  </div>
+                </div>
+                <div class="small">
+                  <strong>Disclaimer:</strong> This is a statistical estimate based on machine learning algorithms. 
+                  It should not replace professional medical advice, diagnosis, or treatment. 
+                  Always consult with a qualified healthcare provider for medical concerns.
+                </div>
+              </div>
+              
+              <div class="mt-4">
+                <a class="btn btn-warning rounded-pill px-4" href="{% url 'predictor:predict' 'hypertension' %}">
+                  <i class="bi bi-arrow-clockwise me-2"></i>Try Another Assessment
+                </a>
+              </div>
+            </div>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+// Initialize Bootstrap tooltips
+var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+  return new bootstrap.Tooltip(tooltipTriggerEl);
+});
+
+// Form validation and user guidance
+document.addEventListener('DOMContentLoaded', function() {
+    const form = document.querySelector('form');
+    const inputs = form.querySelectorAll('input[type="number"], input[type="text"], select');
+    
+    // Real-time validation
+    inputs.forEach(input => {
+        input.addEventListener('input', function() {
+            validateField(this);
+            updateFormProgress();
+        });
+        
+        input.addEventListener('blur', function() {
+            validateField(this);
+        });
+    });
+    
+    function validateField(field) {
+        const value = parseFloat(field.value);
+        const fieldName = field.name;
+        
+        // Remove existing validation classes
+        field.classList.remove('is-valid', 'is-invalid');
+        
+        // Remove existing validation messages
+        const existingMsg = field.parentNode.querySelector('.form-validation-message');
+        if (existingMsg) {
+            existingMsg.remove();
+        }
+        
+        if (field.value === '') return;
+        
+        let isValid = true;
+        let message = '';
+        
+        // Field-specific validation
+        switch(fieldName) {
+            case 'age':
+                if (value < 18 || value > 80) {
+                    isValid = false;
+                    message = 'Age must be between 18 and 80 years';
+                } else if (value > 65) {
+                    message = '🚨 Advanced age increases hypertension risk';
+                    field.classList.add('is-valid');
+                }
+                break;
+                
+            case 'bmi':
+                if (value < 15 || value > 50) {
+                    isValid = false;
+                    message = 'BMI must be between 15.0 and 50.0';
+                } else if (value >= 30) {
+                    message = '🚨 Obesity (BMI ≥30) significantly increases hypertension risk';
+                    field.classList.add('is-valid');
+                } else if (value >= 25) {
+                    message = '⚠️ Overweight (BMI 25-29.9) may increase hypertension risk';
+                    field.classList.add('is-valid');
+                } else if (value >= 18.5) {
+                    message = '✅ Normal BMI range';
+                    field.classList.add('is-valid');
+                }
+                break;
+                
+            case 'systolic_bp':
+                if (value < 90 || value > 200) {
+                    isValid = false;
+                    message = 'Systolic BP must be between 90 and 200 mmHg';
+                } else if (value >= 140) {
+                    message = '🚨 High blood pressure (≥140 mmHg) indicates hypertension';
+                    field.classList.add('is-valid');
+                } else if (value >= 130) {
+                    message = '⚠️ Stage 1 hypertension (130-139 mmHg)';
+                    field.classList.add('is-valid');
+                } else if (value < 120) {
+                    message = '✅ Normal systolic blood pressure';
+                    field.classList.add('is-valid');
+                }
+                break;
+                
+            case 'diastolic_bp':
+                if (value < 60 || value > 120) {
+                    isValid = false;
+                    message = 'Diastolic BP must be between 60 and 120 mmHg';
+                } else if (value >= 90) {
+                    message = '🚨 High diastolic pressure (≥90 mmHg) indicates hypertension';
+                    field.classList.add('is-valid');
+                } else if (value >= 80) {
+                    message = '⚠️ Elevated diastolic pressure (80-89 mmHg)';
+                    field.classList.add('is-valid');
+                } else {
+                    message = '✅ Normal diastolic blood pressure';
+                    field.classList.add('is-valid');
+                }
+                break;
+                
+            default:
+                if (field.value !== '') {
+                    field.classList.add('is-valid');
+                }
+        }
+        
+        if (!isValid) {
+            field.classList.add('is-invalid');
+        }
+        
+        // Show validation message
+        if (message) {
+            const messageDiv = document.createElement('div');
+            messageDiv.className = 'form-validation-message';
+            messageDiv.innerHTML = message;
+            field.parentNode.appendChild(messageDiv);
+        }
+    }
+    
+    function updateFormProgress() {
+        const totalFields = inputs.length;
+        const filledFields = Array.from(inputs).filter(input => input.value !== '').length;
+        const progress = (filledFields / totalFields) * 100;
+        
+        // Update progress indicator if exists
+        const progressBar = document.querySelector('.progress-bar-custom');
+        if (progressBar) {
+            progressBar.style.width = progress + '%';
+            progressBar.classList.remove('d-none');
+        }
+    }
+    
+    // Form submission enhancement
+    form.addEventListener('submit', function(e) {
+        let hasErrors = false;
+        
+        inputs.forEach(input => {
+            if (input.value === '') {
+                input.classList.add('is-invalid');
+                hasErrors = true;
+            }
+        });
+        
+        if (hasErrors) {
+            e.preventDefault();
+            
+            // Show alert
+            const alertDiv = document.createElement('div');
+            alertDiv.className = 'alert alert-danger mt-3';
+            alertDiv.innerHTML = '<i class="bi bi-exclamation-triangle-fill me-2"></i><strong>Please fill in all required fields before submitting.</strong>';
+            
+            const existingAlert = form.querySelector('.alert-danger');
+            if (existingAlert) {
+                existingAlert.remove();
+            }
+            
+            form.insertBefore(alertDiv, form.querySelector('.mt-5'));
+            
+            // Scroll to first empty field
+            const firstEmpty = form.querySelector('.is-invalid');
+            if (firstEmpty) {
+                firstEmpty.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                firstEmpty.focus();
+            }
+        }
+    });
+    
+    // Add helpful tips
+    addHelpfulTips();
+});
+
+function addHelpfulTips() {
+    const tipsData = [
+        {
+            icon: '👨‍⚕️',
+            text: 'Blood pressure readings are most accurate when taken after 5 minutes of rest'
+        },
+        {
+            icon: '🏋️',
+            text: 'Regular physical activity can reduce systolic blood pressure by 4-9 mmHg'
+        },
+        {
+            icon: '🚫',
+            text: 'Quitting smoking can improve blood pressure within 20 minutes'
+        },
+        {
+            icon: '⚖️',
+            text: 'Losing even 5-10 pounds can make a meaningful difference in blood pressure'
+        }
+    ];
+    
+    const tipsContainer = document.createElement('div');
+    tipsContainer.className = 'alert alert-info mt-4';
+    tipsContainer.innerHTML = `
+        <h6><i class="bi bi-lightbulb-fill me-2"></i>Health Tips</h6>
+        <div class="tips-carousel">
+            ${tipsData.map(tip => `<div class="tip-item"><span class="me-2">${tip.icon}</span>${tip.text}</div>`).join('')}
+        </div>
+    `;
+    
+    const form = document.querySelector('form');
+    const submitButton = form.querySelector('.mt-5');
+    form.insertBefore(tipsContainer, submitButton);
+    
+    // Rotate tips every 4 seconds
+    let currentTip = 0;
+    const tipItems = tipsContainer.querySelectorAll('.tip-item');
+    
+    tipItems.forEach((item, index) => {
+        item.style.display = index === 0 ? 'block' : 'none';
+    });
+    
+    setInterval(() => {
+        tipItems[currentTip].style.display = 'none';
+        currentTip = (currentTip + 1) % tipItems.length;
+        tipItems[currentTip].style.display = 'block';
+    }, 4000);
+}
+</script>
+{% endblock %}
+

@@ -1,0 +1,494 @@
+{% extends "base.html" %}
+{% block content %}
+<style>
+    .medicine-store-container {
+        background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+        min-height: 100vh;
+        padding: 2rem 0;
+    }
+
+    .search-section {
+        background: rgba(255, 255, 255, 0.95);
+        backdrop-filter: blur(10px);
+        border-radius: 20px;
+        padding: 2rem;
+        margin-bottom: 2rem;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+    }
+
+    .medicine-card {
+        background: white;
+        border-radius: 16px;
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        position: relative;
+        overflow: hidden;
+        height: 100%;
+    }
+
+    .medicine-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 4px;
+        background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+    }
+
+    .medicine-card:hover {
+        transform: translateY(-8px);
+        box-shadow: 0 16px 48px rgba(0, 0, 0, 0.15);
+    }
+
+    .medicine-icon {
+        width: 60px;
+        height: 60px;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto 20px;
+        color: white;
+        font-size: 24px;
+    }
+
+    .medicine-name {
+        color: #2d3748;
+        font-size: 1.25rem;
+        font-weight: 600;
+        margin-bottom: 12px;
+        text-align: center;
+        line-height: 1.4;
+    }
+
+    .medicine-category {
+        background: linear-gradient(135deg, #e3f2fd 0%, #bbdefb 100%);
+        color: #1976d2;
+        padding: 0.25rem 0.75rem;
+        border-radius: 20px;
+        font-size: 0.75rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        margin-bottom: 1rem;
+        display: inline-block;
+    }
+
+    .price-container {
+        background: linear-gradient(135deg, #f8f9fc 0%, #e9ecef 100%);
+        border-radius: 12px;
+        padding: 12px 16px;
+        margin-bottom: 20px;
+        text-align: center;
+        position: relative;
+    }
+
+    .price-label {
+        color: #6c757d;
+        font-size: 0.875rem;
+        font-weight: 500;
+        margin-bottom: 4px;
+    }
+
+    .price-amount {
+        color: #28a745;
+        font-size: 1.5rem;
+        font-weight: 700;
+    }
+
+    .stock-info {
+        font-size: 0.875rem;
+        margin-bottom: 1rem;
+        text-align: center;
+    }
+
+    .stock-available {
+        color: #28a745;
+        font-weight: 600;
+    }
+
+    .stock-low {
+        color: #ffc107;
+        font-weight: 600;
+    }
+
+    .stock-out {
+        color: #dc3545;
+        font-weight: 600;
+    }
+
+    .add-to-cart-btn {
+        background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+        border: none;
+        border-radius: 12px;
+        padding: 12px 24px;
+        color: white;
+        font-weight: 600;
+        width: 100%;
+        transition: all 0.3s ease;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+    }
+
+    .add-to-cart-btn:hover {
+        background: linear-gradient(135deg, #218838 0%, #1ea085 100%);
+        color: white;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(40, 167, 69, 0.3);
+    }
+
+    .add-to-cart-btn:disabled {
+        background: #6c757d;
+        cursor: not-allowed;
+        transform: none;
+        box-shadow: none;
+    }
+
+    .section-header {
+        text-align: center;
+        margin-bottom: 40px;
+        color: #2d3748;
+    }
+
+    .section-title {
+        font-size: 2.5rem;
+        font-weight: 700;
+        margin-bottom: 16px;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+    }
+
+    .section-subtitle {
+        color: #6c757d;
+        font-size: 1.1rem;
+        font-weight: 400;
+    }
+
+    .cart-badge {
+        position: fixed;
+        top: 100px;
+        right: 20px;
+        background: linear-gradient(135deg, #ff6b6b 0%, #ee5a24 100%);
+        color: white;
+        border-radius: 50px;
+        padding: 12px 20px;
+        box-shadow: 0 8px 24px rgba(255, 107, 107, 0.3);
+        z-index: 1000;
+        transition: all 0.3s ease;
+    }
+
+    .cart-badge:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 12px 32px rgba(255, 107, 107, 0.4);
+    }
+
+    .no-medicines {
+        text-align: center;
+        padding: 60px 20px;
+        color: #6c757d;
+    }
+
+    .no-medicines i {
+        font-size: 4rem;
+        margin-bottom: 20px;
+        color: #dee2e6;
+    }
+
+    @media (max-width: 768px) {
+        .section-title {
+            font-size: 2rem;
+        }
+        
+        .medicine-card {
+            margin-bottom: 20px;
+        }
+
+        .cart-badge {
+            position: relative;
+            top: auto;
+            right: auto;
+            margin: 1rem auto;
+            display: inline-block;
+        }
+    }
+</style>
+
+<div class="medicine-store-container">
+    <div class="container">
+        <!-- Section Header -->
+        <div class="section-header animate__animated animate__fadeInDown">
+            <h2 class="section-title">
+                <i class="bi bi-capsule"></i> Medical Store
+            </h2>
+            <p class="section-subtitle">Quality medicines for your health and wellness</p>
+        </div>
+
+        <!-- Search and Filter Section -->
+        <div class="search-section animate__animated animate__fadeInUp">
+            <form method="get" class="row g-3">
+                <div class="col-md-8">
+                    <div class="input-group">
+                        <span class="input-group-text">
+                            <i class="bi bi-search"></i>
+                        </span>
+                        <input type="text" name="search" class="form-control" placeholder="Search medicines..." value="{{ search }}">
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <select name="category" class="form-select">
+                        <option value="">All Categories</option>
+                        {% for cat in categories %}
+                        <option value="{{ cat }}" {% if category == cat %}selected{% endif %}>{{ cat }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-md-1">
+                    <button type="submit" class="btn btn-primary w-100">
+                        <i class="bi bi-funnel"></i>
+                    </button>
+                </div>
+            </form>
+        </div>
+
+        <!-- Medicine Cards -->
+        <div class="row g-4">
+            {% for medicine in medicines %}
+            <div class="col-lg-4 col-md-6">
+                <div class="medicine-card h-100 animate__animated animate__fadeInUp">
+                    <div class="card-body d-flex flex-column justify-content-between p-4">
+                        <!-- Medicine Icon -->
+                        <div class="medicine-icon">
+                            <i class="bi bi-capsule"></i>
+                        </div>
+                        
+                        <!-- Medicine Name -->
+                        <h5 class="medicine-name">{{ medicine.name }}</h5>
+                        
+                        <!-- Category -->
+                        <div class="text-center">
+                            <span class="medicine-category">{{ medicine.category }}</span>
+                        </div>
+                        
+                        <!-- Stock Information -->
+                        <div class="stock-info">
+                            {% if medicine.stock_quantity > 10 %}
+                                <span class="stock-available">
+                                    <i class="bi bi-check-circle"></i> In Stock ({{ medicine.stock_quantity }})
+                                </span>
+                            {% elif medicine.stock_quantity > 0 %}
+                                <span class="stock-low">
+                                    <i class="bi bi-exclamation-triangle"></i> Low Stock ({{ medicine.stock_quantity }})
+                                </span>
+                            {% else %}
+                                <span class="stock-out">
+                                    <i class="bi bi-x-circle"></i> Out of Stock
+                                </span>
+                            {% endif %}
+                        </div>
+                        
+                        <!-- Price Container -->
+                        <div class="price-container">
+                            <div class="price-label">Price</div>
+                            <div class="price-amount">₹{{ medicine.price }}</div>
+                        </div>
+                        
+                        <!-- Add to Cart Button -->
+                        <form method="post" action="{% url 'add_to_cart' medicine.id %}" class="add-to-cart-form">
+                            {% csrf_token %}
+                            <button type="submit" class="add-to-cart-btn" 
+                                    {% if medicine.stock_quantity == 0 %}disabled{% endif %}
+                                    onclick="showAddToCartMessage('{{ medicine.name }}')">
+                                <i class="bi bi-cart-plus"></i>
+                                {% if medicine.stock_quantity == 0 %}
+                                    Out of Stock
+                                {% else %}
+                                    Add to Cart
+                                {% endif %}
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+            {% empty %}
+            <div class="col-12">
+                <div class="no-medicines">
+                    <i class="bi bi-capsule"></i>
+                    <h4>No medicines found</h4>
+                    <p>Try adjusting your search criteria or check back later.</p>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        
+        <!-- Pagination -->
+        {% if medicines.has_other_pages %}
+        <div class="d-flex justify-content-center mt-5">
+            <nav aria-label="Medicine pagination">
+                <ul class="pagination">
+                    {% if medicines.has_previous %}
+                        <li class="page-item">
+                            <a class="page-link" href="?page={{ medicines.previous_page_number }}">Previous</a>
+                        </li>
+                    {% endif %}
+                    
+                    {% for num in medicines.paginator.page_range %}
+                        {% if medicines.number == num %}
+                            <li class="page-item active">
+                                <span class="page-link">{{ num }}</span>
+                            </li>
+                        {% else %}
+                            <li class="page-item">
+                                <a class="page-link" href="?page={{ num }}">{{ num }}</a>
+                            </li>
+                        {% endif %}
+                    {% endfor %}
+                    
+                    {% if medicines.has_next %}
+                        <li class="page-item">
+                            <a class="page-link" href="?page={{ medicines.next_page_number }}">Next</a>
+                        </li>
+                    {% endif %}
+                </ul>
+            </nav>
+        </div>
+        {% endif %}
+    </div>
+
+    <!-- Floating Cart Badge -->
+    <a href="{% url 'view_cart' %}" class="cart-badge text-decoration-none">
+        <i class="bi bi-cart-fill me-2"></i>
+        <span id="cart-count">0</span> items
+    </a>
+</div>
+
+<script>
+// AJAX Add to Cart
+document.addEventListener('DOMContentLoaded', function() {
+    const addToCartForms = document.querySelectorAll('.add-to-cart-form');
+    
+    addToCartForms.forEach(form => {
+        form.addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const button = form.querySelector('.add-to-cart-btn');
+            const originalText = button.innerHTML;
+            
+            // Show loading state
+            button.innerHTML = '<i class="bi bi-hourglass-split"></i> Adding...';
+            button.disabled = true;
+            
+            fetch(form.action, {
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': form.querySelector('[name=csrfmiddlewaretoken]').value,
+                    'X-Requested-With': 'XMLHttpRequest',
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                },
+                body: new FormData(form)
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    // Update cart count
+                    document.getElementById('cart-count').textContent = data.cart_count;
+                    
+                    // Show success message
+                    button.innerHTML = '<i class="bi bi-check"></i> Added!';
+                    button.style.background = 'linear-gradient(135deg, #28a745 0%, #20c997 100%)';
+                    
+                    // Reset after 2 seconds
+                    setTimeout(() => {
+                        button.innerHTML = originalText;
+                        button.style.background = '';
+                        button.disabled = false;
+                    }, 2000);
+                } else {
+                    // Show error message
+                    button.innerHTML = '<i class="bi bi-x"></i> ' + data.message;
+                    button.style.background = 'linear-gradient(135deg, #dc3545 0%, #c82333 100%)';
+                    
+                    // Reset after 3 seconds
+                    setTimeout(() => {
+                        button.innerHTML = originalText;
+                        button.style.background = '';
+                        button.disabled = false;
+                    }, 3000);
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                button.innerHTML = '<i class="bi bi-x"></i> Error';
+                button.style.background = 'linear-gradient(135deg, #dc3545 0%, #c82333 100%)';
+                
+                setTimeout(() => {
+                    button.innerHTML = originalText;
+                    button.style.background = '';
+                    button.disabled = false;
+                }, 3000);
+            });
+        });
+    });
+    
+    // Update cart count on page load
+    fetch('{% url "view_cart" %}')
+        .then(response => response.text())
+        .then(html => {
+            const parser = new DOMParser();
+            const doc = parser.parseFromString(html, 'text/html');
+            const cartCount = doc.querySelector('[data-cart-count]');
+            if (cartCount) {
+                document.getElementById('cart-count').textContent = cartCount.dataset.cartCount;
+            }
+        });
+});
+
+// Show add to cart message
+function showAddToCartMessage(medicineName) {
+    // Create a temporary success message
+    const message = document.createElement('div');
+    message.className = 'alert alert-success position-fixed';
+    message.style.cssText = 'top: 20px; right: 20px; z-index: 9999; min-width: 300px;';
+    message.innerHTML = `
+        <i class="bi bi-check-circle me-2"></i>
+        ${medicineName} added to cart successfully!
+        <button type="button" class="btn-close" onclick="this.parentElement.remove()"></button>
+    `;
+    
+    document.body.appendChild(message);
+    
+    // Auto remove after 3 seconds
+    setTimeout(() => {
+        if (message.parentElement) {
+            message.remove();
+        }
+    }, 3000);
+}
+
+// Add loading state to forms
+document.addEventListener('DOMContentLoaded', function() {
+    const forms = document.querySelectorAll('.add-to-cart-form');
+    forms.forEach(form => {
+        form.addEventListener('submit', function() {
+            const button = this.querySelector('button[type="submit"]');
+            const originalText = button.innerHTML;
+            button.innerHTML = '<i class="bi bi-hourglass-split"></i> Adding...';
+            button.disabled = true;
+            
+            // Re-enable after 2 seconds (in case of error)
+            setTimeout(() => {
+                button.innerHTML = originalText;
+                button.disabled = false;
+            }, 2000);
+        });
+    });
+});
+</script>
+{% endblock %}

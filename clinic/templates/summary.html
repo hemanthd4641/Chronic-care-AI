@@ -1,0 +1,502 @@
+{% extends 'base.html' %}
+{% block title %}Project Summary{% endblock title %}
+{% block content %}
+<div class="container mt-4">
+  <div class="d-flex justify-content-between align-items-center mb-3">
+    <h2 class="fw-bold text-primary mb-0"><i class="bi bi-file-earmark-text me-2"></i>Chronic Care AI - Project Summary</h2>
+    <button class="btn btn-outline-secondary" onclick="window.print()"><i class="bi bi-printer me-1"></i>Print / Save PDF</button>
+  </div>
+
+  <div class="card shadow-sm border-0 mb-3">
+    <div class="card-body">
+      <h5 class="fw-semibold text-primary mb-2">Overview</h5>
+      <p class="text-muted mb-0">
+        Chronic Care AI is a Django-based healthcare management system featuring patient registration, doctor-patient assignment,
+        appointments, messaging, community chat, feedback, machine-learning powered disease predictions, health tracking,
+        and a medical store. This summary page can be printed or saved as a PDF via your browser.
+      </p>
+    </div>
+  </div>
+
+  <div class="row g-3">
+    <div class="col-md-6">
+      <div class="card shadow-sm border-0 h-100">
+        <div class="card-body">
+          <h6 class="fw-semibold text-primary mb-2">Installed Apps</h6>
+          <ul class="mb-0">
+            {% for app in apps %}
+              <li>{{ app }}</li>
+            {% endfor %}
+          </ul>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-6">
+      <div class="card shadow-sm border-0 h-100">
+        <div class="card-body">
+          <h6 class="fw-semibold text-primary mb-2">Key Features</h6>
+          <ul class="mb-0">
+            {% for f in features %}
+              <li>{{ f }}</li>
+            {% endfor %}
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card shadow-sm border-0 mt-3">
+    <div class="card-body">
+      <h6 class="fw-semibold text-primary mb-2">Major Pages</h6>
+      <ul class="mb-0">
+        <li>Dashboard (role-aware) - admission/index.html</li>
+        <li>Patient List - admission/students.html</li>
+        <li>Manage Assignments - admission/manage_assignments.html</li>
+        <li>Appointments - appointments/book, my, doctor</li>
+        <li>Messages - messaging/private, doctor-patient overview</li>
+        <li>Chatroom & Feedback - chatroom/index, report</li>
+        <li>Predictor - predictor/index, forms, history, compare</li>
+        <li>Health Tracker - health_tracker/dashboard, logs, medications</li>
+        <li>Medical Store - medical_store/medicine_list, cart</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="card shadow-sm border-0 mt-3">
+    <div class="card-body">
+      <h6 class="fw-semibold text-primary mb-2">Notes</h6>
+      <ul class="mb-0">
+        <li>Run server from Chronic_care_AI/hostel_management using: python manage.py runserver</li>
+        <li>Static directory created, ML models located under ml_train/ml_models</li>
+        <li>Predictions require proper numeric inputs; history, charts and compare are linked</li>
+        <li>Doctors can update appointment status; dashboard shows live counts</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="card shadow-sm border-0 mt-3">
+    <div class="card-body">
+      <h6 class="fw-semibold text-primary mb-2">Component Map (Apps & Key Routes)</h6>
+      <div class="row g-3">
+        <div class="col-md-6">
+          <ul class="mb-0 small">
+            <li><strong>admission</strong>: / (login), /index/, /register/, /manage-assignments/</li>
+            <li><strong>appointments</strong>: /appointments/book/, /appointments/my/, /appointments/doctor/</li>
+            <li><strong>messaging</strong>: /messages/private/, /messages/doctor-messages/</li>
+            <li><strong>chatroom</strong>: /chatrooms/, /chatrooms/report/</li>
+            <li><strong>predictor</strong>: /predict/, /predict/history/, /predict/compare/</li>
+          </ul>
+        </div>
+        <div class="col-md-6">
+          <ul class="mb-0 small">
+            <li><strong>health_tracker</strong>: /health-tracker/</li>
+            <li><strong>medical_store</strong>: /store/medicines/, /store/cart/</li>
+            <li><strong>userprofile</strong>: /profile/</li>
+            <li><strong>timetable</strong>: /timetable/</li>
+            <li><strong>summary</strong>: /summary/</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card shadow-sm border-0 mt-3">
+    <div class="card-body">
+      <h6 class="fw-semibold text-primary mb-2">LLM/RAG Integration Guide (Chatbot)</h6>
+      <div class="small text-muted">Add one of the following backends and wire it in <code>chatbot/views.py</code>:</div>
+      <div class="row g-3 mt-2">
+        <div class="col-md-6">
+          <div class="p-3 bg-light rounded-3 border h-100">
+            <div class="fw-semibold">Option A: LangChain + Ollama (local)</div>
+            <ol class="small mb-2">
+              <li>Install: <code>pip install langchain langchain-community ollama</code></li>
+              <li>Run Ollama and pull a model: <code>ollama pull llama3.1</code></li>
+              <li>Ingest docs to vector store (e.g., FAISS) and save index.</li>
+              <li>In <code>chatbot/views.py</code>, load retriever and call LC chain → response.</li>
+            </ol>
+            <div class="small">Pros: private, offline. Cons: needs GPU/CPU resources.</div>
+          </div>
+        </div>
+        <div class="col-md-6">
+          <div class="p-3 bg-light rounded-3 border h-100">
+            <div class="fw-semibold">Option B: LangChain + Hugging Face Inference</div>
+            <ol class="small mb-2">
+              <li>Install: <code>pip install langchain langchain-community huggingface-hub</code></li>
+              <li>Set <code>HUGGINGFACEHUB_API_TOKEN</code> in environment.</li>
+              <li>Use HF text-generation endpoint via LangChain LLM wrapper.</li>
+              <li>Pair with a retriever (FAISS/Chroma) to enable RAG.</li>
+            </ol>
+            <div class="small">Pros: quick setup. Cons: internet, token costs/rate limits.</div>
+          </div>
+        </div>
+        <div class="col-md-6">
+          <div class="p-3 bg-light rounded-3 border h-100 mt-0">
+            <div class="fw-semibold">Minimal RAG Steps</div>
+            <ol class="small mb-0">
+              <li>Chunk project PDFs/HTML → embeddings (e.g., all-MiniLM-L6-v2)</li>
+              <li>Store in FAISS/Chroma (persist to <code>media/vectorstore/</code>)</li>
+              <li>Build retriever: top-k=4, mmr for diversity</li>
+              <li>Prompt: context + user question → LLM → answer with sources</li>
+            </ol>
+          </div>
+        </div>
+        <div class="col-md-6">
+          <div class="p-3 bg-light rounded-3 border h-100 mt-0">
+            <div class="fw-semibold">Django Wiring</div>
+            <ol class="small mb-0">
+              <li>Add a POST endpoint in <code>chatbot/views.py</code> that accepts <code>message</code></li>
+              <li>Call chain (<code>retriever → llm</code>) and return JSON</li>
+              <li>Update <code>chatbot/templates/chatbot.html</code> to fetch this endpoint</li>
+              <li>Cache embeddings and chain objects on module load</li>
+            </ol>
+          </div>
+        </div>
+      </div>
+      <div class="mt-2 small"><strong>Tip:</strong> Start with Option A locally. When stable, switch to Option B for cloud scaling.</div>
+    </div>
+  </div>
+
+  <div class="card shadow-sm border-0 mt-3">
+    <div class="card-body">
+      <h6 class="fw-semibold text-primary mb-2">How To Explain This Project In A Technical Interview</h6>
+      <div class="small text-muted mb-2">A step-by-step narrative from frontend to backend.</div>
+      <ol class="mb-3 small">
+        <li><strong>Elevator pitch</strong>: "Chronic Care AI is a Django app for chronic disease management: patients book appointments, chat with doctors, track health, and get AI predictions (heart, diabetes, hypertension, kidney)."</li>
+        <li><strong>Frontend stack</strong>: Bootstrap 5 + Icons, responsive templates, Chart.js for charts, light JS for search/filter and AJAX (status updates). Shared layout in <code>templates/base.html</code> and <code>templates/navbar.html</code>.</li>
+        <li><strong>Routing</strong>: Project URLs in <code>hostel_management/urls.py</code> delegate to app URLs (e.g., <code>appointments/urls.py</code>, <code>messaging/urls.py</code>). Role-based links in the navbar.</li>
+        <li><strong>Auth & roles</strong>: Django auth; superusers act as doctors. Access control via <code>@login_required</code> and redirects. Doctor–patient mapping via <code>DoctorPatientRelationship</code>.</li>
+        <li><strong>Core models</strong>: <code>Appointment</code>, <code>PredictionHistory</code>, <code>PrivateMessage</code>, health logs/reminders, store items/cart.</li>
+        <li><strong>Appointments flow</strong>: Patient books; if no assigned doctor, sees all doctors. Doctor manages statuses via AJAX endpoint; doctor dashboard aggregates counts.</li>
+        <li><strong>Messaging</strong>: Private inbox/sent for users; doctors get a patient-wise overview with unread counts.</li>
+        <li><strong>Prediction (ML)</strong>: Typed forms coerce inputs to numeric; models loaded with joblib from <code>ml_train/ml_models</code>; results saved to <code>PredictionHistory</code> and visualized.</li>
+        <li><strong>Health Tracker</strong>: Daily logs and medication reminders; dashboard charts show trends; cross-links with prediction history.</li>
+        <li><strong>Data & ORM</strong>: Uses SQLite. Typical ORM patterns: <code>.filter()</code>, <code>.count()</code>, <code>.annotate()</code>, <code>.get_or_create()</code>. JSON fields for flexible payloads.</li>
+        <li><strong>Error handling</strong>: Friendly template messages; descriptive prediction errors; robust URL namespacing; graceful fallbacks when assignments are missing.</li>
+        <li><strong>Performance & UX</strong>: Compact cards, scrollable tables, fixed-height charts, debounced client search; AJAX for non-blocking updates.</li>
+        <li><strong>LLM/RAG option</strong>: Pluggable chatbot backend via LangChain + Ollama or Hugging Face; vector store persisted and reused; simple POST endpoint returns JSON.</li>
+        <li><strong>Testing/demo</strong>: Seed a few users, make a booking, flip statuses as doctor, send messages, submit ML forms, review history/compare, verify store/cart.</li>
+        <li><strong>Trade-offs</strong>: Simplicity over microservices, SQLite for dev speed, server-side rendering with progressive enhancement; easy to containerize later.</li>
+      </ol>
+      <div class="small mb-0"><strong>Closing line</strong>: "It’s a cohesive, role-aware platform with clean Django separation (models-views-templates), pragmatic ML integration, and optional LLM/RAG augmentation for a smarter chatbot."</div>
+    </div>
+  </div>
+
+  <div class="card shadow-sm border-0 mt-3">
+    <div class="card-body">
+      <h6 class="fw-semibold text-primary mb-2">Architecture & How It Works</h6>
+      <p class="small mb-2">
+        The frontend is rendered with Django templates and Bootstrap 5 for responsive UI. A shared layout in <code>templates/base.html</code>
+        and a global <code>templates/navbar.html</code> define consistent structure and navigation. Pages use small amounts of JavaScript
+        for search filtering, form enhancements, Chart.js visualizations, and AJAX calls where instant updates improve UX.
+      </p>
+      <p class="small mb-2">
+        The backend follows Django’s MTV pattern. URL dispatch in <code>hostel_management/urls.py</code> delegates to each app’s
+        <code>urls.py</code>. Views are thin, focusing on input validation, ORM queries, and passing data to templates.
+        Models capture core entities like users, doctor–patient relationships, appointments, prediction history, messages,
+        health logs, and store items. SQLite is used in development for fast iteration.
+      </p>
+      <p class="small mb-2">
+        Data flows are role-aware. When a patient books an appointment, the system first checks for an assigned doctor via
+        <code>DoctorPatientRelationship</code>. If none exists, the booking form falls back to listing doctors (superusers).
+        Created appointments appear immediately in the doctor’s view, where status can be changed via an AJAX endpoint,
+        refreshing both the card list and summary counts without a full page reload.
+      </p>
+      <p class="small mb-2">
+        Predictions use pre-trained scikit-learn models stored under <code>ml_train/ml_models</code>. Forms convert categorical
+        inputs to numeric using <code>TypedChoiceField</code> so the feature vector aligns with the model’s expectations.
+        Each successful prediction is saved to <code>PredictionHistory</code>, which directly powers history tables and Chart.js
+        charts. Error handling is designed to be human-readable, guiding users to correct inputs or alerting them when a
+        model file is missing.
+      </p>
+      <p class="small mb-2">
+        Messaging combines a patient’s private inbox/sent view with a doctor overview that aggregates messages by patient
+        and highlights unread items. This lets doctors triage quickly, while patients get a standard threaded experience.
+        Simple read flags support badge counts and subtle UI emphasis.
+      </p>
+      <p class="small mb-2">
+        The health tracker records daily measurements and medication reminders. Its dashboard renders recent entries and
+        trend charts, and cross-links with prediction history for context. This pairing helps users see how lifestyle or
+        adherence might correlate with model outcomes.
+      </p>
+      <p class="small mb-2">
+        The medical store demonstrates catalogue and cart flows. Items can be added from the listing; the cart page manages
+        quantities and totals. The navbar “Payments” shortcut points to the cart by design for a direct purchase workflow.
+      </p>
+      <p class="small mb-0">
+        For a smarter assistant, the chatbot can be backed by LLM/RAG. Locally, LangChain with Ollama provides privacy and
+        low-latency iteration; in the cloud, LangChain with Hugging Face Inference offers quick scale. Documents are chunked
+        and embedded into a vector store (e.g., FAISS/Chroma). A retriever feeds the LLM a compact context window, producing
+        grounded answers with cited sources. A thin Django POST endpoint connects the web UI to the chain and returns JSON.
+      </p>
+    </div>
+  </div>
+
+  <div class="card shadow-sm border-0 mt-3">
+    <div class="card-body">
+      <h6 class="fw-semibold text-primary mb-2">End-to-End Workflow (Patient & Doctor)</h6>
+      <p class="small mb-2">
+        A typical session starts with authentication. After login, users land on a role-aware dashboard. Patients primarily
+        interact with bookings, predictions, health tracking, messaging and the store. Doctors focus on managing their
+        assigned patients, triaging messages, and confirming/cancelling appointments.
+      </p>
+      <div class="row g-3">
+        <div class="col-md-6">
+          <div class="p-3 bg-light rounded-3 border h-100">
+            <div class="fw-semibold">Patient Journey</div>
+            <ol class="small mb-0">
+              <li>Login → Dashboard shows shortcuts and stats tailored to the patient.</li>
+              <li>Book appointment → If assigned doctor exists, it’s preselected; otherwise, choose from available doctors.</li>
+              <li>Receive confirmation → Track status in “My Appointments”.</li>
+              <li>Use Predictor → Submit disease form, view risk and confidence, result saved to history.</li>
+              <li>Review History/Compare → Charts update from <code>PredictionHistory</code> via <code>/predict/chart-data/</code>.</li>
+              <li>Log health data → Daily metrics and medications populate health dashboard trends.</li>
+              <li>Send/receive messages → Private inbox/sent supports quick questions to the doctor.</li>
+              <li>Browse store → Add medicines to cart, manage quantities, proceed to checkout flow (demo/cart).</li>
+            </ol>
+          </div>
+        </div>
+        <div class="col-md-6">
+          <div class="p-3 bg-light rounded-3 border h-100">
+            <div class="fw-semibold">Doctor Journey</div>
+            <ol class="small mb-0">
+              <li>Login as superuser → Dashboard shows doctor-specific stats (today’s appointments, pending, confirmed).</li>
+              <li>Manage Assignments → Link/unlink patients via <code>DoctorPatientRelationship</code>.</li>
+              <li>Appointments → Filtered to this doctor; update status via AJAX for instant feedback.</li>
+              <li>Messages overview → Patient-wise aggregation highlights unread threads for quick triage.</li>
+              <li>Profile/store access → Standard user features, plus administrative context when needed.</li>
+            </ol>
+          </div>
+        </div>
+      </div>
+      <div class="mt-3 p-3 bg-white rounded-3 border">
+        <div class="fw-semibold small">Data Lifecycle & Cross-App Interactions</div>
+        <ul class="small mb-0">
+          <li><strong>Assignments → Bookings</strong>: Active assignment constrains doctor selection in booking; fallback lists all doctors.</li>
+          <li><strong>Bookings → Doctor Dashboard</strong>: Newly created appointments appear immediately; status updates recalc dashboard counts.</li>
+          <li><strong>Predictions → Charts</strong>: Each prediction writes to <code>PredictionHistory</code>, powering history tables and compare charts.</li>
+          <li><strong>Health Logs ↔ Predictions</strong>: Cross-links let users correlate lifestyle logs with prediction outcomes.</li>
+          <li><strong>Messaging</strong>: Private messages update unread counters; doctor view aggregates by patient for prioritization.</li>
+          <li><strong>Store</strong>: Medicines and cart entries demonstrate transactional flows and UI feedback loops.</li>
+        </ul>
+      </div>
+      <div class="mt-3 p-3 bg-white rounded-3 border">
+        <div class="fw-semibold small">Operational Considerations</div>
+        <ul class="small mb-0">
+          <li><strong>Validation & Errors</strong>: Forms validate types; prediction errors are human-readable; missing model files warned.</li>
+          <li><strong>Permissions</strong>: <code>@login_required</code> on protected views; doctor-only sections guard by <code>is_superuser</code>.</li>
+          <li><strong>Performance</strong>: Compact UI, limited chart heights, client-side filtering, and AJAX minimize reloads.</li>
+          <li><strong>Extensibility</strong>: LLM/RAG chatbot can be plugged via LangChain retriever + LLM; vector store persisted.</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <div class="card shadow-sm border-0 mt-3">
+    <div class="card-body">
+      <h6 class="fw-semibold text-primary mb-2">ML Training, Charts, Roles & Tech Stack</h6>
+      <div class="row g-3">
+        <div class="col-md-6">
+          <div class="p-3 bg-light rounded-3 border h-100">
+            <div class="fw-semibold">How Models Were Trained</div>
+            <ul class="small mb-2">
+              <li>Datasets in <code>ml_train/data/</code> (heart, diabetes, hypertension, kidney).</li>
+              <li>Training scripts: <code>ml_train/train_*.py</code> load CSVs with pandas, split sets.</li>
+              <li>Preprocessing: numeric casting, basic scaling when needed.</li>
+              <li>Algorithm: RandomForestClassifier (robust defaults, low tuning burden).</li>
+              <li>Export: <code>joblib.dump(model, ml_train/ml_models/*.joblib)</code>.</li>
+            </ul>
+            <div class="small mb-0">At runtime, views load joblib models, map form inputs to feature order, predict, and save to <code>PredictionHistory</code>.</div>
+          </div>
+        </div>
+        <div class="col-md-6">
+          <div class="p-3 bg-light rounded-3 border h-100">
+            <div class="fw-semibold">How Charts/VBars Are Plotted</div>
+            <ul class="small mb-2">
+              <li>Server endpoint <code>/predict/chart-data/</code> returns JSON aggregates from <code>PredictionHistory</code>.</li>
+              <li>Frontend uses Chart.js to render bar/line charts with fixed heights for compact UI.</li>
+              <li>Legends moved to bottom; containers scroll when needed; tables set max-height.</li>
+              <li>“Compare” and “History” read the same data source for consistency.</li>
+            </ul>
+            <div class="small mb-0">This separates data concerns (JSON) from presentation (Chart.js), simplifying maintenance.</div>
+          </div>
+        </div>
+        <div class="col-md-6">
+          <div class="p-3 bg-light rounded-3 border h-100">
+            <div class="fw-semibold">Doctor/Patient Separation (No Extra Components)</div>
+            <ul class="small mb-2">
+              <li>Single user model: doctors are <code>is_superuser=True</code>; patients are regular users.</li>
+              <li>Role-aware navbar toggles links; views guarded with <code>@login_required</code> and <code>request.user.is_superuser</code>.</li>
+              <li>Doctor–patient link via <code>DoctorPatientRelationship</code> drives booking defaults and doctor views.</li>
+              <li>Templates reuse the same base; conditional blocks adjust what each role sees.</li>
+            </ul>
+            <div class="small mb-0">This avoids separate auth apps and keeps the codebase lean.</div>
+          </div>
+        </div>
+        <div class="col-md-6">
+          <div class="p-3 bg-light rounded-3 border h-100">
+            <div class="fw-semibold">Tech Stack Map (What For What)</div>
+            <ul class="small mb-0">
+              <li><strong>Django</strong>: Routing, views, ORM, templates, auth.</li>
+              <li><strong>SQLite</strong>: Development database, zero-config.</li>
+              <li><strong>Bootstrap 5 + Icons</strong>: Responsive UI components.</li>
+              <li><strong>Chart.js</strong>: History and comparison charts.</li>
+              <li><strong>Pandas/NumPy/scikit-learn</strong>: Data prep and model training.</li>
+              <li><strong>Joblib</strong>: Serialize/deserialize trained models.</li>
+              <li><strong>JavaScript (fetch)</strong>: AJAX for appointment status updates and chart data.</li>
+              <li><strong>(Optional) LangChain + Ollama/Hugging Face</strong>: LLM/RAG chatbot backend.</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card shadow-sm border-0 mt-3">
+    <div class="card-body">
+      <h6 class="fw-semibold text-primary mb-2">Detailed Reference (Apps, Models, Views, URLs, Templates)</h6>
+      <div class="row g-3">
+        <div class="col-md-6">
+          <div class="p-3 bg-light rounded-3 border h-100">
+            <div class="fw-semibold">Admission</div>
+            <ul class="small mb-2">
+              <li><strong>Key Views</strong>: login/index, register, manage assignments, announcements</li>
+              <li><strong>Models</strong>: DoctorPatientRelationship</li>
+              <li><strong>URLs</strong>: <code>/</code>, <code>/index/</code>, <code>/register/</code>, <code>/manage-assignments/</code>, <code>/viewStudents/</code></li>
+              <li><strong>Templates</strong>: <code>admission/index.html</code>, <code>admission/students.html</code>, <code>admission/manage_assignments.html</code></li>
+            </ul>
+            <div class="fw-semibold">UserProfile</div>
+            <ul class="small mb-0">
+              <li><strong>Views</strong>: profile view/update</li>
+              <li><strong>URLs</strong>: <code>/profile/</code>, <code>/profile/update/</code></li>
+              <li><strong>Template</strong>: <code>userprofile/profile.html</code></li>
+            </ul>
+          </div>
+        </div>
+        <div class="col-md-6">
+          <div class="p-3 bg-light rounded-3 border h-100">
+            <div class="fw-semibold">Appointments</div>
+            <ul class="small mb-2">
+              <li><strong>Model</strong>: Appointment(patient, doctor, date, time, reason, status)</li>
+              <li><strong>Views</strong>: book_appointment, my_appointments, doctor_appointments, update_appointment_status</li>
+              <li><strong>URLs</strong>: <code>/appointments/book/</code>, <code>/appointments/my/</code>, <code>/appointments/doctor/</code>, <code>/appointments/update-status/</code></li>
+              <li><strong>Templates</strong>: <code>appointments/doctor_appointments.html</code>, others</li>
+            </ul>
+            <div class="fw-semibold">Messaging</div>
+            <ul class="small mb-0">
+              <li><strong>Model</strong>: PrivateMessage(sender, recipient, subject, message, is_read)</li>
+              <li><strong>Views</strong>: private_messages, doctor_patient_messages, view_message, send_message</li>
+              <li><strong>URLs</strong>: <code>/messages/private/</code>, <code>/messages/doctor-messages/</code>, <code>/messages/message/&lt;id&gt;/</code></li>
+              <li><strong>Templates</strong>: <code>messaging/private_messages.html</code>, <code>messaging/doctor_patient_messages.html</code></li>
+            </ul>
+          </div>
+        </div>
+        <div class="col-md-6">
+          <div class="p-3 bg-light rounded-3 border h-100">
+            <div class="fw-semibold">Predictor (ML)</div>
+            <ul class="small mb-2">
+              <li><strong>Forms</strong>: disease-specific forms with <code>TypedChoiceField</code> for numeric coercion</li>
+              <li><strong>Model</strong>: PredictionHistory(user, disease_type, result, confidence, input_data, created_at)</li>
+              <li><strong>Views</strong>: disease forms, history, compare, chart_data</li>
+              <li><strong>URLs</strong>: <code>/predict/</code>, <code>/predict/history/</code>, <code>/predict/compare/</code>, <code>/predict/chart-data/</code></li>
+              <li><strong>Templates</strong>: <code>predictor/history.html</code>, <code>predictor/compare.html</code>, plus form pages</li>
+            </ul>
+            <div class="fw-semibold">Health Tracker</div>
+            <ul class="small mb-0">
+              <li><strong>Models</strong>: HealthLog, MedicationReminder</li>
+              <li><strong>View</strong>: dashboard</li>
+              <li><strong>URL</strong>: <code>/health-tracker/</code></li>
+              <li><strong>Template</strong>: <code>health_tracker/dashboard.html</code></li>
+            </ul>
+          </div>
+        </div>
+        <div class="col-md-6">
+          <div class="p-3 bg-light rounded-3 border h-100">
+            <div class="fw-semibold">Medical Store</div>
+            <ul class="small mb-2">
+              <li><strong>Models</strong>: Medicine, CartItem</li>
+              <li><strong>Views</strong>: list_medicines, add_to_cart, view_cart</li>
+              <li><strong>URLs</strong>: <code>/store/medicines/</code>, <code>/store/cart/</code>, <code>/store/add-to-cart/&lt;id&gt;/</code></li>
+              <li><strong>Templates</strong>: <code>medical_store/medicine_list.html</code>, <code>medical_store/cart.html</code></li>
+            </ul>
+            <div class="fw-semibold">Chatroom & Summary</div>
+            <ul class="small mb-0">
+              <li><strong>Chatroom</strong>: <code>/chatrooms/</code>, <code>/chatrooms/report/</code> (feedback)</li>
+              <li><strong>Summary</strong>: <code>/summary/</code> (this page) in <code>templates/summary.html</code></li>
+              <li><strong>Shared Templates</strong>: <code>templates/base.html</code>, <code>templates/navbar.html</code></li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card shadow-sm border-0 mt-3">
+    <div class="card-body">
+      <h6 class="fw-semibold text-primary mb-2">Getting Started (Super Quick)</h6>
+      <ol class="small mb-0">
+        <li>Open a terminal in <code>Chronic_care_AI/hostel_management</code></li>
+        <li>Run <code>python manage.py runserver</code> → open <code>http://127.0.0.1:8000/</code></li>
+        <li>If needed: <code>python manage.py createsuperuser</code> to make a doctor account</li>
+        <li>Visit <code>/summary/</code> for this guide; use Print → Save as PDF</li>
+      </ol>
+    </div>
+  </div>
+
+  <div class="card shadow-sm border-0 mt-3">
+    <div class="card-body">
+      <h6 class="fw-semibold text-primary mb-2">Demo Walkthrough (Human-Readable)</h6>
+      <ol class="small mb-0">
+        <li>Login as patient → Dashboard shows shortcuts.</li>
+        <li>Book an appointment → Pick a date/time and doctor (auto if assigned).</li>
+        <li>Switch to doctor account → See the appointment and change status to Confirmed.</li>
+        <li>Back to patient → Status reflects instantly on “My Appointments”.</li>
+        <li>Go to Predictor → Fill heart/diabetes etc., submit → see risk and confidence.</li>
+        <li>Open Prediction History → See your past results and charts; Compare to view trends.</li>
+        <li>Visit Health Tracker → Add daily entries; observe the dashboard charts.</li>
+        <li>Send a message to doctor → Doctor sees it grouped under your name.</li>
+        <li>Browse Store → Add medicine to cart → View in Payments (cart) page.</li>
+      </ol>
+    </div>
+  </div>
+
+  <div class="card shadow-sm border-0 mt-3">
+    <div class="card-body">
+      <h6 class="fw-semibold text-primary mb-2">FAQ (Short & Clear)</h6>
+      <ul class="small mb-0">
+        <li><strong>Why can’t I run the server from the root folder?</strong> Run it from <code>Chronic_care_AI/hostel_management</code> where <code>manage.py</code> lives.</li>
+        <li><strong>I don’t see my doctor in the booking form.</strong> If no assignment exists, the form lists all doctors (superusers).</li>
+        <li><strong>Predictions fail or look wrong.</strong> Forms coerce to numbers; ensure fields are valid. Models are in <code>ml_train/ml_models</code>.</li>
+        <li><strong>Charts are too tall.</strong> Pages use fixed heights; scroll the container to see more.</li>
+        <li><strong>How do I export the summary?</strong> Open <code>/summary/</code> and click the Print button → Save as PDF.</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="card shadow-sm border-0 mt-3">
+    <div class="card-body">
+      <h6 class="fw-semibold text-primary mb-2">Glossary (Plain English)</h6>
+      <ul class="small mb-0">
+        <li><strong>Appointment Status</strong>: Pending/Confirmed/Cancelled state set by the doctor.</li>
+        <li><strong>PredictionHistory</strong>: Table that stores every prediction result and confidence.</li>
+        <li><strong>DoctorPatientRelationship</strong>: Links one patient to their primary doctor.</li>
+        <li><strong>RAG (Retrieval-Augmented Generation)</strong>: LLM answers using your documents as context.</li>
+        <li><strong>Vector Store</strong>: Searchable index of text chunks represented as embeddings.</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="card shadow-sm border-0 mt-3">
+    <div class="card-body">
+      <h6 class="fw-semibold text-primary mb-2">Troubleshooting (Common Issues)</h6>
+      <ul class="small mb-0">
+        <li><strong>NoReverseMatch</strong>: Check the <code>{% templatetag openblock %} url {% templatetag closeblock %}</code> names match the app’s namespaced URLs.</li>
+        <li><strong>TemplateSyntaxError</strong>: Remove unknown template tags or ensure the tag library is registered.</li>
+        <li><strong>Staticfiles W004</strong>: Create the missing <code>static/</code> directory or fix <code>STATICFILES_DIRS</code>.</li>
+        <li><strong>Model file not found</strong>: Ensure <code>ml_train/ml_models/*.joblib</code> exist; retrain if needed.</li>
+        <li><strong>Wrong working directory</strong>: Run all Django commands in <code>Chronic_care_AI/hostel_management</code>.</li>
+      </ul>
+    </div>
+  </div>
+</div>
+{% endblock content %}
+

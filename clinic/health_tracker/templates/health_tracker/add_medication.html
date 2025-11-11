@@ -1,0 +1,336 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Add Medication{% endblock title %}
+
+{% block content %}
+<style>
+    body {
+        background: linear-gradient(135deg, #ffffff 0%, #f8fafc 50%, #e2e8f0 100%);
+        background-attachment: fixed;
+        font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    }
+
+    .glass-card {
+        backdrop-filter: blur(20px) saturate(180%);
+        background: rgba(255, 255, 255, 0.15);
+        border-radius: 25px;
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        box-shadow: 0 25px 70px rgba(31, 38, 135, 0.16);
+        transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        animation: fadeInUp 1s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        position: relative;
+        overflow: hidden;
+    }
+    
+    .glass-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 1px;
+        background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.5), transparent);
+        opacity: 0.8;
+    }
+    
+    .glass-card:hover {
+        transform: translateY(-3px) scale(1.01);
+        box-shadow: 0 35px 90px rgba(31, 38, 135, 0.2);
+        background: rgba(255, 255, 255, 0.25);
+    }
+
+    .gradient-text {
+        background: linear-gradient(135deg, #e6f3ff 0%, #f0f9ff 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        color: #1e40af;
+        font-weight: 900;
+    }
+
+    .form-control, .form-select {
+        border-radius: 15px;
+        border: 2px solid rgba(226, 232, 240, 0.8);
+        padding: 14px 20px;
+        transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        background: rgba(255, 255, 255, 0.9);
+        font-weight: 500;
+        backdrop-filter: blur(10px);
+        min-height: 48px;
+        font-size: 0.9rem;
+    }
+
+    .form-control:focus, .form-select:focus {
+        border-color: #3b82f6;
+        box-shadow: 0 0 0 0.25rem rgba(59, 130, 246, 0.15), 0 8px 25px rgba(59, 130, 246, 0.1);
+        background: rgba(255, 255, 255, 1);
+        transform: translateY(-2px);
+    }
+
+    .form-label {
+        font-weight: 700;
+        color: #4a5568;
+        margin-bottom: 0.75rem;
+        display: flex;
+        align-items: center;
+        font-size: 0.95rem;
+    }
+
+    .form-label i {
+        color: #3b82f6;
+        margin-right: 0.5rem;
+        font-size: 1.1rem;
+    }
+
+    .btn {
+        border-radius: 15px;
+        font-weight: 700;
+        padding: 14px 24px;
+        transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        position: relative;
+        overflow: hidden;
+        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+    }
+
+    .btn::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+        transition: left 0.6s;
+    }
+
+    .btn:hover::before {
+        left: 100%;
+    }
+
+    .btn:hover {
+        transform: translateY(-3px) scale(1.05);
+        box-shadow: 0 15px 35px rgba(0, 0, 0, 0.2);
+    }
+
+    .btn-primary {
+        background: linear-gradient(135deg, #e6f3ff 0%, #f0f9ff 100%);
+        border: none;
+        color: #1e40af;
+        box-shadow: 0 8px 20px rgba(30, 64, 175, 0.2);
+    }
+
+    .btn-primary:hover {
+        background: linear-gradient(135deg, #dbeafe 0%, #eff6ff 100%);
+        color: #1e40af;
+        box-shadow: 0 15px 35px rgba(30, 64, 175, 0.3);
+    }
+
+    .btn-outline-secondary {
+        border: 2px solid rgba(108, 117, 125, 0.3);
+        background: rgba(248, 249, 250, 0.8);
+        color: #6c757d;
+        backdrop-filter: blur(10px);
+    }
+
+    .btn-outline-secondary:hover {
+        background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+        color: #495057;
+        border-color: rgba(108, 117, 125, 0.5);
+    }
+
+    .alert {
+        border-radius: 15px;
+        border: none;
+        font-weight: 500;
+        backdrop-filter: blur(10px);
+        animation: fadeInDown 0.5s ease-out;
+    }
+
+    .alert-success {
+        background: linear-gradient(135deg, #f0fdf4 0%, #f7fee7 100%);
+        color: #166534;
+    }
+
+    textarea.form-control {
+        min-height: 100px;
+        resize: vertical;
+    }
+
+    @keyframes fadeInUp {
+        from {
+            opacity: 0;
+            transform: translateY(40px) scale(0.95);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0) scale(1);
+        }
+    }
+
+    @keyframes fadeInDown {
+        from {
+            opacity: 0;
+            transform: translateY(-20px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    /* Mobile Responsive */
+    @media (max-width: 768px) {
+        .glass-card {
+            margin: 1rem 0.5rem;
+            border-radius: 20px;
+        }
+        
+        .form-control, .form-select {
+            padding: 12px 16px;
+            font-size: 0.85rem;
+        }
+        
+        .btn {
+            padding: 12px 20px;
+            font-size: 0.9rem;
+        }
+        
+        .gradient-text {
+            font-size: 1.75rem;
+        }
+        
+        .d-flex {
+            flex-direction: column;
+            gap: 1rem;
+        }
+    }
+
+    @media (max-width: 576px) {
+        .glass-card {
+            margin: 0.5rem 0.25rem;
+            border-radius: 15px;
+            padding: 1rem !important;
+        }
+        
+        .form-control, .form-select {
+            padding: 10px 14px;
+            font-size: 0.8rem;
+        }
+        
+        .btn {
+            padding: 10px 16px;
+            font-size: 0.85rem;
+            width: 100%;
+            margin-bottom: 0.5rem;
+        }
+        
+        .gradient-text {
+            font-size: 1.5rem;
+        }
+    }
+</style>
+
+<div class="container mt-4">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="glass-card p-4">
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <h2 class="fw-bold gradient-text">
+                        <i class="fas fa-pills me-2"></i>Add Medication Reminder
+                    </h2>
+                    <a href="{% url 'medication_reminders' %}" class="btn btn-outline-secondary">
+                        <i class="fas fa-arrow-left me-2"></i>Back to Medications
+                    </a>
+                </div>
+
+                {% if messages %}
+                    {% for message in messages %}
+                        <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                            <i class="fas fa-check-circle me-2"></i>{{ message }}
+                            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                        </div>
+                    {% endfor %}
+                {% endif %}
+
+                <form method="POST">
+                    {% csrf_token %}
+                    <div class="row g-3">
+                        <!-- Medication Name -->
+                        <div class="col-12">
+                            <label class="form-label">
+                                <i class="fas fa-capsules"></i>Medication Name
+                            </label>
+                            <input type="text" name="medication_name" class="form-control" required placeholder="Enter medication name">
+                        </div>
+
+                        <!-- Dosage -->
+                        <div class="col-md-6">
+                            <label class="form-label">
+                                <i class="fas fa-weight"></i>Dosage
+                            </label>
+                            <input type="text" name="dosage" class="form-control" required placeholder="e.g., 500mg, 1 tablet">
+                        </div>
+
+                        <!-- Frequency -->
+                        <div class="col-md-6">
+                            <label class="form-label">
+                                <i class="fas fa-clock"></i>Frequency
+                            </label>
+                            <select name="frequency" class="form-select" required>
+                                <option value="">Select frequency</option>
+                                <option value="Once daily">Once daily</option>
+                                <option value="Twice daily">Twice daily</option>
+                                <option value="Three times daily">Three times daily</option>
+                                <option value="Four times daily">Four times daily</option>
+                                <option value="As needed">As needed</option>
+                                <option value="Weekly">Weekly</option>
+                                <option value="Monthly">Monthly</option>
+                            </select>
+                        </div>
+
+                        <!-- Start Date -->
+                        <div class="col-md-6">
+                            <label class="form-label">
+                                <i class="fas fa-calendar-alt"></i>Start Date
+                            </label>
+                            <input type="date" name="start_date" class="form-control" required>
+                        </div>
+
+                        <!-- End Date -->
+                        <div class="col-md-6">
+                            <label class="form-label">
+                                <i class="fas fa-calendar-times"></i>End Date (Optional)
+                            </label>
+                            <input type="date" name="end_date" class="form-control">
+                        </div>
+
+                        <!-- Notes -->
+                        <div class="col-12">
+                            <label class="form-label">
+                                <i class="fas fa-sticky-note"></i>Notes
+                            </label>
+                            <textarea name="notes" class="form-control" rows="3" placeholder="Any additional notes about this medication..."></textarea>
+                        </div>
+
+                        <!-- Submit Button -->
+                        <div class="col-12 text-center">
+                            <button type="submit" class="btn btn-primary btn-lg">
+                                <i class="fas fa-save me-2"></i>Add Medication
+                            </button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+// Set default start date to today
+document.addEventListener('DOMContentLoaded', function() {
+    const today = new Date().toISOString().split('T')[0];
+    document.querySelector('input[name="start_date"]').value = today;
+});
+</script>
+{% endblock content %}

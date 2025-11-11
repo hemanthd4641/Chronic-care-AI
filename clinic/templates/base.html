@@ -1,0 +1,1083 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Chronic Care AI - Healthcare Management System</title>
+  
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-icons/1.10.5/font/bootstrap-icons.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/aos@2.3.4/dist/aos.css" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css" rel="stylesheet">
+
+  <style>
+    :root {
+      --bg-color: #f8f9fa;
+      --text-color: #212529;
+      --primary-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      --secondary-gradient: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+      --success-gradient: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+      --warning-gradient: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);
+      --danger-gradient: linear-gradient(135deg, #fa709a 0%, #fee140 100%);
+      --card-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+      --card-shadow-hover: 0 20px 40px rgba(0, 0, 0, 0.15);
+      --border-radius: 15px;
+      --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    
+    * {
+      box-sizing: border-box;
+    }
+    
+    body {
+      background: var(--bg-color);
+      color: var(--text-color);
+      transition: var(--transition);
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      line-height: 1.6;
+      overflow-x: hidden;
+    }
+    
+    /* Smooth scrolling */
+    html {
+      scroll-behavior: smooth;
+    }
+    
+    /* Custom scrollbar */
+    ::-webkit-scrollbar {
+      width: 8px;
+    }
+    
+    ::-webkit-scrollbar-track {
+      background: #f1f1f1;
+      border-radius: 10px;
+    }
+    
+    ::-webkit-scrollbar-thumb {
+      background: var(--primary-gradient);
+      border-radius: 10px;
+    }
+    
+    ::-webkit-scrollbar-thumb:hover {
+      background: linear-gradient(135deg, #5a6fd8 0%, #6a4190 100%);
+    }
+    /* Enhanced card styles */
+    .card {
+      border: none;
+      border-radius: var(--border-radius);
+      box-shadow: var(--card-shadow);
+      transition: var(--transition);
+      background: rgba(255, 255, 255, 0.95);
+      backdrop-filter: blur(10px);
+    }
+    
+    .card:hover {
+      transform: translateY(-5px);
+      box-shadow: var(--card-shadow-hover);
+    }
+    
+    /* Enhanced button styles */
+    .btn {
+      border-radius: 10px;
+      font-weight: 500;
+      transition: var(--transition);
+      border: none;
+      position: relative;
+      overflow: hidden;
+    }
+    
+    .btn::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+      transition: left 0.5s;
+    }
+    
+    .btn:hover::before {
+      left: 100%;
+    }
+    
+    .btn-primary {
+      background: var(--primary-gradient);
+      box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+    }
+    
+    .btn-primary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 25px rgba(102, 126, 234, 0.6);
+    }
+    
+    .btn-success {
+      background: var(--success-gradient);
+      box-shadow: 0 4px 15px rgba(79, 172, 254, 0.4);
+    }
+    
+    .btn-warning {
+      background: var(--warning-gradient);
+      box-shadow: 0 4px 15px rgba(67, 233, 123, 0.4);
+    }
+    
+    .btn-danger {
+      background: var(--danger-gradient);
+      box-shadow: 0 4px 15px rgba(250, 112, 154, 0.4);
+    }
+    
+    .logo {
+      max-width: 100px;
+      height: auto;
+      margin-top: 20px;
+      border-radius: 50%;
+      box-shadow: var(--card-shadow);
+      transition: var(--transition);
+    }
+    
+    .logo:hover {
+      transform: scale(1.05);
+      box-shadow: var(--card-shadow-hover);
+    }
+    
+    .welcome-section {
+      margin-top: 80px;
+      text-align: center;
+      padding: 2rem;
+    }
+    
+    .welcome-section h1 {
+      font-size: 3rem;
+      font-weight: 700;
+      background: var(--primary-gradient);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      animation: fadeInUp 1.2s ease-out;
+      margin-bottom: 1rem;
+    }
+    
+    .welcome-section p {
+      font-size: 1.2rem;
+      color: #6c757d;
+      animation: fadeInUp 1.2s ease-out 0.2s both;
+    }
+    /* Enhanced form styles */
+    .form-control, .form-select {
+      border-radius: 10px;
+      border: 2px solid #e9ecef;
+      transition: var(--transition);
+      background: rgba(255, 255, 255, 0.9);
+    }
+    
+    .form-control:focus, .form-select:focus {
+      border-color: #667eea;
+      box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.25);
+      background: rgba(255, 255, 255, 1);
+    }
+    
+    /* Enhanced theme toggle */
+    .theme-toggle {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      border-radius: 50px;
+      padding: 12px 20px;
+      background: var(--primary-gradient);
+      color: white;
+      border: none;
+      font-weight: 600;
+      box-shadow: var(--card-shadow);
+      transition: var(--transition);
+      z-index: 1000;
+      backdrop-filter: blur(10px);
+    }
+    
+    .theme-toggle:hover {
+      transform: translateY(-2px) scale(1.05);
+      box-shadow: var(--card-shadow-hover);
+    }
+    
+    /* Dark mode variables */
+    body.dark-mode {
+      --bg-color: #0f0f23;
+      --text-color: #e2e8f0;
+      --primary-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      --card-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+      --card-shadow-hover: 0 20px 40px rgba(0, 0, 0, 0.4);
+    }
+    
+    body.dark-mode .card {
+      background: rgba(30, 30, 47, 0.95);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+    
+    body.dark-mode .form-control,
+    body.dark-mode .form-select {
+      background: rgba(30, 30, 47, 0.9);
+      border-color: rgba(255, 255, 255, 0.2);
+      color: var(--text-color);
+    }
+    
+    body.dark-mode .form-control:focus,
+    body.dark-mode .form-select:focus {
+      background: rgba(30, 30, 47, 1);
+      border-color: #667eea;
+    }
+    
+    /* Enhanced animations */
+    @keyframes fadeInUp {
+      from {
+        opacity: 0;
+        transform: translateY(30px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+    
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    
+    @keyframes slideInLeft {
+      from {
+        opacity: 0;
+        transform: translateX(-30px);
+      }
+      to {
+        opacity: 1;
+        transform: translateX(0);
+      }
+    }
+    
+    @keyframes slideInRight {
+      from {
+        opacity: 0;
+        transform: translateX(30px);
+      }
+      to {
+        opacity: 1;
+        transform: translateX(0);
+      }
+    }
+    
+    @keyframes pulse {
+      0% { transform: scale(1); }
+      50% { transform: scale(1.05); }
+      100% { transform: scale(1); }
+    }
+    
+    /* Loading animation */
+    .loading {
+      display: inline-block;
+      width: 20px;
+      height: 20px;
+      border: 3px solid rgba(255,255,255,.3);
+      border-radius: 50%;
+      border-top-color: #fff;
+      animation: spin 1s ease-in-out infinite;
+    }
+    
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+    
+    /* Responsive design */
+    @media (max-width: 768px) {
+      .welcome-section h1 {
+        font-size: 2rem;
+      }
+      
+      .theme-toggle {
+        top: 10px;
+        right: 10px;
+        padding: 8px 16px;
+        font-size: 0.9rem;
+      }
+    }
+    
+    /* Main content adjustments for glassmorphism sidebar */
+    .main-content {
+      margin-left: 280px;
+      transition: margin-left 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      min-height: 100vh;
+      padding: 0;
+      position: relative;
+      z-index: 1;
+      overflow-x: hidden;
+    }
+    
+    @media (max-width: 992px) {
+      .main-content {
+        margin-left: 0;
+        padding: 0;
+        width: 100%;
+      }
+      
+      /* Mobile-specific container adjustments */
+      .container-fluid {
+        padding-left: 1rem !important;
+        padding-right: 1rem !important;
+      }
+      
+      .glass-container,
+      .glass-card {
+        margin: 1rem 0.5rem !important;
+        border-radius: 20px !important;
+        padding: 1.5rem !important;
+      }
+      
+      /* Mobile navigation spacing */
+      .main-content {
+        padding-top: 80px; /* Account for mobile toggle button */
+      }
+      
+      /* Mobile typography enhancements */
+      h1, .h1 { 
+        font-size: 1.75rem !important; 
+        line-height: 1.3 !important;
+        margin-bottom: 1rem !important;
+      }
+      h2, .h2 { 
+        font-size: 1.5rem !important; 
+        line-height: 1.3 !important;
+        margin-bottom: 0.875rem !important;
+      }
+      h3, .h3 { 
+        font-size: 1.25rem !important; 
+        line-height: 1.3 !important;
+        margin-bottom: 0.75rem !important;
+      }
+      h4, .h4 { 
+        font-size: 1.1rem !important; 
+        line-height: 1.3 !important;
+        margin-bottom: 0.625rem !important;
+      }
+      h5, .h5 { 
+        font-size: 1rem !important; 
+        line-height: 1.3 !important;
+        margin-bottom: 0.5rem !important;
+      }
+      
+      /* Mobile button enhancements */
+      .btn {
+        padding: 0.875rem 1.5rem !important;
+        font-size: 0.95rem !important;
+        min-height: 48px !important;
+        border-radius: 12px !important;
+        font-weight: 600 !important;
+        letter-spacing: 0.3px !important;
+        touch-action: manipulation;
+        -webkit-tap-highlight-color: transparent;
+      }
+      
+      .btn-lg {
+        padding: 1rem 2rem !important;
+        font-size: 1rem !important;
+        min-height: 52px !important;
+        border-radius: 15px !important;
+      }
+      
+      .btn-sm {
+        padding: 0.75rem 1.25rem !important;
+        font-size: 0.85rem !important;
+        min-height: 44px !important;
+        border-radius: 10px !important;
+      }
+      
+      /* Mobile form enhancements */
+      .form-control,
+      .form-select {
+        padding: 0.875rem 1.125rem !important;
+        font-size: 0.95rem !important;
+        min-height: 48px !important;
+        border-radius: 12px !important;
+        border-width: 2px !important;
+      }
+      
+      .form-control:focus,
+      .form-select:focus {
+        transform: none !important; /* Remove transform on mobile for better performance */
+        box-shadow: 0 0 0 0.25rem rgba(59, 130, 246, 0.25) !important;
+      }
+      
+      /* Mobile table enhancements */
+      .table {
+        font-size: 0.85rem !important;
+        border-radius: 15px !important;
+        overflow: hidden !important;
+      }
+      
+      .table th,
+      .table td {
+        padding: 0.875rem 0.75rem !important;
+        vertical-align: middle !important;
+      }
+      
+      .table-responsive {
+        border-radius: 15px !important;
+        -webkit-overflow-scrolling: touch;
+      }
+      
+      /* Mobile card enhancements */
+      .card {
+        border-radius: 20px !important;
+        margin-bottom: 1.5rem !important;
+      }
+      
+      .card-body {
+        padding: 1.5rem !important;
+      }
+      
+      .card-header {
+        padding: 1.25rem 1.5rem !important;
+        border-radius: 20px 20px 0 0 !important;
+      }
+      
+      /* Mobile modal enhancements */
+      .modal-dialog {
+        margin: 1rem !important;
+        max-width: calc(100% - 2rem) !important;
+      }
+      
+      .modal-content {
+        border-radius: 20px !important;
+      }
+      
+      .modal-header,
+      .modal-footer {
+        padding: 1.25rem 1.5rem !important;
+      }
+      
+      .modal-body {
+        padding: 1.5rem !important;
+      }
+      
+      /* Mobile alert enhancements */
+      .alert {
+        border-radius: 15px !important;
+        padding: 1rem 1.25rem !important;
+        margin-bottom: 1.25rem !important;
+      }
+      
+      /* Mobile badge enhancements */
+      .badge {
+        padding: 0.5rem 0.875rem !important;
+        font-size: 0.8rem !important;
+        border-radius: 25px !important;
+      }
+    }
+    
+    @media (max-width: 768px) {
+      .main-content {
+        padding: 0;
+        padding-top: 70px; /* Account for mobile toggle button */
+      }
+      
+      .container-fluid {
+        padding-left: 0.875rem !important;
+        padding-right: 0.875rem !important;
+      }
+      
+      .glass-container,
+      .glass-card {
+        margin: 0.75rem 0.375rem !important;
+        border-radius: 18px !important;
+        padding: 1.25rem !important;
+      }
+      
+      /* Enhanced mobile typography */
+      h1, .h1 { 
+        font-size: 1.5rem !important; 
+        line-height: 1.2 !important;
+        margin-bottom: 0.875rem !important;
+      }
+      h2, .h2 { 
+        font-size: 1.3rem !important; 
+        line-height: 1.2 !important;
+        margin-bottom: 0.75rem !important;
+      }
+      h3, .h3 { 
+        font-size: 1.15rem !important; 
+        line-height: 1.2 !important;
+        margin-bottom: 0.625rem !important;
+      }
+      h4, .h4 { 
+        font-size: 1rem !important; 
+        line-height: 1.2 !important;
+        margin-bottom: 0.5rem !important;
+      }
+      h5, .h5 { 
+        font-size: 0.95rem !important; 
+        line-height: 1.2 !important;
+        margin-bottom: 0.375rem !important;
+      }
+      
+      /* Mobile button refinements */
+      .btn {
+        padding: 0.75rem 1.25rem !important;
+        font-size: 0.9rem !important;
+        min-height: 46px !important;
+        border-radius: 11px !important;
+      }
+      
+      .btn-lg {
+        padding: 0.875rem 1.75rem !important;
+        font-size: 0.95rem !important;
+        min-height: 50px !important;
+        border-radius: 13px !important;
+      }
+      
+      .btn-sm {
+        padding: 0.625rem 1rem !important;
+        font-size: 0.8rem !important;
+        min-height: 42px !important;
+        border-radius: 9px !important;
+      }
+      
+      /* Mobile form refinements */
+      .form-control,
+      .form-select {
+        padding: 0.75rem 1rem !important;
+        font-size: 0.9rem !important;
+        min-height: 46px !important;
+        border-radius: 11px !important;
+      }
+      
+      /* Mobile table refinements */
+      .table {
+        font-size: 0.8rem !important;
+        border-radius: 13px !important;
+      }
+      
+      .table th,
+      .table td {
+        padding: 0.75rem 0.625rem !important;
+      }
+      
+      /* Mobile card refinements */
+      .card {
+        border-radius: 18px !important;
+        margin-bottom: 1.25rem !important;
+      }
+      
+      .card-body {
+        padding: 1.25rem !important;
+      }
+      
+      .card-header {
+        padding: 1rem 1.25rem !important;
+        border-radius: 18px 18px 0 0 !important;
+      }
+      
+      /* Mobile modal refinements */
+      .modal-dialog {
+        margin: 0.75rem !important;
+        max-width: calc(100% - 1.5rem) !important;
+      }
+      
+      .modal-content {
+        border-radius: 18px !important;
+      }
+      
+      /* Mobile spacing optimizations */
+      .mb-4 { margin-bottom: 1.25rem !important; }
+      .mb-3 { margin-bottom: 1rem !important; }
+      .mb-2 { margin-bottom: 0.75rem !important; }
+      .mt-4 { margin-top: 1.25rem !important; }
+      .mt-3 { margin-top: 1rem !important; }
+      .mt-2 { margin-top: 0.75rem !important; }
+      
+      .p-4 { padding: 1.25rem !important; }
+      .p-3 { padding: 1rem !important; }
+      .p-2 { padding: 0.75rem !important; }
+    }
+    
+    @media (max-width: 576px) {
+      .main-content {
+        padding: 0;
+        padding-top: 65px; /* Account for smaller mobile toggle button */
+      }
+      
+      .container-fluid {
+        padding-left: 0.75rem !important;
+        padding-right: 0.75rem !important;
+      }
+      
+      .glass-container,
+      .glass-card {
+        margin: 0.5rem 0.25rem !important;
+        border-radius: 15px !important;
+        padding: 1rem !important;
+      }
+      
+      /* Small mobile typography */
+      h1, .h1 { 
+        font-size: 1.35rem !important; 
+        line-height: 1.1 !important;
+        margin-bottom: 0.75rem !important;
+      }
+      h2, .h2 { 
+        font-size: 1.2rem !important; 
+        line-height: 1.1 !important;
+        margin-bottom: 0.625rem !important;
+      }
+      h3, .h3 { 
+        font-size: 1.05rem !important; 
+        line-height: 1.1 !important;
+        margin-bottom: 0.5rem !important;
+      }
+      h4, .h4 { 
+        font-size: 0.95rem !important; 
+        line-height: 1.1 !important;
+        margin-bottom: 0.375rem !important;
+      }
+      h5, .h5 { 
+        font-size: 0.9rem !important; 
+        line-height: 1.1 !important;
+        margin-bottom: 0.25rem !important;
+      }
+      
+      /* Small mobile button adjustments */
+      .btn {
+        padding: 0.625rem 1rem !important;
+        font-size: 0.85rem !important;
+        min-height: 44px !important;
+        border-radius: 10px !important;
+      }
+      
+      .btn-lg {
+        padding: 0.75rem 1.5rem !important;
+        font-size: 0.9rem !important;
+        min-height: 48px !important;
+        border-radius: 12px !important;
+      }
+      
+      .btn-sm {
+        padding: 0.5rem 0.875rem !important;
+        font-size: 0.75rem !important;
+        min-height: 40px !important;
+        border-radius: 8px !important;
+      }
+      
+      /* Small mobile form adjustments */
+      .form-control,
+      .form-select {
+        padding: 0.625rem 0.875rem !important;
+        font-size: 0.85rem !important;
+        min-height: 44px !important;
+        border-radius: 10px !important;
+      }
+      
+      /* Small mobile table adjustments */
+      .table {
+        font-size: 0.75rem !important;
+        border-radius: 12px !important;
+      }
+      
+      .table th,
+      .table td {
+        padding: 0.625rem 0.5rem !important;
+      }
+      
+      /* Small mobile card adjustments */
+      .card {
+        border-radius: 15px !important;
+        margin-bottom: 1rem !important;
+      }
+      
+      .card-body {
+        padding: 1rem !important;
+      }
+      
+      .card-header {
+        padding: 0.875rem 1rem !important;
+        border-radius: 15px 15px 0 0 !important;
+      }
+      
+      /* Small mobile modal adjustments */
+      .modal-dialog {
+        margin: 0.5rem !important;
+        max-width: calc(100% - 1rem) !important;
+      }
+      
+      .modal-content {
+        border-radius: 15px !important;
+      }
+    }
+    
+    @media (max-width: 480px) {
+      .main-content {
+        padding: 0;
+        padding-top: 60px; /* Account for extra small mobile toggle button */
+      }
+      
+      .container-fluid {
+        padding-left: 0.5rem !important;
+        padding-right: 0.5rem !important;
+      }
+      
+      .glass-container,
+      .glass-card {
+        margin: 0.375rem 0.125rem !important;
+        border-radius: 12px !important;
+        padding: 0.875rem !important;
+      }
+      
+      /* Extra small mobile typography */
+      h1, .h1 { 
+        font-size: 1.25rem !important; 
+        line-height: 1.05 !important;
+        margin-bottom: 0.625rem !important;
+      }
+      h2, .h2 { 
+        font-size: 1.1rem !important; 
+        line-height: 1.05 !important;
+        margin-bottom: 0.5rem !important;
+      }
+      h3, .h3 { 
+        font-size: 1rem !important; 
+        line-height: 1.05 !important;
+        margin-bottom: 0.375rem !important;
+      }
+      h4, .h4 { 
+        font-size: 0.9rem !important; 
+        line-height: 1.05 !important;
+        margin-bottom: 0.25rem !important;
+      }
+      h5, .h5 { 
+        font-size: 0.85rem !important; 
+        line-height: 1.05 !important;
+        margin-bottom: 0.125rem !important;
+      }
+      
+      /* Extra small mobile button adjustments */
+      .btn {
+        padding: 0.5rem 0.875rem !important;
+        font-size: 0.8rem !important;
+        min-height: 42px !important;
+        border-radius: 8px !important;
+      }
+      
+      .btn-lg {
+        padding: 0.625rem 1.25rem !important;
+        font-size: 0.85rem !important;
+        min-height: 46px !important;
+        border-radius: 10px !important;
+      }
+      
+      .btn-sm {
+        padding: 0.375rem 0.75rem !important;
+        font-size: 0.7rem !important;
+        min-height: 38px !important;
+        border-radius: 6px !important;
+      }
+      
+      /* Extra small mobile form adjustments */
+      .form-control,
+      .form-select {
+        padding: 0.5rem 0.75rem !important;
+        font-size: 0.8rem !important;
+        min-height: 42px !important;
+        border-radius: 8px !important;
+      }
+      
+      /* Extra small mobile table adjustments */
+      .table {
+        font-size: 0.7rem !important;
+        border-radius: 10px !important;
+      }
+      
+      .table th,
+      .table td {
+        padding: 0.5rem 0.375rem !important;
+      }
+      
+      /* Extra small mobile card adjustments */
+      .card {
+        border-radius: 12px !important;
+        margin-bottom: 0.875rem !important;
+      }
+      
+      .card-body {
+        padding: 0.875rem !important;
+      }
+      
+      .card-header {
+        padding: 0.75rem 0.875rem !important;
+        border-radius: 12px 12px 0 0 !important;
+      }
+      
+      /* Extra small mobile modal adjustments */
+      .modal-dialog {
+        margin: 0.25rem !important;
+        max-width: calc(100% - 0.5rem) !important;
+      }
+      
+      .modal-content {
+        border-radius: 12px !important;
+      }
+      
+      /* Extra small mobile spacing optimizations */
+      .mb-4 { margin-bottom: 1rem !important; }
+      .mb-3 { margin-bottom: 0.75rem !important; }
+      .mb-2 { margin-bottom: 0.5rem !important; }
+      .mt-4 { margin-top: 1rem !important; }
+      .mt-3 { margin-top: 0.75rem !important; }
+      .mt-2 { margin-top: 0.5rem !important; }
+      
+      .p-4 { padding: 1rem !important; }
+      .p-3 { padding: 0.75rem !important; }
+      .p-2 { padding: 0.5rem !important; }
+    }
+      }
+      
+      .form-control,
+      .form-select {
+        padding: 0.6rem 0.875rem !important;
+        font-size: 0.85rem !important;
+        min-height: 42px !important;
+      }
+    }
+    
+    @media (max-width: 576px) {
+      .container-fluid {
+        padding-left: 0.5rem !important;
+        padding-right: 0.5rem !important;
+      }
+      
+      .glass-container,
+      .glass-card {
+        margin: 0.125rem !important;
+        border-radius: 12px !important;
+      }
+      
+      /* Small mobile adjustments */
+      h1, .h1 { font-size: 1.5rem !important; }
+      h2, .h2 { font-size: 1.25rem !important; }
+      h3, .h3 { font-size: 1.1rem !important; }
+      
+      .btn {
+        padding: 0.5rem 0.875rem !important;
+        font-size: 0.8rem !important;
+      }
+      
+      .form-control,
+      .form-select {
+        padding: 0.5rem 0.75rem !important;
+        font-size: 0.8rem !important;
+        min-height: 40px !important;
+      }
+      
+      .table {
+        font-size: 0.8rem !important;
+      }
+      
+      .table th,
+      .table td {
+        padding: 0.5rem 0.25rem !important;
+      }
+    }
+    
+    /* Ensure body layout for sidebar positioning */
+    body {
+      margin: 0;
+      padding: 0;
+      position: relative;
+    }
+  </style>
+</head>
+<body>
+  <!-- Dark Mode Toggle Button -->
+  <!-- <button class="theme-toggle" id="theme-toggle">
+    <i class="bi bi-moon-fill me-1" id="theme-icon"></i>
+    Dark Mode
+  </button> -->
+
+  {% if request.user.is_authenticated %}
+    {% include "navbar.html" %}
+  {% endif %}
+
+  {% if not request.user.is_authenticated %}
+  <div class="welcome-section">
+    <h1>Chronic Care AI</h1>
+    <p class="animate__animated animate__fadeInUp">Advanced Healthcare Management System</p>
+  </div>
+  {% endif %}
+
+  <!-- Messages Section -->
+  {% if messages %}
+  <div class="container-fluid" style="margin-left: 280px; padding: 1rem; position: relative; z-index: 1;">
+    <div class="row">
+      <div class="col-12">
+        {% for message in messages %}
+        <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert" style="backdrop-filter: blur(15px); background: rgba(255, 255, 255, 0.15); border: 2px solid rgba(255, 255, 255, 0.3); border-radius: 15px; margin-bottom: 1rem;">
+          <i class="bi bi-{% if message.tags == 'success' %}check-circle{% elif message.tags == 'error' %}exclamation-triangle{% elif message.tags == 'warning' %}exclamation-triangle{% else %}info-circle{% endif %} me-2"></i>
+          {{ message }}
+          <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+  </div>
+  {% endif %}
+
+  <div class="main-content">
+    {% block content %}{% endblock content %}
+  </div>
+
+  <style>
+    /* Additional responsive fixes for messages */
+    @media (max-width: 992px) {
+      .container-fluid[style*="margin-left: 280px"] {
+        margin-left: 0 !important;
+        padding: 0.75rem !important;
+      }
+      
+      .alert {
+        border-radius: 12px !important;
+        padding: 0.75rem 1rem !important;
+        font-size: 0.9rem !important;
+      }
+    }
+    
+    @media (max-width: 576px) {
+      .container-fluid[style*="margin-left: 280px"] {
+        padding: 0.5rem !important;
+      }
+      
+      .alert {
+        border-radius: 10px !important;
+        padding: 0.6rem 0.875rem !important;
+        font-size: 0.85rem !important;
+      }
+    }
+    
+    /* Touch device optimizations */
+    .touch-device .btn:hover,
+    .touch-device .card:hover,
+    .touch-device .form-control:hover {
+      transform: none; /* Disable hover transforms on touch devices */
+    }
+    
+    /* Mobile-specific enhancements */
+    .mobile-device {
+      -webkit-overflow-scrolling: touch;
+      -webkit-text-size-adjust: 100%;
+    }
+    
+    .mobile-device * {
+      -webkit-tap-highlight-color: transparent;
+    }
+    
+    /* Mobile safe area support for notched devices */
+    @supports (padding: max(0px)) {
+      .main-content {
+        padding-left: max(0px, env(safe-area-inset-left));
+        padding-right: max(0px, env(safe-area-inset-right));
+      }
+      
+      @media (max-width: 992px) {
+        .sidebar {
+          padding-left: max(1rem, env(safe-area-inset-left));
+          padding-right: max(1rem, env(safe-area-inset-right));
+        }
+        
+        .sidebar-toggler {
+          left: max(15px, env(safe-area-inset-left) + 15px);
+        }
+      }
+    }
+    
+    /* Enhanced accessibility for mobile */
+    @media (max-width: 768px) {
+      /* Larger touch targets */
+      .btn,
+      .form-control,
+      .form-select,
+      a {
+        min-height: 44px;
+        touch-action: manipulation;
+      }
+      
+      /* Improved focus visibility on mobile */
+      .btn:focus,
+      .form-control:focus,
+      .form-select:focus,
+      a:focus {
+        outline: 3px solid rgba(59, 130, 246, 0.6);
+        outline-offset: 2px;
+      }
+      
+      /* Better text legibility */
+      body {
+        -webkit-font-smoothing: antialiased;
+        -moz-osx-font-smoothing: grayscale;
+        text-rendering: optimizeLegibility;
+      }
+    }
+    
+    /* Mobile landscape orientation optimizations */
+    @media (max-width: 992px) and (orientation: landscape) {
+      .main-content {
+        padding-top: 60px;
+      }
+      
+      .sidebar {
+        height: 100vh;
+        overflow-y: auto;
+      }
+      
+      .sidebar-toggler {
+        top: 10px;
+        padding: 8px 10px;
+      }
+    }
+  </style>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/aos@2.3.4/dist/aos.js"></script>
+
+  <script>
+    // Initialize AOS library
+    document.addEventListener('DOMContentLoaded', function() {
+      AOS.init({
+        duration: 800,
+        easing: 'ease-out',
+        once: true
+      });
+    });
+    
+    const themeToggleBtn = document.getElementById('theme-toggle');
+    const themeIcon = document.getElementById('theme-icon');
+
+    const savedTheme = localStorage.getItem('theme');
+    if (savedTheme === 'dark') {
+      document.body.classList.add('dark-mode');
+      setDarkMode(true);
+    }
+
+    themeToggleBtn.addEventListener('click', () => {
+      const isDarkMode = document.body.classList.toggle('dark-mode');
+      setDarkMode(isDarkMode);
+      localStorage.setItem('theme', isDarkMode ? 'dark' : 'light');
+    });
+
+    function setDarkMode(isDark) {
+      if (isDark) {
+        themeIcon.classList.replace('bi-moon-fill', 'bi-sun-fill');
+        themeToggleBtn.innerHTML = '<i class="bi bi-sun-fill me-1"></i> Light Mode';
+      } else {
+        themeIcon.classList.replace('bi-sun-fill', 'bi-moon-fill');
+        themeToggleBtn.innerHTML = '<i class="bi bi-moon-fill me-1"></i> Dark Mode';
+      }
+    }
+  </script>
+</body>
+</html>

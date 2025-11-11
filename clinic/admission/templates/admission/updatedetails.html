@@ -1,0 +1,688 @@
+{% extends 'base.html' %}
+{% block title %}Update Patient Details{% endblock title %}
+{% block content %}
+<style>
+    body {
+        background: linear-gradient(135deg, #e6f3ff 0%, #f0f9ff 30%, #ffffff 70%, #ecfdf5 100%);
+        background-attachment: fixed;
+        font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+        min-height: 100vh;
+    }
+    
+    /* Medical floating background elements */
+    .medical-bg {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        z-index: -1;
+        overflow: hidden;
+        pointer-events: none;
+    }
+    
+    .floating-icon {
+        position: absolute;
+        color: rgba(59, 130, 246, 0.08);
+        font-size: 2rem;
+        animation: float 8s ease-in-out infinite;
+    }
+    
+    .floating-icon:nth-child(1) { top: 15%; left: 10%; animation-delay: 0s; }
+    .floating-icon:nth-child(2) { top: 25%; right: 15%; animation-delay: 2s; }
+    .floating-icon:nth-child(3) { top: 65%; left: 8%; animation-delay: 4s; }
+    .floating-icon:nth-child(4) { bottom: 20%; right: 12%; animation-delay: 6s; }
+    
+    @keyframes float {
+        0%, 100% { transform: translateY(0px) rotate(0deg); }
+        25% { transform: translateY(-20px) rotate(5deg); }
+        50% { transform: translateY(-35px) rotate(0deg); }
+        75% { transform: translateY(-20px) rotate(-5deg); }
+    }
+    
+    /* Medical overlay gradients */
+    .medical-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: radial-gradient(circle at 20% 80%, rgba(16, 185, 129, 0.08) 0%, transparent 50%),
+                    radial-gradient(circle at 80% 20%, rgba(59, 130, 246, 0.08) 0%, transparent 50%),
+                    radial-gradient(circle at 40% 40%, rgba(139, 92, 246, 0.05) 0%, transparent 50%);
+        z-index: -1;
+        pointer-events: none;
+    }
+
+    .glass-card {
+        backdrop-filter: blur(25px) saturate(180%);
+        background: rgba(255, 255, 255, 0.15);
+        border-radius: 30px;
+        border: 2px solid rgba(255, 255, 255, 0.3);
+        box-shadow: 0 30px 80px rgba(31, 38, 135, 0.2),
+                    inset 0 1px 0 rgba(255, 255, 255, 0.4);
+        transition: all 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        animation: slideInUp 0.8s ease-out;
+        position: relative;
+        overflow: hidden;
+        max-width: 800px;
+        margin: 2rem auto;
+    }
+    
+    @keyframes slideInUp {
+        from {
+            opacity: 0;
+            transform: translateY(50px) scale(0.95);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0) scale(1);
+        }
+    }
+    
+    .glass-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 3px;
+        background: linear-gradient(90deg, 
+            transparent, 
+            rgba(59, 130, 246, 0.8), 
+            rgba(16, 185, 129, 0.8), 
+            rgba(139, 92, 246, 0.8), 
+            transparent);
+        animation: borderShine 3s ease-in-out infinite;
+    }
+    
+    @keyframes borderShine {
+        0%, 100% { transform: translateX(-100%); }
+        50% { transform: translateX(100%); }
+    }
+    
+    .glass-card::after {
+        content: '';
+        position: absolute;
+        top: -50%;
+        left: -50%;
+        width: 200%;
+        height: 200%;
+        background: conic-gradient(from 0deg, transparent, rgba(59, 130, 246, 0.03), transparent);
+        animation: rotate 12s linear infinite;
+        z-index: -1;
+    }
+    
+    @keyframes rotate {
+        from { transform: rotate(0deg); }
+        to { transform: rotate(360deg); }
+    }
+    
+    .glass-card:hover {
+        transform: translateY(-8px) scale(1.02);
+        box-shadow: 0 40px 120px rgba(31, 38, 135, 0.25),
+                    inset 0 1px 0 rgba(255, 255, 255, 0.6);
+        background: rgba(255, 255, 255, 0.25);
+    }
+
+    .card-title {
+        background: linear-gradient(135deg, #3b82f6 0%, #10b981 50%, #8b5cf6 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        background-size: 200% 200%;
+        animation: gradientShift 4s ease-in-out infinite, pulse 2s ease-in-out infinite;
+        font-weight: 900;
+        margin-bottom: 2rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.75rem;
+        position: relative;
+    }
+    
+    @keyframes gradientShift {
+        0%, 100% { background-position: 0% 50%; }
+        50% { background-position: 100% 50%; }
+    }
+    
+    @keyframes pulse {
+        0%, 100% { transform: scale(1); }
+        50% { transform: scale(1.02); }
+    }
+    
+    .form-icon {
+        background: linear-gradient(135deg, #3b82f6, #10b981);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        font-size: 1.5rem;
+        filter: drop-shadow(0 4px 8px rgba(59, 130, 246, 0.3));
+        animation: iconFloat 3s ease-in-out infinite;
+    }
+    
+    @keyframes iconFloat {
+        0%, 100% { transform: translateY(0px) rotate(0deg); }
+        50% { transform: translateY(-5px) rotate(2deg); }
+    }
+
+    .form-group {
+        margin-bottom: 2rem;
+        position: relative;
+    }
+
+    .form-group label {
+        font-weight: 700;
+        color: #374151;
+        margin-bottom: 0.75rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        font-size: 0.95rem;
+        transition: all 0.3s ease;
+    }
+    
+    .form-group label::before {
+        content: '✦';
+        color: #3b82f6;
+        font-size: 0.8rem;
+        animation: sparkle 2s ease-in-out infinite;
+    }
+    
+    @keyframes sparkle {
+        0%, 100% { opacity: 1; transform: scale(1); }
+        50% { opacity: 0.7; transform: scale(1.2); }
+    }
+
+    .form-control, .form-select {
+        border-radius: 18px;
+        border: 2px solid rgba(59, 130, 246, 0.2);
+        padding: 16px 20px;
+        transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        background: rgba(255, 255, 255, 0.95);
+        font-weight: 500;
+        backdrop-filter: blur(15px);
+        width: 100%;
+        min-height: 52px;
+        font-size: 0.95rem;
+        position: relative;
+        overflow: hidden;
+    }
+    
+    .form-control::before, .form-select::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(59, 130, 246, 0.1), transparent);
+        transition: left 0.6s;
+        z-index: -1;
+    }
+    
+    .form-control:focus::before, .form-select:focus::before {
+        left: 100%;
+    }
+
+    .form-control:focus, .form-select:focus {
+        border-color: #3b82f6;
+        box-shadow: 0 0 0 0.3rem rgba(59, 130, 246, 0.2), 
+                    0 12px 30px rgba(59, 130, 246, 0.15);
+        background: rgba(255, 255, 255, 1);
+        transform: translateY(-3px) scale(1.02);
+        outline: none;
+    }
+    
+    .form-control.is-invalid {
+        border-color: #dc3545;
+        box-shadow: 0 0 0 0.25rem rgba(220, 53, 69, 0.15);
+    }
+    
+    .form-control.is-valid {
+        border-color: #28a745;
+        box-shadow: 0 0 0 0.25rem rgba(40, 167, 69, 0.15);
+    }
+
+    .btn-primary {
+        background: linear-gradient(135deg, #3b82f6 0%, #10b981 100%);
+        border: none;
+        border-radius: 20px;
+        padding: 18px 36px;
+        font-weight: 700;
+        font-size: 1.1rem;
+        letter-spacing: 0.8px;
+        transition: all 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        position: relative;
+        overflow: hidden;
+        box-shadow: 0 12px 30px rgba(59, 130, 246, 0.3);
+        color: white;
+        width: 100%;
+        text-transform: uppercase;
+    }
+    
+    .btn-primary::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent);
+        transition: left 0.8s;
+    }
+    
+    .btn-primary:hover::before {
+        left: 100%;
+    }
+    
+    .btn-primary::after {
+        content: '';
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        width: 0;
+        height: 0;
+        background: rgba(255, 255, 255, 0.2);
+        border-radius: 50%;
+        transform: translate(-50%, -50%);
+        transition: width 0.6s, height 0.6s;
+    }
+    
+    .btn-primary:active::after {
+        width: 300px;
+        height: 300px;
+    }
+
+    .btn-primary:hover {
+        transform: translateY(-4px) scale(1.05);
+        box-shadow: 0 20px 40px rgba(59, 130, 246, 0.4);
+        background: linear-gradient(135deg, #2563eb 0%, #059669 100%);
+        color: white;
+    }
+
+    .form-icon {
+        background: linear-gradient(135deg, #3b82f6, #10b981);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        font-size: 1.5rem;
+        filter: drop-shadow(0 4px 8px rgba(59, 130, 246, 0.3));
+        animation: iconFloat 3s ease-in-out infinite;
+    }
+    
+    @keyframes iconFloat {
+        0%, 100% { transform: translateY(0px) rotate(0deg); }
+        50% { transform: translateY(-5px) rotate(2deg); }
+    }
+
+    /* Enhanced form sections */
+    .form-section {
+        background: rgba(255, 255, 255, 0.1);
+        backdrop-filter: blur(15px);
+        border-radius: 20px;
+        padding: 1.5rem;
+        margin-bottom: 1.5rem;
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        transition: all 0.3s ease;
+    }
+    
+    .form-section:hover {
+        background: rgba(255, 255, 255, 0.15);
+        transform: scale(1.01);
+    }
+
+    /* Form styling improvements */
+    form p {
+        margin-bottom: 1.5rem;
+        position: relative;
+        animation: fieldSlideIn 0.6s ease-out;
+    }
+    
+    form p:nth-child(1) { animation-delay: 0.1s; }
+    form p:nth-child(2) { animation-delay: 0.2s; }
+    form p:nth-child(3) { animation-delay: 0.3s; }
+    form p:nth-child(4) { animation-delay: 0.4s; }
+    form p:nth-child(5) { animation-delay: 0.5s; }
+    
+    @keyframes fieldSlideIn {
+        from {
+            opacity: 0;
+            transform: translateX(-20px);
+        }
+        to {
+            opacity: 1;
+            transform: translateX(0);
+        }
+    }
+
+    form p label {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        font-weight: 700;
+        color: #4a5568;
+        margin-bottom: 0.5rem;
+        transition: all 0.3s ease;
+    }
+
+    form p label::before {
+        content: '✦';
+        color: #3b82f6;
+        font-size: 0.8rem;
+        animation: sparkle 2s ease-in-out infinite;
+    }
+    
+    form p:hover label {
+        color: #3b82f6;
+        transform: translateX(5px);
+    }
+
+    textarea.form-control {
+        min-height: 140px;
+        resize: vertical;
+        font-family: inherit;
+    }
+
+    .card-body {
+        padding: 3rem;
+        position: relative;
+    }
+    
+    .card-body::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: linear-gradient(45deg, transparent, rgba(255,255,255,0.02), transparent);
+        animation: bodyShimmer 6s ease-in-out infinite;
+        pointer-events: none;
+    }
+    
+    @keyframes bodyShimmer {
+        0%, 100% { opacity: 0; }
+        50% { opacity: 1; }
+    }
+
+    /* Loading state for button */
+    .btn-loading {
+        position: relative;
+        color: transparent;
+    }
+    
+    .btn-loading::after {
+        content: '';
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        width: 20px;
+        height: 20px;
+        margin-top: -10px;
+        margin-left: -10px;
+        border: 2px solid #ffffff;
+        border-top: 2px solid transparent;
+        border-radius: 50%;
+        animation: buttonSpin 1s linear infinite;
+    }
+    
+    @keyframes buttonSpin {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+    }
+
+    @keyframes fadeInUp {
+        from {
+            opacity: 0;
+            transform: translateY(40px) scale(0.95);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0) scale(1);
+        }
+    }
+    
+    /* Success animation */
+    .success-animation {
+        animation: successPulse 0.6s ease-out;
+    }
+    
+    @keyframes successPulse {
+        0% { transform: scale(1); }
+        50% { transform: scale(1.05); }
+        100% { transform: scale(1); }
+    }
+
+    /* Mobile Responsive */
+    @media (max-width: 768px) {
+        .glass-card {
+            margin: 1rem 0.5rem;
+            border-radius: 25px;
+        }
+        
+        .card-body {
+            padding: 2.5rem;
+        }
+        
+        .form-control, .form-select {
+            padding: 14px 18px;
+            font-size: 0.9rem;
+            min-height: 48px;
+        }
+        
+        .btn-primary {
+            padding: 16px 28px;
+            font-size: 1rem;
+        }
+        
+        .card-title {
+            font-size: 1.75rem;
+        }
+        
+        .floating-icon {
+            font-size: 1.5rem;
+        }
+    }
+
+    @media (max-width: 576px) {
+        .glass-card {
+            margin: 0.5rem 0.25rem;
+            border-radius: 20px;
+        }
+        
+        .card-body {
+            padding: 2rem;
+        }
+        
+        .form-control, .form-select {
+            padding: 12px 16px;
+            font-size: 0.85rem;
+            min-height: 44px;
+        }
+        
+        .btn-primary {
+            padding: 14px 24px;
+            font-size: 0.95rem;
+        }
+        
+        .card-title {
+            font-size: 1.5rem;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+        
+        .floating-icon {
+            font-size: 1.2rem;
+        }
+        
+        .form-section {
+            padding: 1rem;
+        }
+    }
+</style>
+
+<!-- Medical Background Elements -->
+<div class="medical-bg">
+    <div class="floating-icon"><i class="bi bi-person-gear"></i></div>
+    <div class="floating-icon"><i class="bi bi-clipboard2-pulse"></i></div>
+    <div class="floating-icon"><i class="bi bi-heart-pulse"></i></div>
+    <div class="floating-icon"><i class="bi bi-shield-check"></i></div>
+</div>
+<div class="medical-overlay"></div>
+
+<div class="container mt-5">
+    <div class="glass-card shadow-lg border-0">
+        <div class="card-body">
+            <h3 class="card-title text-center">
+                <i class="bi bi-person-gear form-icon"></i>
+                Update Patient Details
+            </h3>
+            
+            <form method="POST" novalidate id="updateForm">
+                {% csrf_token %}
+                <div class="form-section">
+                    {{ form.as_p }}
+                </div>
+                <div class="d-grid">
+                    <button type="submit" class="btn btn-primary btn-lg" id="submitBtn">
+                        <i class="bi bi-check-circle-fill me-2"></i>
+                        Update Details
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+// Enhanced form interactions with medical animations
+document.addEventListener('DOMContentLoaded', function() {
+    const form = document.getElementById('updateForm');
+    const submitBtn = document.getElementById('submitBtn');
+    const formFields = form.querySelectorAll('.form-control, .form-select');
+    const formGroups = form.querySelectorAll('p');
+    
+    // Add staggered animation to form fields
+    formGroups.forEach((group, index) => {
+        group.style.opacity = '0';
+        group.style.transform = 'translateX(-20px)';
+        setTimeout(() => {
+            group.style.transition = 'all 0.6s ease-out';
+            group.style.opacity = '1';
+            group.style.transform = 'translateX(0)';
+        }, index * 100);
+    });
+    
+    // Enhanced field interactions
+    formFields.forEach(field => {
+        // Medical pulse effect on focus
+        field.addEventListener('focus', function() {
+            this.style.borderColor = '#3b82f6';
+            this.style.animation = 'pulse 0.5s ease-in-out';
+            
+            // Add label animation
+            const label = this.closest('p').querySelector('label');
+            if (label) {
+                label.style.color = '#3b82f6';
+                label.style.transform = 'translateX(5px)';
+            }
+        });
+        
+        field.addEventListener('blur', function() {
+            this.style.animation = '';
+            
+            // Reset label
+            const label = this.closest('p').querySelector('label');
+            if (label) {
+                label.style.color = '#4a5568';
+                label.style.transform = 'translateX(0)';
+            }
+        });
+        
+        // Real-time validation styling
+        field.addEventListener('input', function() {
+            if (this.value.trim()) {
+                this.classList.add('is-valid');
+                this.classList.remove('is-invalid');
+            } else {
+                this.classList.remove('is-valid');
+            }
+        });
+    });
+    
+    // Enhanced form submission
+    form.addEventListener('submit', function(e) {
+        let isValid = true;
+        
+        // Validate required fields
+        formFields.forEach(field => {
+            if (field.hasAttribute('required') && !field.value.trim()) {
+                field.classList.add('is-invalid');
+                field.style.animation = 'shake 0.5s ease-in-out';
+                setTimeout(() => field.style.animation = '', 500);
+                isValid = false;
+            }
+        });
+        
+        if (isValid) {
+            // Add loading state
+            submitBtn.classList.add('btn-loading');
+            submitBtn.disabled = true;
+            
+            // Add success animation to card
+            const card = document.querySelector('.glass-card');
+            card.classList.add('success-animation');
+            
+            // Simulate processing time (remove in production)
+            setTimeout(() => {
+                // Form will submit naturally
+            }, 1000);
+        }
+    });
+    
+    // Initialize floating icons animation
+    const floatingIcons = document.querySelectorAll('.floating-icon');
+    floatingIcons.forEach((icon, index) => {
+        icon.style.animationDelay = `${index * 2}s`;
+    });
+    
+    // Add medical-themed CSS animations
+    const style = document.createElement('style');
+    style.textContent = `
+        @keyframes pulse {
+            0% { box-shadow: 0 0 0 0 rgba(59, 130, 246, 0.4); }
+            70% { box-shadow: 0 0 0 10px rgba(59, 130, 246, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(59, 130, 246, 0); }
+        }
+        
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            10%, 30%, 50%, 70%, 90% { transform: translateX(-5px); }
+            20%, 40%, 60%, 80% { transform: translateX(5px); }
+        }
+    `;
+    document.head.appendChild(style);
+    
+    // Enhanced button interactions
+    submitBtn.addEventListener('mouseenter', function() {
+        this.style.transform = 'translateY(-4px) scale(1.05)';
+    });
+    
+    submitBtn.addEventListener('mouseleave', function() {
+        if (!this.disabled) {
+            this.style.transform = 'translateY(0) scale(1)';
+        }
+    });
+    
+    submitBtn.addEventListener('mousedown', function() {
+        this.style.transform = 'translateY(-2px) scale(1.02)';
+    });
+    
+    submitBtn.addEventListener('mouseup', function() {
+        this.style.transform = 'translateY(-4px) scale(1.05)';
+    });
+});
+</script>
+
+{% endblock content %}

@@ -1,0 +1,175 @@
+{% extends 'base.html' %}
+{% block title %}Announcement{% endblock title %}
+{% block content %}
+<style>
+    /* Container */
+    .announcement-container {
+        max-width: 850px;
+        margin: auto;
+    }
+
+    /* Page Title */
+    .announcement-title-main {
+        font-size: 2.2rem;
+        font-weight: 700;
+        text-align: center;
+        background: linear-gradient(90deg, #4facfe, #00f2fe);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        margin-bottom: 2rem;
+    }
+
+    /* Cards */
+    .announcement-card {
+        border: none;
+        border-radius: 16px;
+        background: #ffffff;
+        box-shadow: 0 6px 20px rgba(0,0,0,0.06);
+        padding: 1.2rem;
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+        border-left: 5px solid #4facfe;
+    }
+    .announcement-card:hover {
+        transform: translateY(-6px);
+        box-shadow: 0 10px 28px rgba(0,0,0,0.1);
+    }
+
+    /* Card Content */
+    .announcement-title {
+        font-size: 1.3rem;
+        font-weight: 600;
+        color: #2d3e50;
+        margin-bottom: 0.4rem;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+    .announcement-title::before {
+        content: "";
+    }
+    .announcement-body {
+        font-size: 0.95rem;
+        color: #555;
+        line-height: 1.5;
+        margin-bottom: 0.8rem;
+    }
+    .announcement-time {
+        font-size: 0.85rem;
+        color: #777;
+        display: flex;
+        align-items: center;
+        gap: 5px;
+    }
+    .announcement-time::before {
+        content: "";
+    }
+
+    /* Delete Button */
+    .btn-outline-danger {
+        border-radius: 8px;
+        font-size: 0.85rem;
+        transition: all 0.2s;
+    }
+    .btn-outline-danger:hover {
+        background: #dc3545;
+        color: #fff;
+    }
+
+    /* Alert Box */
+    .alert {
+        border-radius: 14px;
+        background: #fff6e6;
+        border: 1px solid #ffe2b5;
+        color: #9a6c00;
+        padding: 1.2rem;
+    }
+
+    /* Form Styles */
+    .form-label {
+        font-weight: 600;
+        color: #333;
+    }
+    .form-control, textarea {
+        border-radius: 12px;
+        background: #f9fcff;
+        border: 1.5px solid #d0e3ff;
+        transition: all 0.2s;
+    }
+    .form-control:focus, textarea:focus {
+        border-color: #4facfe;
+        box-shadow: 0 0 6px rgba(79,172,254,0.4);
+        background: #ffffff;
+    }
+
+    /* Reduced Content Box Size */
+    textarea {
+        min-height: 120px; /* smaller height */
+        max-height: 160px;
+        resize: vertical;
+    }
+
+    /* Submit Button */
+    .btn-primary {
+        border-radius: 12px;
+        padding: 8px 18px;
+        font-weight: 600;
+        background: linear-gradient(90deg, #4facfe, #00f2fe);
+        border: none;
+        transition: all 0.3s ease;
+    }
+    .btn-primary:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 15px rgba(79,172,254,0.4);
+    }
+</style>
+
+<div class="container mt-5 announcement-container">
+    <h1 class="announcement-title-main">Announcements</h1>
+
+    {% if announcements %}
+        {% for announcement in announcements %}
+            <div class="announcement-card mb-4">
+                <h2 class="announcement-title">{{ announcement.about }}</h2>
+                <p class="announcement-body">{{ announcement.body }}</p>
+                <div class="d-flex justify-content-between align-items-center">
+                    <time class="announcement-time">{{ announcement.created | timesince }} ago</time>
+                    {% if request.user.is_superuser %}
+                    <a href="{% url 'admission:deleteannouncement' announcement.id %}" 
+                       class="btn btn-outline-danger btn-sm px-3 shadow-sm" 
+                       data-bs-toggle="tooltip" 
+                       data-bs-placement="top" 
+                       title="Delete Announcement">
+                       🗑 Delete
+                    </a>
+                    {% endif %}
+                </div>
+            </div>
+        {% endfor %}
+    {% else %}
+        <div class="alert text-center">
+            <h4 class="fw-bold">No Announcements Yet!</h4>
+            <p class="mb-0">Please check back later.</p>
+        </div>
+    {% endif %}
+
+    {% if request.user.is_superuser %}
+    <form method="POST" class="mt-5">
+        {% csrf_token %}
+        <div class="form-group mb-4">
+            <label for="id_about" class="form-label h5">Topic:</label>
+            <input type="text" name="about" id="id_about" 
+                   class="form-control form-control-lg shadow-sm" 
+                   placeholder="Enter the title here" required>
+        </div>
+        <div class="form-group mb-4">
+            <label for="id_body" class="form-label h5">Announcement:</label>
+            <textarea name="body" id="id_body" 
+                      class="form-control shadow-sm" rows="4" 
+                      placeholder="Enter the report details here" required></textarea>
+        </div>
+        <button type="submit" class="btn btn-primary shadow-sm">Submit Announcement</button>
+    </form>
+    {% endif %}
+</div>
+
+{% endblock content %}

@@ -1,0 +1,829 @@
+{% extends "base.html" %} {% block title %}Login{% endblock title %}
+{% load static %}
+<link rel="stylesheet" href="{% static 'css/simple-navbar.css' %}">
+{% block content %}
+<style>
+  body {
+    background: linear-gradient(135deg, #e6f3ff 0%, #f0f9ff 30%, #ffffff 70%, #ecfdf5 100%);
+    background-attachment: fixed;
+    position: relative;
+    overflow-x: hidden;
+    margin: 0;
+    padding: 0;
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  
+  /* Perfect centering container */
+  .login-container {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+    width: 100%;
+    padding: 2rem 1rem;
+    box-sizing: border-box;
+  }
+  
+  .login-wrapper {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    max-width: 480px;
+    margin: 0 auto;
+  }
+  
+  /* Medical floating background elements */
+  .medical-bg {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: -1;
+    overflow: hidden;
+    pointer-events: none;
+  }
+  
+  .floating-icon {
+    position: absolute;
+    color: rgba(59, 130, 246, 0.1);
+    font-size: 2rem;
+    animation: float 6s ease-in-out infinite;
+  }
+  
+  .floating-icon:nth-child(1) { top: 10%; left: 10%; animation-delay: 0s; }
+  .floating-icon:nth-child(2) { top: 20%; right: 10%; animation-delay: 1s; }
+  .floating-icon:nth-child(3) { top: 60%; left: 5%; animation-delay: 2s; }
+  .floating-icon:nth-child(4) { bottom: 20%; right: 5%; animation-delay: 3s; }
+  .floating-icon:nth-child(5) { top: 80%; left: 20%; animation-delay: 4s; }
+  .floating-icon:nth-child(6) { top: 40%; right: 15%; animation-delay: 5s; }
+  
+  @keyframes float {
+    0%, 100% { transform: translateY(0px) rotate(0deg); }
+    25% { transform: translateY(-20px) rotate(5deg); }
+    50% { transform: translateY(-40px) rotate(0deg); }
+    75% { transform: translateY(-20px) rotate(-5deg); }
+  }
+  
+  /* Heartbeat animation for main icon */
+  .heartbeat {
+    animation: heartbeat 2s ease-in-out infinite;
+  }
+  
+  @keyframes heartbeat {
+    0% { transform: scale(1); }
+    14% { transform: scale(1.1); }
+    28% { transform: scale(1); }
+    42% { transform: scale(1.1); }
+    70% { transform: scale(1); }
+  }
+  
+  /* Pulse animation for medical cross */
+  .pulse-cross {
+    animation: pulseCross 3s ease-in-out infinite;
+  }
+  
+  @keyframes pulseCross {
+    0%, 100% { 
+      transform: scale(1) rotate(0deg);
+      color: #3b82f6;
+    }
+    50% { 
+      transform: scale(1.1) rotate(5deg);
+      color: #10b981;
+    }
+  }
+  
+  /* DNA helix animation */
+  .dna-helix {
+    animation: dnaRotate 4s linear infinite;
+  }
+  
+  @keyframes dnaRotate {
+    from { transform: rotate(0deg) scale(1); }
+    to { transform: rotate(360deg) scale(1.1); }
+  }
+  
+  .fade-in {
+    animation: fadeInUp 1.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  }
+
+  @keyframes fadeInUp {
+    from {
+      opacity: 0;
+      transform: translateY(50px) scale(0.9) rotateX(10deg);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0) scale(1) rotateX(0deg);
+    }
+  }
+  
+  /* Medical gradient background overlay */
+  .medical-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: radial-gradient(circle at 20% 80%, rgba(16, 185, 129, 0.1) 0%, transparent 50%),
+                radial-gradient(circle at 80% 20%, rgba(59, 130, 246, 0.1) 0%, transparent 50%),
+                radial-gradient(circle at 40% 40%, rgba(239, 68, 68, 0.05) 0%, transparent 50%);
+    z-index: -1;
+    pointer-events: none;
+  }
+
+  .glass-card {
+    backdrop-filter: blur(25px) saturate(180%);
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 30px;
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    box-shadow: 0 30px 80px rgba(31, 38, 135, 0.2),
+                inset 0 1px 0 rgba(255, 255, 255, 0.4);
+    transition: all 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    position: relative;
+    overflow: hidden;
+  }
+  
+  .glass-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 2px;
+    background: linear-gradient(90deg, 
+      transparent, 
+      rgba(59, 130, 246, 0.8), 
+      rgba(16, 185, 129, 0.8), 
+      rgba(59, 130, 246, 0.8), 
+      transparent);
+    opacity: 0.9;
+    animation: borderShine 3s ease-in-out infinite;
+  }
+  
+  @keyframes borderShine {
+    0%, 100% { transform: translateX(-100%); }
+    50% { transform: translateX(100%); }
+  }
+  
+  .glass-card::after {
+    content: '';
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: conic-gradient(from 0deg, transparent, rgba(59, 130, 246, 0.05), transparent);
+    animation: rotate 8s linear infinite;
+    z-index: -1;
+  }
+  
+  @keyframes rotate {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+  }
+  
+  .glass-card:hover {
+    transform: translateY(-8px) scale(1.02);
+    box-shadow: 0 40px 120px rgba(31, 38, 135, 0.25),
+                inset 0 1px 0 rgba(255, 255, 255, 0.6);
+    background: rgba(255, 255, 255, 0.3);
+  }
+  
+  /* Medical icon styling */
+  .main-medical-icon {
+    background: linear-gradient(135deg, #3b82f6, #10b981);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    filter: drop-shadow(0 4px 8px rgba(59, 130, 246, 0.3));
+  }
+
+  .form-control {
+    border-radius: 15px;
+    border: 2px solid rgba(59, 130, 246, 0.2);
+    transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    background: rgba(255, 255, 255, 0.95);
+    padding: 16px 20px;
+    font-weight: 500;
+    backdrop-filter: blur(15px);
+    min-height: 55px;
+    position: relative;
+    overflow: hidden;
+  }
+  
+  .form-control::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(59, 130, 246, 0.1), transparent);
+    transition: left 0.6s;
+    z-index: -1;
+  }
+  
+  .form-control:focus::before {
+    left: 100%;
+  }
+  
+  .form-control:focus {
+    box-shadow: 0 0 0 0.3rem rgba(59, 130, 246, 0.2), 
+                0 12px 30px rgba(59, 130, 246, 0.15);
+    border-color: #3b82f6;
+    background: rgba(255, 255, 255, 1);
+    transform: translateY(-3px) scale(1.02);
+  }
+  
+  .form-floating > label {
+    font-weight: 600;
+    color: #6b7280;
+    transition: all 0.3s ease;
+  }
+  
+  .form-floating > .form-control:focus ~ label,
+  .form-floating > .form-control:not(:placeholder-shown) ~ label {
+    color: #3b82f6;
+    transform: scale(0.85) translateY(-0.5rem) translateX(0.15rem);
+  }
+
+  .btn-primary {
+    background: linear-gradient(135deg, #3b82f6 0%, #10b981 100%);
+    border: none;
+    border-radius: 18px;
+    padding: 16px 28px;
+    font-weight: 700;
+    letter-spacing: 0.8px;
+    transition: all 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    position: relative;
+    overflow: hidden;
+    box-shadow: 0 12px 30px rgba(59, 130, 246, 0.3);
+    color: white;
+    text-transform: uppercase;
+    font-size: 0.95rem;
+  }
+  
+  .btn-primary::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent);
+    transition: left 0.8s;
+  }
+  
+  .btn-primary:hover::before {
+    left: 100%;
+  }
+  
+  .btn-primary::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 0;
+    height: 0;
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 50%;
+    transform: translate(-50%, -50%);
+    transition: width 0.6s, height 0.6s;
+  }
+  
+  .btn-primary:active::after {
+    width: 300px;
+    height: 300px;
+  }
+
+  .btn-primary:hover {
+    transform: translateY(-4px) scale(1.05);
+    box-shadow: 0 20px 40px rgba(59, 130, 246, 0.4);
+    background: linear-gradient(135deg, #2563eb 0%, #059669 100%);
+    color: white;
+  }
+
+  .card {
+    border: none;
+  }
+
+  .form-label {
+    font-weight: 600;
+    color: #4a5568;
+  }
+  
+  .gradient-text {
+    background: linear-gradient(135deg, #3b82f6 0%, #10b981 50%, #8b5cf6 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    font-weight: 900;
+    animation: gradientShift 4s ease-in-out infinite;
+    background-size: 200% 200%;
+  }
+  
+  @keyframes gradientShift {
+    0%, 100% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+  }
+  
+  .alert {
+    border-radius: 18px;
+    border: none;
+    backdrop-filter: blur(15px);
+    font-weight: 600;
+    animation: alertSlideIn 0.5s ease-out;
+  }
+  
+  @keyframes alertSlideIn {
+    from {
+      opacity: 0;
+      transform: translateY(-20px) scale(0.95);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0) scale(1);
+    }
+  }
+  
+  .alert-danger {
+    background: linear-gradient(135deg, #fef2f2 0%, #fee2e2 100%);
+    color: #dc2626;
+    border: 2px solid rgba(220, 38, 38, 0.2);
+  }
+  
+  /* Loading animation for button */
+  .btn-loading {
+    position: relative;
+    color: transparent;
+  }
+  
+  .btn-loading::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 20px;
+    height: 20px;
+    margin-top: -10px;
+    margin-left: -10px;
+    border: 2px solid #ffffff;
+    border-top: 2px solid transparent;
+    border-radius: 50%;
+    animation: buttonSpin 1s linear infinite;
+  }
+  
+  @keyframes buttonSpin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+  }
+</style>
+
+<!-- Enhanced Mobile Responsiveness with Medical Theme -->
+<style>
+  /* Ensure proper centering on all devices */
+  .login-container {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    min-height: 100vh !important;
+  }
+  
+  .login-wrapper {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    width: 100% !important;
+  }
+  
+  @media (max-width: 768px) {
+    .login-container {
+      padding: 1rem 0.75rem;
+    }
+    
+    .login-wrapper {
+      max-width: 100%;
+    }
+    
+    .glass-card {
+      padding: 2.5rem 2rem;
+      border-radius: 25px;
+      margin: 1rem 0;
+      width: 100% !important;
+      max-width: 100%;
+    }
+    
+    .form-control {
+      padding: 14px 18px;
+      font-size: 0.95rem;
+      min-height: 50px;
+    }
+    
+    .btn {
+      padding: 12px 22px;
+      font-size: 0.9rem;
+      min-height: 48px;
+    }
+    
+    h2 {
+      font-size: 1.8rem;
+    }
+    
+    .floating-icon {
+      font-size: 1.5rem;
+    }
+  }
+  
+  @media (max-width: 576px) {
+    .login-container {
+      padding: 0.75rem 0.5rem;
+      min-height: 100vh;
+    }
+    
+    .glass-card {
+      padding: 2rem 1.5rem;
+      border-radius: 20px;
+      margin: 0.5rem 0;
+    }
+    
+    .form-control {
+      padding: 12px 16px;
+      font-size: 0.9rem;
+      min-height: 46px;
+      border-radius: 12px;
+    }
+    
+    .btn {
+      padding: 10px 18px;
+      font-size: 0.85rem;
+      min-height: 44px;
+      width: 100%;
+      border-radius: 12px;
+    }
+    
+    h2 {
+      font-size: 1.6rem;
+      margin-bottom: 1.5rem;
+    }
+    
+    .form-group {
+      margin-bottom: 1.5rem;
+    }
+    
+    .floating-icon {
+      font-size: 1.2rem;
+    }
+    
+    .main-medical-icon {
+      font-size: 3rem !important;
+    }
+  }
+  
+  @media (max-width: 480px) {
+    .login-container {
+      padding: 1rem 0.5rem;
+    }
+    
+    .glass-card {
+      padding: 1.5rem 1rem;
+      border-radius: 18px;
+    }
+    
+    .form-control {
+      padding: 10px 14px;
+      font-size: 0.85rem;
+      min-height: 42px;
+    }
+    
+    .btn {
+      padding: 8px 16px;
+      font-size: 0.8rem;
+      min-height: 40px;
+    }
+    
+    h2 {
+      font-size: 1.4rem;
+    }
+    
+    .floating-icon {
+      font-size: 1rem;
+    }
+    
+    .main-medical-icon {
+      font-size: 2.5rem !important;
+    }
+  }
+  
+  /* Additional viewport adjustments */
+  @media (max-height: 600px) {
+    .login-container {
+      align-items: flex-start;
+      padding-top: 2rem;
+    }
+    
+    .glass-card {
+      margin: 1rem 0;
+    }
+  }
+  
+  @media (min-height: 800px) {
+    .login-container {
+      align-items: center;
+    }
+  }
+  
+  /* Enhanced Mobile Touch Optimizations */
+  @media (max-width: 992px) {
+    .glass-card {
+      padding: 2.75rem 2.25rem;
+      border-radius: 26px;
+      margin: 1.25rem auto;
+      max-width: 450px;
+      width: 90%;
+    }
+    
+    .form-control,
+    .form-floating > .form-control {
+      min-height: 50px;
+      padding: 14px 18px;
+      font-size: 0.95rem;
+      border-radius: 14px;
+      touch-action: manipulation;
+      -webkit-tap-highlight-color: transparent;
+    }
+    
+    .btn {
+      min-height: 50px;
+      padding: 14px 24px;
+      font-size: 0.95rem;
+      border-radius: 14px;
+      touch-action: manipulation;
+    }
+    
+    .form-floating label {
+      padding: 1rem 1.125rem;
+      font-size: 0.9rem;
+    }
+    
+    h2 {
+      font-size: 1.9rem;
+      margin-bottom: 1.25rem;
+    }
+    
+    .main-medical-icon {
+      font-size: 3.25rem !important;
+    }
+  }
+  
+  /* Touch Device Optimizations */
+  .touch-device .glass-card:hover {
+    transform: none;
+  }
+  
+  .touch-device .btn:hover {
+    transform: none;
+  }
+  
+  /* Enhanced Accessibility for Mobile */
+  @media (max-width: 768px) {
+    .form-control:focus,
+    .btn:focus {
+      outline: 3px solid rgba(59, 130, 246, 0.6);
+      outline-offset: 2px;
+    }
+    
+    /* Better text legibility */
+    .glass-card {
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+      text-rendering: optimizeLegibility;
+    }
+  }
+  
+  /* Landscape Mobile Adjustments */
+  @media (max-width: 992px) and (orientation: landscape) {
+    .login-container {
+      padding: 1rem 2rem;
+      align-items: center;
+    }
+    
+    .glass-card {
+      padding: 2rem 2.5rem;
+      margin: 0.75rem auto;
+      max-width: 600px;
+    }
+    
+    h2 {
+      font-size: 1.7rem;
+      margin-bottom: 1rem;
+    }
+    
+    .main-medical-icon {
+      font-size: 2.8rem !important;
+      margin-bottom: 1rem !important;
+    }
+    
+    .form-floating {
+      margin-bottom: 1.25rem;
+    }
+  }
+</style>
+
+<!-- Medical Background Elements -->
+<div class="medical-bg">
+  <div class="floating-icon"><i class="bi bi-heart-pulse pulse-cross"></i></div>
+  <div class="floating-icon"><i class="bi bi-capsule"></i></div>
+  <div class="floating-icon"><i class="bi bi-bandaid"></i></div>
+  <div class="floating-icon"><i class="bi bi-shield-plus"></i></div>
+  <div class="floating-icon"><i class="bi bi-thermometer-half"></i></div>
+  <div class="floating-icon dna-helix"><i class="bi bi-virus"></i></div>
+</div>
+<div class="medical-overlay"></div>
+
+<div class="login-container">
+  <div class="login-wrapper">
+    <div class="glass-card shadow-lg p-5 fade-in" style="width: 100%;">
+      <div class="text-center mb-5">
+        <i class="bi bi-heart-pulse-fill fs-1 main-medical-icon heartbeat mb-3"></i>
+        <h2 class="gradient-text fw-bold mb-2">Chronic Care AI</h2>
+        <p class="text-muted fw-medium">🏥 Advanced Healthcare Management System</p>
+        <div class="d-flex justify-content-center gap-3 mt-3">
+          <i class="bi bi-clipboard2-pulse text-primary"></i>
+          <i class="bi bi-heart text-success"></i>
+          <i class="bi bi-graph-up text-info"></i>
+        </div>
+      </div>
+
+    <form method="POST" class="needs-validation" novalidate id="loginForm">
+      {% csrf_token %}
+
+      <div class="form-floating mb-4">
+        <input
+          type="text"
+          id="username"
+          name="username"
+          class="form-control"
+          placeholder="Username"
+          required
+        />
+        <label for="username"><i class="bi bi-person-circle me-2"></i>Username</label>
+        <div class="invalid-feedback">Please enter your username.</div>
+      </div>
+
+      <div class="form-floating mb-4">
+        <input
+          type="password"
+          id="password"
+          name="password"
+          class="form-control"
+          placeholder="Password"
+          required
+        />
+        <label for="password"><i class="bi bi-shield-lock-fill me-2"></i>Password</label>
+        <div class="invalid-feedback">Please enter your password.</div>
+      </div>
+
+      <div class="text-center mb-4">
+        <button type="submit" class="btn btn-primary w-100 py-3" id="loginBtn">
+          <i class="bi bi-box-arrow-in-right me-2"></i>Sign In Securely
+        </button>
+      </div>
+
+      {% if error %}
+      <div class="alert alert-danger mt-3 text-center" role="alert">
+        {{ error }}
+      </div>
+      {% endif %}
+    </form>
+
+    <div class="text-center mt-4">
+      <a href="#" class="text-decoration-none text-muted fw-medium">
+        <i class="bi bi-question-circle-fill me-1"></i>Forgot Password?
+      </a>
+      <div class="mt-3">
+        <small class="text-muted d-flex align-items-center justify-content-center">
+          <i class="bi bi-shield-check me-1"></i>
+          Secured with advanced encryption
+        </small>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  (() => {
+    "use strict";
+    
+    // Form validation with medical-themed interactions
+    const forms = document.querySelectorAll(".needs-validation");
+    const loginBtn = document.getElementById('loginBtn');
+    const loginForm = document.getElementById('loginForm');
+    
+    // Medical pulse effect on focus
+    const inputs = document.querySelectorAll('.form-control');
+    inputs.forEach(input => {
+      input.addEventListener('focus', function() {
+        this.style.borderColor = '#3b82f6';
+        this.style.animation = 'pulse 0.5s ease-in-out';
+      });
+      
+      input.addEventListener('blur', function() {
+        this.style.animation = '';
+      });
+    });
+    
+    // Enhanced form submission with loading animation
+    Array.from(forms).forEach((form) => {
+      form.addEventListener(
+        "submit",
+        (event) => {
+          if (!form.checkValidity()) {
+            event.preventDefault();
+            event.stopPropagation();
+            
+            // Medical alert animation
+            const firstInvalid = form.querySelector(':invalid');
+            if (firstInvalid) {
+              firstInvalid.style.animation = 'shake 0.5s ease-in-out';
+              setTimeout(() => {
+                firstInvalid.style.animation = '';
+              }, 500);
+            }
+          } else {
+            // Add loading state
+            loginBtn.classList.add('btn-loading');
+            loginBtn.disabled = true;
+            
+            // Simulate medical scan effect
+            const card = document.querySelector('.glass-card');
+            card.style.animation = 'medicalScan 2s ease-in-out';
+          }
+          form.classList.add("was-validated");
+        },
+        false
+      );
+    });
+    
+    // Add medical-themed CSS animations
+    const style = document.createElement('style');
+    style.textContent = `
+      @keyframes pulse {
+        0% { box-shadow: 0 0 0 0 rgba(59, 130, 246, 0.4); }
+        70% { box-shadow: 0 0 0 10px rgba(59, 130, 246, 0); }
+        100% { box-shadow: 0 0 0 0 rgba(59, 130, 246, 0); }
+      }
+      
+      @keyframes shake {
+        0%, 100% { transform: translateX(0); }
+        10%, 30%, 50%, 70%, 90% { transform: translateX(-5px); }
+        20%, 40%, 60%, 80% { transform: translateX(5px); }
+      }
+      
+      @keyframes medicalScan {
+        0% { box-shadow: 0 30px 80px rgba(31, 38, 135, 0.2); }
+        50% { 
+          box-shadow: 0 30px 80px rgba(16, 185, 129, 0.3),
+                      inset 0 0 20px rgba(16, 185, 129, 0.1);
+        }
+        100% { box-shadow: 0 30px 80px rgba(31, 38, 135, 0.2); }
+      }
+    `;
+    document.head.appendChild(style);
+    
+    // Heartbeat animation for main icon on page load
+    setTimeout(() => {
+      const mainIcon = document.querySelector('.main-medical-icon');
+      if (mainIcon) {
+        mainIcon.style.animation = 'heartbeat 2s ease-in-out infinite';
+      }
+    }, 500);
+    
+    // Medical ambient sound simulation (visual feedback)
+    const floatingIcons = document.querySelectorAll('.floating-icon');
+    floatingIcons.forEach((icon, index) => {
+      setTimeout(() => {
+        icon.style.animation = `float 6s ease-in-out infinite ${index * 0.5}s`;
+      }, index * 200);
+    });
+    
+    // Add medical statistics animation
+    const statsIcons = document.querySelectorAll('.text-primary, .text-success, .text-info');
+    statsIcons.forEach((icon, index) => {
+      icon.addEventListener('mouseenter', function() {
+        this.style.transform = 'scale(1.2) rotate(5deg)';
+        this.style.transition = 'all 0.3s ease';
+      });
+      
+      icon.addEventListener('mouseleave', function() {
+        this.style.transform = 'scale(1) rotate(0deg)';
+      });
+    });
+  })();
+</script>
+{% endblock content %}

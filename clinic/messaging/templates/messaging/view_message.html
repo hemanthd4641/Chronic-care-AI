@@ -1,0 +1,317 @@
+{% extends "base.html" %}
+{% block content %}
+<style>
+    body {
+        background: linear-gradient(135deg, #ffffff 0%, #f8fafc 50%, #e2e8f0 100%);
+        background-attachment: fixed;
+        font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    }
+
+    .message-container {
+        backdrop-filter: blur(20px) saturate(180%);
+        background: rgba(255, 255, 255, 0.85);
+        border-radius: 25px;
+        border: 1px solid rgba(255, 255, 255, 0.18);
+        box-shadow: 0 25px 50px rgba(31, 38, 135, 0.15);
+        transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        animation: fadeInUp 0.8s ease-out;
+        position: relative;
+        overflow: hidden;
+    }
+    
+    .message-container::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 6px;
+        background: linear-gradient(90deg, #e6f3ff 0%, #f0f9ff 50%, #fef7f7 100%);
+        background-size: 200% 100%;
+        animation: gradientShift 3s ease-in-out infinite;
+    }
+    
+    @keyframes gradientShift {
+        0%, 100% { background-position: 0% 50%; }
+        50% { background-position: 100% 50%; }
+    }
+    
+    .message-container:hover {
+        transform: translateY(-5px) scale(1.01);
+        box-shadow: 0 35px 70px rgba(31, 38, 135, 0.2);
+        background: rgba(255, 255, 255, 0.95);
+    }
+
+    .message-header {
+        background: linear-gradient(135deg, #e6f3ff 0%, #f0f9ff 100%);
+        padding: 3rem;
+        text-align: left;
+        border-bottom: none;
+        position: relative;
+        overflow: hidden;
+        border-radius: 25px 25px 0 0;
+    }
+
+    .message-header::before {
+        content: '';
+        position: absolute;
+        top: -50%;
+        left: -50%;
+        width: 200%;
+        height: 200%;
+        background: linear-gradient(45deg, transparent, rgba(30, 64, 175, 0.05), transparent);
+        animation: shimmer 3s infinite;
+    }
+
+    @keyframes shimmer {
+        0% { transform: translateX(-100%) translateY(-100%) rotate(45deg); }
+        100% { transform: translateX(100%) translateY(100%) rotate(45deg); }
+    }
+
+    .message-title {
+        color: #1e40af;
+        font-size: 2rem;
+        font-weight: 900;
+        margin-bottom: 10px;
+        background: linear-gradient(135deg, #e6f3ff 0%, #f0f9ff 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        position: relative;
+        z-index: 1;
+    }
+
+    .message-subtitle {
+        color: #6b7280;
+        font-size: 1rem;
+        margin: 0;
+        font-weight: 500;
+        position: relative;
+        z-index: 1;
+    }
+
+    .info-card {
+        background: rgba(255, 255, 255, 0.9);
+        backdrop-filter: blur(15px);
+        border-radius: 20px;
+        border: 1px solid rgba(226, 232, 240, 0.3);
+        padding: 1.5rem;
+        transition: all 0.3s ease;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+    }
+
+    .info-card:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+        background: rgba(255, 255, 255, 1);
+    }
+
+    .info-card h6 {
+        color: #1e40af;
+        font-weight: 700;
+        margin-bottom: 1rem;
+    }
+
+    .badge {
+        border-radius: 12px;
+        padding: 8px 12px;
+        font-size: 0.75rem;
+        font-weight: 600;
+        backdrop-filter: blur(10px);
+    }
+
+    .btn {
+        border-radius: 18px;
+        font-weight: 700;
+        padding: 14px 24px;
+        transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        position: relative;
+        overflow: hidden;
+    }
+
+    .btn::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+        transition: left 0.6s;
+    }
+
+    .btn:hover::before {
+        left: 100%;
+    }
+
+    .btn:hover {
+        transform: translateY(-3px) scale(1.05);
+        box-shadow: 0 15px 35px rgba(0, 0, 0, 0.2);
+    }
+
+    @keyframes fadeInUp {
+        from {
+            opacity: 0;
+            transform: translateY(40px) scale(0.95);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0) scale(1);
+        }
+    }
+</style>
+<div class="container mt-4">
+  <div class="row justify-content-center">
+    <div class="col-lg-8">
+      <div class="message-container">
+        <div class="message-header">
+          <div class="d-flex justify-content-between align-items-center">
+            <div>
+              <h3 class="message-title mb-0">
+                <i class="bi bi-envelope-open me-3" style="color: #3b82f6;"></i>{{ message.subject }}
+              </h3>
+              <p class="message-subtitle">
+                {% if message.sender == request.user %}
+                  To: {{ message.recipient.get_full_name|default:message.recipient.username }}
+                {% else %}
+                  From: {{ message.sender.get_full_name|default:message.sender.username }}
+                {% endif %}
+              </p>
+            </div>
+            <div class="text-end">
+              <small style="color: #6b7280; font-weight: 500;">{{ message.created_at|date:"M d, Y H:i" }}</small>
+            </div>
+          </div>
+        </div>
+        <div class="card-body p-4" style="padding: 3rem !important; background: rgba(255, 255, 255, 0.3); backdrop-filter: blur(10px);">
+          <div class="message-content">
+            <div class="mb-4">
+              <div class="info-card">
+                <h6 class="mb-3">
+                  <i class="bi bi-chat-text me-2"></i>Message Content
+                </h6>
+                <div style="padding: 1.5rem; border-radius: 15px; background: rgba(248, 250, 252, 0.8); border: 1px solid rgba(226, 232, 240, 0.5);">
+                  <p class="mb-0" style="white-space: pre-wrap; color: #374151; font-weight: 500;">{{ message.message }}</p>
+                </div>
+              </div>
+            </div>
+            
+            <div class="row g-3 mb-4">
+              <div class="col-md-6">
+                <div class="info-card">
+                  <h6 class="mb-2">
+                    <i class="bi bi-person me-2"></i>Sender Information
+                  </h6>
+                  <div class="d-flex align-items-center mb-2">
+                    <i class="bi {% if message.sender.is_superuser %}bi-person-badge{% else %}bi-person-circle{% endif %} me-2" style="color: #3b82f6;"></i>
+                    <strong style="color: #374151;">{{ message.sender.get_full_name|default:message.sender.username }}</strong>
+                    {% if message.sender.is_superuser %}
+                      <span class="badge bg-success ms-2">Doctor</span>
+                    {% else %}
+                      <span class="badge bg-info ms-2">Patient</span>
+                    {% endif %}
+                  </div>
+                  <div class="small" style="color: #6b7280; font-weight: 500;">
+                    <div><strong>Username:</strong> {{ message.sender.username }}</div>
+                    <div><strong>Email:</strong> {{ message.sender.email|default:"Not provided" }}</div>
+                    <div><strong>Joined:</strong> {{ message.sender.date_joined|date:"M d, Y" }}</div>
+                  </div>
+                </div>
+              </div>
+              
+              <div class="col-md-6">
+                <div class="info-card">
+                  <h6 class="mb-2">
+                    <i class="bi bi-person-check me-2"></i>Recipient Information
+                  </h6>
+                  <div class="d-flex align-items-center mb-2">
+                    <i class="bi {% if message.recipient.is_superuser %}bi-person-badge{% else %}bi-person-circle{% endif %} me-2" style="color: #3b82f6;"></i>
+                    <strong style="color: #374151;">{{ message.recipient.get_full_name|default:message.recipient.username }}</strong>
+                    {% if message.recipient.is_superuser %}
+                      <span class="badge bg-success ms-2">Doctor</span>
+                    {% else %}
+                      <span class="badge bg-info ms-2">Patient</span>
+                    {% endif %}
+                  </div>
+                  <div class="small" style="color: #6b7280; font-weight: 500;">
+                    <div><strong>Username:</strong> {{ message.recipient.username }}</div>
+                    <div><strong>Email:</strong> {{ message.recipient.email|default:"Not provided" }}</div>
+                    <div><strong>Joined:</strong> {{ message.recipient.date_joined|date:"M d, Y" }}</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            
+            <div class="mb-4">
+              <div class="info-card">
+                <h6 class="mb-3">
+                  <i class="bi bi-info-circle me-2"></i>Message Details
+                </h6>
+                <div class="row g-3">
+                  <div class="col-md-4">
+                    <div class="text-center" style="padding: 1.5rem; border-radius: 15px; background: rgba(248, 250, 252, 0.8); border: 1px solid rgba(226, 232, 240, 0.5);">
+                      <i class="bi bi-calendar-event text-primary fs-4"></i>
+                      <div class="mt-2">
+                        <strong style="color: #374151;">Date Sent</strong><br>
+                        <small style="color: #6b7280;">{{ message.created_at|date:"M d, Y" }}</small>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="col-md-4">
+                    <div class="text-center" style="padding: 1.5rem; border-radius: 15px; background: rgba(248, 250, 252, 0.8); border: 1px solid rgba(226, 232, 240, 0.5);">
+                      <i class="bi bi-clock text-primary fs-4"></i>
+                      <div class="mt-2">
+                        <strong style="color: #374151;">Time Sent</strong><br>
+                        <small style="color: #6b7280;">{{ message.created_at|time:"H:i" }}</small>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="col-md-4">
+                    <div class="text-center" style="padding: 1.5rem; border-radius: 15px; background: rgba(248, 250, 252, 0.8); border: 1px solid rgba(226, 232, 240, 0.5);">
+                      <i class="bi {% if message.is_read %}bi-check-circle-fill text-success{% else %}bi-circle text-warning{% endif %} fs-4"></i>
+                      <div class="mt-2">
+                        <strong style="color: #374151;">Status</strong><br>
+                        <small style="color: #6b7280;">
+                          {% if message.is_read %}Read{% else %}Unread{% endif %}
+                        </small>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="card-footer" style="background: rgba(255, 255, 255, 0.8); backdrop-filter: blur(15px); border-radius: 0 0 25px 25px; border: none; padding: 2rem;">
+          <div class="d-flex justify-content-between align-items-center">
+            <div>
+              <a href="{% url 'messaging:private_messages' %}" class="btn btn-outline-secondary">
+                <i class="bi bi-arrow-left me-2"></i>Back to Messages
+              </a>
+            </div>
+            <div>
+              {% if message.recipient == request.user %}
+                <a href="{% url 'messaging:send_message' %}?recipient={{ message.sender.id }}" class="btn btn-primary" style="
+                  background: linear-gradient(135deg, #e6f3ff 0%, #f0f9ff 100%);
+                  color: #1e40af;
+                  border: none;
+                  box-shadow: 0 8px 20px rgba(30, 64, 175, 0.2);">
+                  <i class="bi bi-reply me-2"></i>Reply
+                </a>
+              {% endif %}
+              <a href="{% url 'messaging:send_message' %}" class="btn btn-success" style="
+                background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%);
+                color: #166534;
+                border: none;
+                box-shadow: 0 8px 20px rgba(34, 197, 94, 0.2);">
+                <i class="bi bi-plus-circle me-2"></i>New Message
+              </a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+

@@ -1,0 +1,1564 @@
+{% extends 'base.html' %}
+{% block title %}All Patients{% endblock title %}
+{% block content %}
+<style>
+  body {
+    background: linear-gradient(135deg, #e6f3ff 0%, #f0f9ff 30%, #ffffff 70%, #ecfdf5 100%);
+    background-attachment: fixed;
+    min-height: 100vh;
+  }
+  
+  /* Medical floating background elements */
+  .medical-bg {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: -1;
+    overflow: hidden;
+    pointer-events: none;
+  }
+  
+  .floating-icon {
+    position: absolute;
+    color: rgba(59, 130, 246, 0.06);
+    font-size: 1.8rem;
+    animation: float 10s ease-in-out infinite;
+  }
+  
+  .floating-icon:nth-child(1) { top: 15%; left: 8%; animation-delay: 0s; }
+  .floating-icon:nth-child(2) { top: 25%; right: 12%; animation-delay: 2.5s; }
+  .floating-icon:nth-child(3) { top: 60%; left: 10%; animation-delay: 5s; }
+  .floating-icon:nth-child(4) { bottom: 25%; right: 15%; animation-delay: 7.5s; }
+  .floating-icon:nth-child(5) { top: 80%; left: 25%; animation-delay: 10s; }
+  
+  @keyframes float {
+    0%, 100% { transform: translateY(0px) rotate(0deg); }
+    25% { transform: translateY(-20px) rotate(5deg); }
+    50% { transform: translateY(-35px) rotate(0deg); }
+    75% { transform: translateY(-20px) rotate(-5deg); }
+  }
+  
+  /* Main container glassmorphism */
+  .patients-container {
+    backdrop-filter: blur(25px) saturate(180%);
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 30px;
+    border: 2px solid rgba(255, 255, 255, 0.2);
+    box-shadow: 0 30px 80px rgba(31, 38, 135, 0.15),
+                inset 0 1px 0 rgba(255, 255, 255, 0.3);
+    padding: 2rem;
+    margin: 2rem auto;
+    animation: slideInUp 0.8s ease-out;
+  }
+  
+  @keyframes slideInUp {
+    from {
+      opacity: 0;
+      transform: translateY(50px) scale(0.95);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0) scale(1);
+    }
+  }
+  
+  /* Header styling */
+  .patients-header {
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.2) 0%, rgba(255, 255, 255, 0.1) 100%);
+    backdrop-filter: blur(15px);
+    border-radius: 20px;
+    padding: 1.5rem;
+    margin-bottom: 2rem;
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    position: relative;
+    overflow: hidden;
+  }
+  
+  .patients-header::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+    animation: headerShine 4s ease-in-out infinite;
+  }
+  
+  @keyframes headerShine {
+    0%, 100% { left: -100%; }
+    50% { left: 100%; }
+  }
+  
+  .patients-title {
+    background: linear-gradient(135deg, #3b82f6 0%, #10b981 50%, #8b5cf6 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    background-size: 200% 200%;
+    animation: gradientShift 3s ease-in-out infinite;
+  }
+  
+  /* Enhanced search box */
+  .search-container {
+    backdrop-filter: blur(20px);
+    background: rgba(255, 255, 255, 0.15);
+    border-radius: 25px;
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    padding: 0.5rem;
+    transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  }
+  
+  .search-container:focus-within {
+    transform: translateY(-2px);
+    box-shadow: 0 12px 30px rgba(59, 130, 246, 0.2);
+    border-color: rgba(59, 130, 246, 0.5);
+  }
+  
+  .form-control {
+    background: rgba(255, 255, 255, 0.9) !important;
+    border: none !important;
+    border-radius: 20px !important;
+    backdrop-filter: blur(10px);
+    transition: all 0.3s ease;
+    padding: 12px 16px;
+  }
+  
+  .form-control:focus {
+    background: rgba(255, 255, 255, 1) !important;
+    box-shadow: 0 0 0 0.25rem rgba(59, 130, 246, 0.15) !important;
+    transform: scale(1.02);
+  }
+  
+  /* Enhanced patient cards - Reduced size */
+  .glass-card {
+    backdrop-filter: blur(25px) saturate(180%);
+    background: rgba(255, 255, 255, 0.15);
+    border-radius: 20px;
+    border: 2px solid rgba(255, 255, 255, 0.2);
+    box-shadow: 0 15px 30px rgba(31, 38, 135, 0.15),
+                inset 0 1px 0 rgba(255, 255, 255, 0.4);
+    transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    position: relative;
+    overflow: hidden;
+    height: 100%;
+  }
+  
+  .glass-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 3px;
+    background: linear-gradient(90deg, 
+      transparent, 
+      rgba(59, 130, 246, 0.8), 
+      rgba(16, 185, 129, 0.8), 
+      rgba(139, 92, 246, 0.8), 
+      transparent);
+    animation: borderShine 3s ease-in-out infinite;
+  }
+  
+  @keyframes borderShine {
+    0%, 100% { transform: translateX(-100%); }
+    50% { transform: translateX(100%); }
+  }
+  
+  .glass-card:hover {
+    transform: translateY(-5px) scale(1.02);
+    box-shadow: 0 20px 40px rgba(31, 38, 135, 0.2),
+                inset 0 1px 0 rgba(255, 255, 255, 0.6);
+    background: rgba(255, 255, 255, 0.2);
+  }
+  
+  .glass-card::after {
+    content: '';
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: conic-gradient(from 0deg, transparent, rgba(59, 130, 246, 0.03), transparent);
+    animation: rotate 12s linear infinite;
+    z-index: -1;
+  }
+  
+  @keyframes rotate {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+  }
+  
+  /* Avatar enhancements */
+  .patient-avatar {
+    background: linear-gradient(135deg, #667eea, #764ba2) !important;
+    border: 3px solid rgba(255, 255, 255, 0.3);
+    box-shadow: 0 8px 25px rgba(102, 126, 234, 0.3);
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+  }
+  
+  /* Comprehensive Mobile Responsiveness - Enhanced */
+  @media (max-width: 1200px) {
+    .col-xl-3 {
+      flex: 0 0 33.333333%;
+      max-width: 33.333333%;
+    }
+  }
+  
+  @media (max-width: 992px) {
+    .patients-container {
+      margin: 1rem 0.5rem;
+      padding: 1.2rem;
+      border-radius: 20px;
+    }
+    
+    .patients-header {
+      padding: 1rem;
+      border-radius: 15px;
+      margin-bottom: 1.2rem;
+    }
+    
+    .patients-title {
+      font-size: 1.5rem;
+    }
+    
+    .header-subtitle {
+      font-size: 0.8rem;
+    }
+    
+    .glass-card {
+      border-radius: 18px;
+      margin-bottom: 0.8rem;
+    }
+    
+    .card-body {
+      padding: 1rem;
+    }
+    
+    .search-container {
+      border-radius: 20px;
+      padding: 0.4rem;
+      max-width: 100% !important;
+      margin-bottom: 1rem;
+    }
+    
+    .form-control {
+      padding: 10px 14px;
+      font-size: 0.9rem;
+      min-height: 44px;
+      border-radius: 16px !important;
+      touch-action: manipulation;
+      -webkit-tap-highlight-color: transparent;
+    }
+    
+    .btn {
+      min-height: 44px;
+      padding: 8px 14px;
+      font-size: 0.9rem;
+      border-radius: 12px;
+      touch-action: manipulation;
+    }
+    
+    .patient-avatar {
+      width: 45px;
+      height: 45px;
+      font-size: 1.2rem;
+    }
+    
+    .floating-icon {
+      font-size: 1.3rem;
+    }
+    
+    .patient-name {
+      font-size: 1rem;
+    }
+    
+    .username-badge {
+      font-size: 0.6rem;
+      padding: 1px 4px;
+    }
+    
+    .detail-item {
+      padding: 0.4rem;
+    }
+    
+    .contact-info,
+    .address-section,
+    .admission-info {
+      padding: 0.5rem;
+    }
+    
+    .col-xl-3 {
+      flex: 0 0 50%;
+      max-width: 50%;
+    }
+  }
+  
+  @media (max-width: 768px) {
+    .patients-container {
+      margin: 0.75rem 0.375rem;
+      padding: 1rem;
+      border-radius: 18px;
+    }
+    
+    .patients-header {
+      padding: 0.875rem;
+      border-radius: 12px;
+      margin-bottom: 1rem;
+    }
+    
+    .header-title-section {
+      text-align: center;
+      margin-bottom: 0.875rem;
+    }
+    
+    .patients-title {
+      font-size: 1.35rem;
+      text-align: center;
+    }
+    
+    .header-subtitle {
+      font-size: 0.75rem;
+      margin-bottom: 0.5rem;
+    }
+    
+    .glass-card {
+      border-radius: 15px;
+      margin-bottom: 0.75rem;
+    }
+    
+    .card-body {
+      padding: 0.875rem;
+    }
+    
+    .search-container {
+      border-radius: 15px;
+      margin-bottom: 1rem;
+      max-width: 100% !important;
+    }
+    
+    .form-control {
+      padding: 9px 12px;
+      font-size: 0.85rem;
+      min-height: 42px;
+      border-radius: 14px !important;
+    }
+    
+    .btn {
+      min-height: 40px;
+      padding: 7px 12px;
+      font-size: 0.85rem;
+      border-radius: 10px;
+    }
+    
+    .btn-sm {
+      min-height: 36px;
+      padding: 6px 10px;
+      font-size: 0.75rem;
+      border-radius: 8px;
+    }
+    
+    .patient-avatar {
+      width: 40px;
+      height: 40px;
+      font-size: 1rem;
+    }
+    
+    .floating-icon {
+      font-size: 1.1rem;
+    }
+    
+    .patient-name {
+      font-size: 0.95rem;
+    }
+    
+    .username-badge {
+      font-size: 0.55rem;
+      padding: 1px 3px;
+    }
+    
+    .detail-item {
+      padding: 0.35rem;
+    }
+    
+    .contact-info,
+    .address-section,
+    .admission-info {
+      padding: 0.4rem;
+    }
+    
+    .info-row {
+      padding: 0.35rem 0;
+    }
+    
+    .card-text {
+      font-size: 0.8rem;
+      line-height: 1.25;
+    }
+    
+    .card-title {
+      font-size: 0.95rem;
+      margin-bottom: 0.5rem;
+    }
+    
+    /* Stack patient info vertically on smaller screens */
+    .d-flex.align-items-center {
+      flex-direction: column;
+      text-align: center;
+    }
+    
+    .d-flex.align-items-center .patient-avatar {
+      margin-bottom: 0.5rem;
+    }
+    
+    .d-flex.align-items-center .ms-3 {
+      margin-left: 0 !important;
+    }
+    
+    /* Make buttons full width on mobile */
+    .d-flex.gap-2 {
+      flex-direction: column;
+      gap: 0.3rem !important;
+    }
+    
+    .d-flex.gap-2 .btn {
+      width: 100%;
+      justify-content: center;
+    }
+    
+    .empty-title {
+      font-size: 1.15rem;
+    }
+    
+    .empty-description {
+      font-size: 0.85rem;
+    }
+    
+    .col-xl-3, .col-lg-4 {
+      flex: 0 0 100%;
+      max-width: 100%;
+    }
+  }
+  
+  @media (max-width: 576px) {
+    .patients-container {
+      margin: 0.5rem 0.25rem;
+      padding: 0.875rem;
+      border-radius: 15px;
+    }
+    
+    .patients-header {
+      padding: 0.75rem;
+      border-radius: 10px;
+      margin-bottom: 0.875rem;
+    }
+    
+    .patients-title {
+      font-size: 1.25rem;
+    }
+    
+    .glass-card {
+      border-radius: 12px;
+      margin-bottom: 0.625rem;
+    }
+    
+    .card-body {
+      padding: 0.75rem;
+    }
+    
+    .search-container {
+      border-radius: 12px;
+      margin-bottom: 0.875rem;
+    }
+    
+    .form-control {
+      padding: 8px 10px;
+      font-size: 0.8rem;
+      min-height: 40px;
+      border-radius: 12px !important;
+    }
+    
+    .btn {
+      min-height: 38px;
+      padding: 6px 10px;
+      font-size: 0.8rem;
+      border-radius: 8px;
+    }
+    
+    .btn-sm {
+      min-height: 34px;
+      padding: 5px 8px;
+      font-size: 0.7rem;
+      border-radius: 6px;
+    }
+    
+    .patient-avatar {
+      width: 35px;
+      height: 35px;
+      font-size: 0.9rem;
+    }
+    
+    .floating-icon {
+      font-size: 1rem;
+    }
+    
+    .card-text {
+      font-size: 0.75rem;
+      line-height: 1.2;
+    }
+    
+    .card-title {
+      font-size: 0.9rem;
+      margin-bottom: 0.4rem;
+    }
+    
+    .detail-item {
+      padding: 0.3rem;
+    }
+    
+    .contact-info,
+    .address-section,
+    .admission-info {
+      padding: 0.35rem;
+    }
+    
+    /* Ultra-compact layout for small screens */
+    .patients-header p {
+      font-size: 0.7rem;
+    }
+    
+    .badge {
+      font-size: 0.6rem;
+      padding: 0.25rem 0.4rem;
+    }
+    
+    .username-badge {
+      font-size: 0.5rem;
+      padding: 1px 2px;
+    }
+    
+    .detail-label small, .contact-label, .address-label, .admission-date {
+      font-size: 0.7rem;
+    }
+    
+    .detail-value, .contact-value, .address-text {
+      font-size: 0.75rem;
+    }
+  }
+  
+  @media (max-width: 480px) {
+    .patients-container {
+      margin: 0.375rem 0.125rem;
+      padding: 0.75rem;
+      border-radius: 12px;
+    }
+    
+    .patients-header {
+      padding: 0.625rem;
+      border-radius: 8px;
+      margin-bottom: 0.75rem;
+    }
+    
+    .patients-title {
+      font-size: 1.15rem;
+    }
+    
+    .glass-card {
+      border-radius: 10px;
+      margin-bottom: 0.5rem;
+    }
+    
+    .card-body {
+      padding: 0.625rem;
+    }
+    
+    .search-container {
+      border-radius: 10px;
+      margin-bottom: 0.75rem;
+    }
+    
+    .form-control {
+      padding: 7px 9px;
+      font-size: 0.75rem;
+      min-height: 36px;
+      border-radius: 10px !important;
+    }
+    
+    .btn {
+      min-height: 36px;
+      padding: 5px 8px;
+      font-size: 0.75rem;
+      border-radius: 6px;
+    }
+    
+    .btn-sm {
+      min-height: 32px;
+      padding: 4px 6px;
+      font-size: 0.65rem;
+      border-radius: 5px;
+    }
+    
+    .patient-avatar {
+      width: 30px;
+      height: 30px;
+      font-size: 0.8rem;
+    }
+    
+    .floating-icon {
+      font-size: 0.9rem;
+    }
+    
+    .card-text {
+      font-size: 0.7rem;
+      line-height: 1.15;
+    }
+    
+    .card-title {
+      font-size: 0.85rem;
+      margin-bottom: 0.3rem;
+    }
+    
+    .detail-item {
+      padding: 0.25rem;
+    }
+    
+    .contact-info,
+    .address-section,
+    .admission-info {
+      padding: 0.3rem;
+    }
+    
+    /* Ultra-compact layout */
+    .patients-header p {
+      font-size: 0.65rem;
+    }
+    
+    .badge {
+      font-size: 0.55rem;
+      padding: 0.2rem 0.3rem;
+    }
+    
+    .username-badge {
+      font-size: 0.45rem;
+      padding: 1px 1px;
+    }
+    
+    .detail-label small, .contact-label, .address-label, .admission-date {
+      font-size: 0.65rem;
+    }
+    
+    .detail-value, .contact-value, .address-text {
+      font-size: 0.7rem;
+    }
+  }
+  
+  /* Touch device optimizations */
+  .touch-device .glass-card:hover {
+    transform: none;
+  }
+  
+  .touch-device .btn:hover {
+    transform: none;
+  }
+  
+  .touch-device .search-container:focus-within {
+    transform: none;
+  }
+  
+  /* Enhanced accessibility for mobile */
+  @media (max-width: 768px) {
+    .form-control:focus,
+    .btn:focus {
+      outline: 3px solid rgba(59, 130, 246, 0.6);
+      outline-offset: 2px;
+    }
+    
+    /* Better text legibility */
+    .patients-container {
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+      text-rendering: optimizeLegibility;
+    }
+    
+    /* Improved scrolling */
+    .patients-container {
+      -webkit-overflow-scrolling: touch;
+    }
+  }
+  
+  /* Landscape orientation adjustments for mobile */
+  @media (max-width: 992px) and (orientation: landscape) {
+    .patients-container {
+      margin: 1rem 2rem;
+    }
+    
+    .patients-header {
+      padding: 1rem 1.5rem;
+    }
+    
+    .patients-title {
+      font-size: 1.5rem;
+    }
+    
+    .glass-card {
+      margin-bottom: 1rem;
+    }
+    
+    .card-body {
+      padding: 1.25rem;
+    }
+  }
+  
+  /* Grid layout adjustments for mobile */
+  @media (max-width: 768px) {
+    .row.g-3 {
+      gap: 0.75rem !important;
+    }
+    
+    .col-lg-4,
+    .col-md-6 {
+      width: 100% !important;
+      max-width: 100% !important;
+      flex: 0 0 100% !important;
+    }
+  }
+  
+  @media (max-width: 576px) {
+    .row.g-3 {
+      gap: 0.5rem !important;
+      margin: 0 !important;
+    }
+  }
+  
+  .patient-avatar::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: linear-gradient(45deg, transparent, rgba(255,255,255,0.3), transparent);
+    transform: rotate(45deg);
+    animation: avatarShine 3s ease-in-out infinite;
+  }
+  
+  @keyframes avatarShine {
+    0%, 100% { transform: translateX(-100%) rotate(45deg); }
+    50% { transform: translateX(100%) rotate(45deg); }
+  }
+  
+  /* Enhanced buttons */
+  .btn-glass {
+    backdrop-filter: blur(15px);
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    border-radius: 15px;
+    padding: 8px 16px;
+    font-weight: 600;
+    transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    position: relative;
+    overflow: hidden;
+  }
+  
+  .btn-glass::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent);
+    transition: left 0.6s;
+  }
+  
+  .btn-glass:hover::before {
+    left: 100%;
+  }
+  
+  .btn-glass:hover {
+    transform: translateY(-2px) scale(1.05);
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+  }
+  
+  .btn-success.btn-glass {
+    background: linear-gradient(135deg, rgba(16, 185, 129, 0.8) 0%, rgba(5, 150, 105, 0.8) 100%);
+    color: white;
+  }
+  
+  .btn-success.btn-glass:hover {
+    background: linear-gradient(135deg, rgba(16, 185, 129, 0.9) 0%, rgba(5, 150, 105, 0.9) 100%);
+    color: white;
+  }
+  
+  .btn-outline-primary.btn-glass {
+    background: rgba(59, 130, 246, 0.1);
+    border-color: rgba(59, 130, 246, 0.3);
+    color: #3b82f6;
+  }
+  
+  .btn-outline-primary.btn-glass:hover {
+    background: rgba(59, 130, 246, 0.2);
+    border-color: rgba(59, 130, 246, 0.5);
+    color: #2563eb;
+  }
+  
+  .btn-outline-danger.btn-glass {
+    background: rgba(239, 68, 68, 0.1);
+    border-color: rgba(239, 68, 68, 0.3);
+    color: #ef4444;
+  }
+  
+  /* Information sections */
+  .patient-info {
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(10px);
+    border-radius: 12px;
+    padding: 0.75rem;
+    margin-bottom: 0.75rem;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    transition: all 0.3s ease;
+  }
+  
+  .patient-info:hover {
+    background: rgba(255, 255, 255, 0.15);
+    transform: scale(1.02);
+  }
+  
+  /* Icon enhancements */
+  .bi {
+    filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.1));
+  }
+  
+  /* Empty state */
+  .empty-state {
+    backdrop-filter: blur(20px);
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 25px;
+    border: 2px solid rgba(255, 255, 255, 0.2);
+    padding: 3rem;
+    text-align: center;
+    animation: fadeInUp 0.6s ease-out;
+  }
+  
+  @keyframes fadeInUp {
+    from {
+      opacity: 0;
+      transform: translateY(30px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+  
+  /* Card animations */
+  .patient-card {
+    animation: cardSlideIn 0.6s ease-out;
+  }
+  
+  .patient-card:nth-child(1) { animation-delay: 0.1s; }
+  .patient-card:nth-child(2) { animation-delay: 0.2s; }
+  .patient-card:nth-child(3) { animation-delay: 0.3s; }
+  .patient-card:nth-child(4) { animation-delay: 0.4s; }
+  .patient-card:nth-child(5) { animation-delay: 0.5s; }
+  .patient-card:nth-child(6) { animation-delay: 0.6s; }
+  
+  @keyframes cardSlideIn {
+    from {
+      opacity: 0;
+      transform: translateY(30px) scale(0.95);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0) scale(1);
+    }
+  }
+  
+  /* Enhanced Text & Typography */
+  .text-primary {
+    background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    font-weight: 600;
+    letter-spacing: 0.02em;
+  }
+  
+  .text-muted {
+    color: rgba(107, 114, 128, 0.85) !important;
+    font-weight: 500;
+    letter-spacing: 0.01em;
+  }
+  
+  /* Modern Typography System */
+  .patients-title {
+    font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, 'Roboto', sans-serif;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    line-height: 1.2;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  }
+  
+  .card-title,
+  .fw-semibold {
+    font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, 'Roboto', sans-serif;
+    font-weight: 600;
+    letter-spacing: -0.01em;
+    line-height: 1.3;
+    color: #1f2937;
+  }
+  
+  .card-text,
+  .small {
+    font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, 'Roboto', sans-serif;
+    font-weight: 400;
+    letter-spacing: 0.005em;
+    line-height: 1.4;
+    color: #4b5563;
+  }
+  
+  /* Enhanced Text Contrast & Readability */
+  .glass-card .fw-semibold {
+    color: #1e293b;
+    text-shadow: 0 1px 2px rgba(255, 255, 255, 0.8);
+  }
+  
+  .glass-card .text-muted {
+    color: rgba(71, 85, 105, 0.9) !important;
+    text-shadow: 0 1px 1px rgba(255, 255, 255, 0.6);
+  }
+  
+  .glass-card .small {
+    color: #64748b;
+    font-weight: 500;
+    text-shadow: 0 1px 1px rgba(255, 255, 255, 0.5);
+  }
+  
+  /* Username Styling */
+  .glass-card .text-muted small,
+  .glass-card small.text-muted {
+    font-family: 'JetBrains Mono', 'Fira Code', 'Monaco', monospace;
+    font-size: 0.7rem;
+    color: #6b7280;
+    background: rgba(255, 255, 255, 0.6);
+    padding: 2px 5px;
+    border-radius: 5px;
+    font-weight: 500;
+    letter-spacing: 0.02em;
+  }
+  
+  /* Information Text Enhancement */
+  .patient-info .small {
+    font-size: 0.8rem;
+    color: #374151;
+    font-weight: 500;
+    line-height: 1.5;
+  }
+  
+  .patient-info .fw-semibold {
+    color: #1f2937;
+    font-weight: 600;
+  }
+  
+  /* Icon and Text Alignment */
+  .bi {
+    vertical-align: -0.125em;
+    margin-right: 0.4rem;
+    filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.1));
+    font-size: 0.8rem;
+  }
+  
+  /* Button Text Enhancement */
+  .btn {
+    font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, 'Roboto', sans-serif;
+    font-weight: 600;
+    letter-spacing: 0.01em;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+  }
+  
+  .btn-glass {
+    color: #1f2937;
+    text-shadow: 0 1px 1px rgba(255, 255, 255, 0.8);
+  }
+  
+  /* Search Placeholder Enhancement */
+  .form-control::placeholder {
+    color: #9ca3af;
+    font-weight: 400;
+    font-style: italic;
+    opacity: 0.8;
+  }
+  
+  .form-control:focus::placeholder {
+    color: #6b7280;
+    opacity: 0.6;
+  }
+  
+  /* Header Text Enhancement */
+  .patients-header h3 {
+    text-shadow: 0 2px 4px rgba(255, 255, 255, 0.3);
+  }
+  
+  /* Empty State Text */
+  .empty-state h5 {
+    font-weight: 600;
+    color: #6b7280;
+    letter-spacing: -0.01em;
+    text-shadow: 0 1px 2px rgba(255, 255, 255, 0.8);
+  }
+  
+  /* Badge Enhancement */
+  .badge {
+    font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, 'Roboto', sans-serif;
+    font-weight: 600;
+    letter-spacing: 0.02em;
+    text-shadow: 0 1px 1px rgba(0, 0, 0, 0.1);
+  }
+  
+  /* Link Text Enhancement */
+  a {
+    text-decoration: none;
+    transition: all 0.3s ease;
+  }
+  
+  a:hover {
+    text-decoration: none;
+  }
+  
+  /* Address Text Truncation with Tooltip */
+  .address-text {
+    max-width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    cursor: help;
+    position: relative;
+  }
+  
+  /* Header Enhancement */
+  .header-title-section {
+    text-align: center;
+    flex-grow: 1;
+  }
+  
+  .header-subtitle {
+    font-size: 0.9rem;
+    font-weight: 500;
+    color: rgba(107, 114, 128, 0.9) !important;
+    max-width: 500px;
+    margin: 0 auto;
+  }
+  
+  .gradient-text {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    background-size: 200% 200%;
+    animation: gradientShift 4s ease-in-out infinite;
+  }
+  
+  @keyframes gradientShift {
+    0%, 100% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+  }
+  
+  /* Patient Card Content Enhancement */
+  .patient-header-info {
+    min-height: 50px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+  }
+  
+  .patient-name {
+    font-size: 1.1rem;
+    line-height: 1.2;
+    margin-bottom: 0.15rem;
+  }
+  
+  .username-badge {
+    background: rgba(59, 130, 246, 0.1);
+    color: #3b82f6;
+    padding: 1px 6px;
+    border-radius: 6px;
+    font-family: 'JetBrains Mono', monospace;
+    font-weight: 600;
+    font-size: 0.65rem;
+  }
+  
+  /* Information Layout */
+  .info-row {
+    padding: 0.5rem 0;
+    border-bottom: 1px solid rgba(226, 232, 240, 0.5);
+  }
+  
+  .info-label {
+    color: #64748b;
+    font-weight: 600;
+    font-size: 0.8rem;
+  }
+  
+  .info-value {
+    color: #1e293b;
+    font-weight: 600;
+  }
+  
+  .room-number {
+    background: linear-gradient(135deg, #10b981, #059669);
+    color: white;
+    padding: 3px 10px;
+    border-radius: 10px;
+    font-size: 0.8rem;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+  }
+  
+  /* Detail Items */
+  .detail-item {
+    background: rgba(255, 255, 255, 0.6);
+    border-radius: 8px;
+    padding: 0.5rem;
+    height: 100%;
+    transition: all 0.3s ease;
+  }
+  
+  .detail-item:hover {
+    background: rgba(255, 255, 255, 0.8);
+    transform: translateY(-1px);
+  }
+  
+  .detail-label {
+    display: flex;
+    align-items: center;
+    color: #6b7280;
+    font-weight: 600;
+    margin-bottom: 0.3rem;
+  }
+  
+  .detail-value {
+    color: #1f2937;
+    font-size: 0.8rem;
+  }
+  
+  /* Contact Information */
+  .contact-info {
+    background: rgba(255, 255, 255, 0.4);
+    border-radius: 10px;
+    padding: 0.75rem;
+  }
+  
+  .contact-item {
+    padding: 0.35rem 0;
+  }
+  
+  .contact-label {
+    color: #6b7280;
+    font-weight: 600;
+    margin-bottom: 0.2rem;
+  }
+  
+  .contact-value {
+    color: #374151;
+    font-weight: 500;
+    font-size: 0.8rem;
+  }
+  
+  /* Address Section */
+  .address-section {
+    background: rgba(248, 250, 252, 0.8);
+    border-radius: 8px;
+    padding: 0.75rem;
+  }
+  
+  .address-label {
+    font-weight: 600;
+    margin-bottom: 0.2rem;
+    display: block;
+    font-size: 0.8rem;
+  }
+  
+  .address-content {
+    flex-grow: 1;
+  }
+  
+  /* Admission Info */
+  .admission-info {
+    background: rgba(241, 245, 249, 0.8);
+    border-radius: 6px;
+    padding: 0.625rem;
+  }
+  
+  .admission-date {
+    font-size: 0.8rem;
+  }
+  
+  /* Button Text Enhancement */
+  .btn-text {
+    font-weight: 600;
+    letter-spacing: 0.01em;
+  }
+  
+  /* Empty State Enhancement */
+  .empty-icon {
+    animation: pulseGlow 2s ease-in-out infinite;
+  }
+  
+  @keyframes pulseGlow {
+    0%, 100% {
+      transform: scale(1);
+      opacity: 0.8;
+    }
+    50% {
+      transform: scale(1.05);
+      opacity: 1;
+    }
+  }
+  
+  .empty-title {
+    color: #1f2937;
+    font-size: 1.5rem;
+    letter-spacing: -0.02em;
+  }
+  
+  .empty-description {
+    font-size: 1rem;
+    line-height: 1.6;
+    color: #6b7280;
+  }
+  
+  .empty-actions .btn {
+    font-size: 1.1rem;
+    padding: 1rem 2rem;
+    border-radius: 15px;
+  }
+  
+  /* Compact grid for larger screens */
+  @media (min-width: 1200px) {
+    .col-xl-3 {
+      flex: 0 0 25%;
+      max-width: 25%;
+    }
+  }
+  
+  @media (min-width: 1400px) {
+    .col-xl-3 {
+      flex: 0 0 20%;
+      max-width: 20%;
+    }
+  }
+</style>
+
+<!-- Medical Background Elements -->
+<div class="medical-bg">
+  <div class="floating-icon"><i class="bi bi-people"></i></div>
+  <div class="floating-icon"><i class="bi bi-heart-pulse"></i></div>
+  <div class="floating-icon"><i class="bi bi-clipboard2-pulse"></i></div>
+  <div class="floating-icon"><i class="bi bi-shield-check"></i></div>
+  <div class="floating-icon"><i class="bi bi-hospital"></i></div>
+</div>
+<div class="container mt-5">
+  <div class="patients-container">
+    <div class="patients-header">
+      <div class="d-flex flex-column flex-md-row align-items-center justify-content-between gap-3">
+        <div class="header-title-section">
+          <h1 class="patients-title fw-bold mb-2">
+            <i class="bi bi-people-fill me-2"></i>
+            <span class="gradient-text">Patients Directory</span>
+          </h1>
+          <p class="header-subtitle text-muted mb-0">
+            <i class="bi bi-info-circle me-1"></i>
+            Manage and view all registered patients in the healthcare system
+          </p>
+        </div>
+        <div class="search-container d-flex align-items-center" style="max-width: 400px;">
+          <div class="input-group">
+            <span class="input-group-text bg-transparent border-0">
+              <i class="bi bi-search text-primary"></i>
+            </span>
+            <input id="patientFilter" type="text" class="form-control border-0" 
+                   placeholder="Search patients by name, username, or room number...">
+          </div>
+          <a href="{% url 'admission:registration' %}" class="btn btn-success btn-glass ms-3">
+            <i class="bi bi-person-plus me-2"></i>
+            <span class="btn-text">Add Patient</span>
+          </a>
+        </div>
+      </div>
+    </div>
+
+  {% if students %}
+  <div class="row g-3" id="patientsGrid">
+    {% for student in students %}
+    <div class="col-xl-3 col-lg-4 col-md-6 col-sm-6 patient-card" 
+         data-name="{{ student.first_name }} {{ student.last_name }}"
+         data-username="{{ student.username }}"
+         data-room="{{ student.room }}">
+      <div class="glass-card h-100">
+        <div class="card-body p-3">
+          <!-- Patient Header -->
+          <div class="d-flex align-items-center mb-2">
+            <div class="patient-avatar rounded-circle d-flex align-items-center justify-content-center text-white me-2"
+                 style="width:40px;height:40px;">
+              <span class="fw-bold fs-6">{{ student.first_name|first|upper }}{{ student.last_name|first|upper }}</span>
+            </div>
+            <div class="patient-header-info flex-grow-1">
+              <h5 class="patient-name fw-bold text-primary mb-0">
+                {{ student.first_name }} {{ student.last_name }}
+              </h5>
+              <div class="patient-username d-flex align-items-center">
+                <i class="bi bi-at text-muted me-1" style="font-size: 0.6rem;"></i>
+                <small class="text-muted username-badge">{{ student.username }}</small>
+              </div>
+            </div>
+          </div>
+
+          <!-- Patient Information Grid -->
+          <div class="patient-info">
+
+            
+            <!-- Personal Details Grid -->
+            <div class="personal-details mb-2">
+              <div class="row g-1">
+                <div class="col-6">
+                  <div class="detail-item">
+                    <div class="detail-label">
+                      <i class="bi bi-calendar-event text-success me-1"></i>
+                      <small>DOB</small>
+                    </div>
+                    <div class="detail-value fw-medium" style="font-size: 0.75rem;">{{ student.dob|date:"M d, Y" }}</div>
+                  </div>
+                </div>
+                <div class="col-6">
+                  <div class="detail-item">
+                    <div class="detail-label">
+                      <i class="bi bi-gender-ambiguous text-info me-1"></i>
+                      <small>Gender</small>
+                    </div>
+                    <div class="detail-value fw-medium" style="font-size: 0.75rem;">{{ student.gender|title }}</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            
+            <!-- Contact Information -->
+            <div class="contact-info mb-2">
+              <div class="contact-item mb-1">
+                <div class="d-flex align-items-center">
+                  <i class="bi bi-envelope text-warning me-1" style="font-size: 0.6rem;"></i>
+                  <small class="contact-label">Email</small>
+                </div>
+                <div class="contact-value text-truncate" title="{{ student.email }}" style="font-size: 0.75rem;">
+                  {{ student.email|truncatechars:20 }}
+                </div>
+              </div>
+              <div class="contact-item mb-1">
+                <div class="d-flex align-items-center">
+                  <i class="bi bi-telephone text-success me-1" style="font-size: 0.6rem;"></i>
+                  <small class="contact-label">Phone</small>
+                </div>
+                <div class="contact-value fw-medium" style="font-size: 0.75rem;">
+                  {{ student.phone_number|truncatechars:15 }}
+                </div>
+              </div>
+            </div>
+            
+            <!-- Address -->
+            <div class="address-section mb-2">
+              <div class="d-flex align-items-start">
+                <i class="bi bi-geo-alt text-danger me-1 mt-1" style="font-size: 0.6rem;"></i>
+                <div class="address-content">
+                  <small class="address-label text-muted">Address</small>
+                  <div class="address-text fw-medium" 
+                       data-full-address="{{ student.address }}" 
+                       title="{{ student.address }}" style="font-size: 0.75rem;">
+                    {{ student.address|truncatechars:25 }}
+                  </div>
+                </div>
+              </div>
+            </div>
+            
+            <!-- Admission Date -->
+            <div class="admission-info">
+              <div class="d-flex align-items-center justify-content-between">
+                <div class="d-flex align-items-center">
+                  <i class="bi bi-clock-history text-secondary me-1" style="font-size: 0.6rem;"></i>
+                  <small class="text-muted">Admitted</small>
+                </div>
+                <div class="admission-date fw-medium text-secondary" style="font-size: 0.75rem;">
+                  {{ student.admission_date|date:"M d, Y" }}
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="card-footer bg-transparent border-0 pt-0 pb-3 px-3">
+          <div class="d-flex justify-content-end gap-2">
+            <a href="{% url 'admission:updatedetails' student.user.id %}" 
+               class="btn btn-outline-primary btn-sm btn-glass flex-grow-1 flex-md-grow-0"
+               title="Edit patient information">
+              <i class="bi bi-pencil-square me-1"></i>
+              <span class="btn-text">Edit</span>
+            </a>
+            <a href="{% url 'admission:deletestudent' student.user.id %}" 
+               class="btn btn-outline-danger btn-sm btn-glass flex-grow-1 flex-md-grow-0" 
+               onclick="return confirm('Are you sure you want to delete this patient? This action cannot be undone.')"
+               title="Remove patient from system">
+              <i class="bi bi-trash me-1"></i>
+              <span class="btn-text">Remove</span>
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+  {% else %}
+  <div class="empty-state mt-5">
+    <div class="empty-icon mb-4">
+      <i class="bi bi-people display-2 text-primary"></i>
+    </div>
+    <div class="empty-content text-center">
+      <h4 class="empty-title fw-bold text-dark mb-3">No Patients Found</h4>
+      <p class="empty-description text-muted mb-4 mx-auto" style="max-width: 400px;">
+        Your patient directory is currently empty. Start building your patient database by adding the first patient to the healthcare management system.
+      </p>
+      <div class="empty-actions">
+        <a href="{% url 'admission:registration' %}" class="btn btn-success btn-lg btn-glass">
+          <i class="bi bi-person-plus me-2"></i>
+          <span class="btn-text">Register First Patient</span>
+        </a>
+      </div>
+    </div>
+  </div>
+  {% endif %}
+  </div>
+</div>
+
+<script>
+// Enhanced search functionality with animation
+document.addEventListener('DOMContentLoaded', function() {
+  const searchInput = document.getElementById('patientFilter');
+  const patientCards = document.querySelectorAll('.patient-card');
+  
+  // Add initial staggered animation
+  patientCards.forEach((card, index) => {
+    card.style.opacity = '0';
+    card.style.transform = 'translateY(30px) scale(0.95)';
+    setTimeout(() => {
+      card.style.transition = 'all 0.6s ease-out';
+      card.style.opacity = '1';
+      card.style.transform = 'translateY(0) scale(1)';
+    }, index * 100);
+  });
+  
+  // Enhanced search with smooth animations
+  if (searchInput) {
+    searchInput.addEventListener('input', function() {
+      const filter = this.value.toLowerCase();
+      let visibleCount = 0;
+      
+      patientCards.forEach((card, index) => {
+        const name = card.dataset.name.toLowerCase();
+        const username = card.dataset.username.toLowerCase();
+        const room = card.dataset.room.toLowerCase();
+        
+        const matches = name.includes(filter) || username.includes(filter) || room.includes(filter);
+        
+        if (matches) {
+          card.style.display = 'block';
+          setTimeout(() => {
+            card.style.opacity = '1';
+            card.style.transform = 'translateY(0) scale(1)';
+          }, visibleCount * 50);
+          visibleCount++;
+        } else {
+          card.style.opacity = '0';
+          card.style.transform = 'translateY(-20px) scale(0.95)';
+          setTimeout(() => {
+            card.style.display = 'none';
+          }, 300);
+        }
+      });
+      
+      // Update search container style based on results
+      const searchContainer = document.querySelector('.search-container');
+      if (filter && visibleCount === 0) {
+        searchContainer.style.borderColor = 'rgba(239, 68, 68, 0.5)';
+      } else {
+        searchContainer.style.borderColor = 'rgba(255, 255, 255, 0.3)';
+      }
+    });
+  }
+  
+  // Add hover sound effect simulation (visual feedback)
+  const glassCards = document.querySelectorAll('.glass-card');
+  glassCards.forEach(card => {
+    card.addEventListener('mouseenter', function() {
+      this.style.transform = 'translateY(-8px) scale(1.02)';
+      const avatar = this.querySelector('.patient-avatar');
+      if (avatar) {
+        avatar.style.transform = 'scale(1.1) rotate(5deg)';
+      }
+    });
+    
+    card.addEventListener('mouseleave', function() {
+      this.style.transform = 'translateY(0) scale(1)';
+      const avatar = this.querySelector('.patient-avatar');
+      if (avatar) {
+        avatar.style.transform = 'scale(1) rotate(0deg)';
+      }
+    });
+  });
+  
+  // Enhanced button interactions
+  const buttons = document.querySelectorAll('.btn-glass');
+  buttons.forEach(button => {
+    button.addEventListener('mouseenter', function() {
+      this.style.transform = 'translateY(-2px) scale(1.05)';
+    });
+    
+    button.addEventListener('mouseleave', function() {
+      this.style.transform = 'translateY(0) scale(1)';
+    });
+    
+    button.addEventListener('mousedown', function() {
+      this.style.transform = 'translateY(0) scale(0.98)';
+    });
+    
+    button.addEventListener('mouseup', function() {
+      this.style.transform = 'translateY(-2px) scale(1.05)';
+    });
+  });
+  
+  // Initialize floating icons animation
+  const floatingIcons = document.querySelectorAll('.floating-icon');
+  floatingIcons.forEach((icon, index) => {
+    icon.style.animationDelay = `${index * 2}s`;
+  });
+  
+  // Add scroll-triggered animations
+  const observerOptions = {
+    threshold: 0.1,
+    rootMargin: '0px 0px -50px 0px'
+  };
+  
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        entry.target.style.opacity = '1';
+        entry.target.style.transform = 'translateY(0) scale(1)';
+      }
+    });
+  }, observerOptions);
+  
+  // Observe cards for scroll animation
+  patientCards.forEach(card => {
+    observer.observe(card);
+  });
+});
+</script>
+
+{% endblock content %}

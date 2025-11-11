@@ -1,0 +1,473 @@
+{% extends 'base.html' %}
+{% block title %}Feedback{% endblock title %}
+{% block content %}
+<style>
+  body {
+    background: linear-gradient(135deg, #ffffff 0%, #f8fafc 30%, #e2e8f0 70%, #f1f5f9 100%);
+    background-attachment: fixed;
+    min-height: 100vh;
+  }
+  
+  /* Medical floating background elements */
+  .medical-bg {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: -1;
+    overflow: hidden;
+    pointer-events: none;
+  }
+  
+  .floating-icon {
+    position: absolute;
+    color: rgba(59, 130, 246, 0.08);
+    font-size: 1.5rem;
+    animation: float 8s ease-in-out infinite;
+  }
+  
+  .floating-icon:nth-child(1) { top: 10%; left: 10%; animation-delay: 0s; }
+  .floating-icon:nth-child(2) { top: 30%; right: 15%; animation-delay: 2s; }
+  .floating-icon:nth-child(3) { top: 70%; left: 5%; animation-delay: 4s; }
+  .floating-icon:nth-child(4) { bottom: 20%; right: 20%; animation-delay: 6s; }
+  
+  @keyframes float {
+    0%, 100% { transform: translateY(0px) rotate(0deg); }
+    25% { transform: translateY(-15px) rotate(3deg); }
+    50% { transform: translateY(-30px) rotate(0deg); }
+    75% { transform: translateY(-15px) rotate(-3deg); }
+  }
+  
+  /* Glassmorphism cards */
+  .glass-card {
+    backdrop-filter: blur(25px) saturate(180%);
+    background: rgba(255, 255, 255, 0.25);
+    border-radius: 30px;
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    box-shadow: 0 30px 80px rgba(31, 38, 135, 0.15),
+                inset 0 1px 0 rgba(255, 255, 255, 0.4),
+                0 8px 32px rgba(31, 38, 135, 0.1);
+    overflow: hidden;
+    animation: slideInUp 0.8s ease-out;
+  }
+  
+  @keyframes slideInUp {
+    from {
+      opacity: 0;
+      transform: translateY(50px) scale(0.95);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0) scale(1);
+    }
+  }
+  
+  /* Enhanced headers */
+  .glass-header {
+    background: linear-gradient(135deg, rgba(59, 130, 246, 0.95) 0%, rgba(16, 185, 129, 0.9) 100%);
+    backdrop-filter: blur(20px);
+    border: none;
+    position: relative;
+    overflow: hidden;
+    border-radius: 30px 30px 0 0;
+  }
+  
+  /* Form controls */
+  .form-control {
+    background: rgba(255, 255, 255, 0.95);
+    border: 2px solid rgba(59, 130, 246, 0.25);
+    border-radius: 18px;
+    backdrop-filter: blur(15px);
+    transition: all 0.3s ease;
+    padding: 12px 16px;
+    box-shadow: 0 4px 15px rgba(59, 130, 246, 0.08);
+  }
+  
+  .form-control:focus {
+    background: rgba(255, 255, 255, 1);
+    border-color: #3b82f6;
+    box-shadow: 0 0 0 0.25rem rgba(59, 130, 246, 0.2), 0 8px 30px rgba(59, 130, 246, 0.15);
+    transform: translateY(-2px) scale(1.01);
+  }
+  
+  /* Button styles */
+  .btn-primary {
+    background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+    border: none;
+    border-radius: 18px;
+    padding: 12px 20px;
+    transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    box-shadow: 0 6px 20px rgba(59, 130, 246, 0.35);
+    backdrop-filter: blur(10px);
+  }
+  
+  .btn-primary:hover {
+    transform: translateY(-3px) scale(1.05);
+    box-shadow: 0 12px 35px rgba(59, 130, 246, 0.4);
+  }
+  
+  /* Rating buttons */
+  .btn-outline-warning {
+    backdrop-filter: blur(15px);
+    border: 2px solid rgba(245, 158, 11, 0.4);
+    background: rgba(245, 158, 11, 0.15);
+    border-radius: 50%;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 15px rgba(245, 158, 11, 0.2);
+  }
+  
+  .btn-check:checked + .btn-outline-warning {
+    background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+    border-color: #f59e0b;
+    color: white;
+    transform: scale(1.1);
+    box-shadow: 0 8px 25px rgba(245, 158, 11, 0.4);
+  }
+  
+  /* Feedback cards */
+  .hover-lift {
+    backdrop-filter: blur(20px);
+    background: rgba(255, 255, 255, 0.3);
+    border: 2px solid rgba(255, 255, 255, 0.3) !important;
+    border-radius: 25px;
+    transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    box-shadow: 0 8px 25px rgba(31, 38, 135, 0.1);
+    overflow: hidden;
+  }
+  
+  .hover-lift:hover {
+    transform: translateY(-5px) scale(1.02);
+    box-shadow: 0 15px 40px rgba(31, 38, 135, 0.2);
+    border-color: rgba(59, 130, 246, 0.4) !important;
+  }
+  
+  /* Feedback cards */
+  .feedback-card {
+    backdrop-filter: blur(20px);
+    background: rgba(255, 255, 255, 0.3);
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    border-radius: 25px;
+    transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    box-shadow: 0 8px 25px rgba(31, 38, 135, 0.1);
+    overflow: hidden;
+  }
+  
+  .feedback-card:hover {
+    transform: translateY(-5px) scale(1.02);
+    box-shadow: 0 15px 40px rgba(31, 38, 135, 0.2);
+    border-color: rgba(59, 130, 246, 0.4);
+  }
+  
+  /* Empty state styling */
+  .empty-state {
+    backdrop-filter: blur(20px);
+    background: rgba(248, 250, 252, 0.8);
+    border-radius: 20px;
+    padding: 3rem;
+    text-align: center;
+    border: 2px solid rgba(255, 255, 255, 0.3);
+  }
+  
+  /* Text effects */
+  .gradient-text {
+    background: linear-gradient(135deg, #3b82f6 0%, #8b5cf6 50%, #06b6d4 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    animation: gradientShift 3s ease-in-out infinite;
+  }
+  
+  @keyframes gradientShift {
+    0%, 100% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+  }
+  
+  /* Mobile responsiveness */
+  @media (max-width: 768px) {
+    .glass-card {
+      margin: 0.75rem 0.5rem;
+      border-radius: 25px;
+    }
+    
+    .floating-icon {
+      font-size: 1.2rem;
+    }
+    
+    .rating-buttons {
+      gap: 0.5rem !important;
+    }
+    
+    .rating-buttons .btn {
+      width: 40px !important;
+      height: 40px !important;
+    }
+  }
+  
+  @media (max-width: 576px) {
+    .glass-card {
+      margin: 0.5rem 0.25rem;
+      border-radius: 22px;
+    }
+    
+    .floating-icon {
+      font-size: 1rem;
+    }
+    
+    .rating-buttons .btn {
+      width: 36px !important;
+      height: 36px !important;
+    }
+  }
+  
+  /* Accessibility improvements */
+  .btn:focus {
+    outline: 3px solid rgba(59, 130, 246, 0.6);
+    outline-offset: 2px;
+  }
+  
+  /* Smooth scrolling */
+  html {
+    scroll-behavior: smooth;
+  }
+</style>
+
+<!-- Medical Background Elements -->
+<div class="medical-bg">
+  <div class="floating-icon"><i class="bi bi-chat-heart"></i></div>
+  <div class="floating-icon"><i class="bi bi-star"></i></div>
+  <div class="floating-icon"><i class="bi bi-heart-pulse"></i></div>
+  <div class="floating-icon"><i class="bi bi-shield-check"></i></div>
+</div>
+<div class="container my-5">
+    <div class="row justify-content-center">
+        <div class="col-xl-8 col-lg-10">
+            <div class="text-center mb-5">
+                <i class="bi bi-chat-heart-fill display-3 text-primary"></i>
+                <h1 class="fw-bold mt-3 mb-4 gradient-text">
+                    {% if request.user.is_superuser %}
+                        Manage Patient Feedback
+                    {% else %}
+                        Submit & View Your Feedback
+                    {% endif %}
+                </h1>
+                <p class="text-muted mb-0">
+                    {% if request.user.is_superuser %}
+                        View and manage feedback from patients to improve care quality
+                    {% else %}
+                        Share your experience to help us improve our services
+                    {% endif %}
+                </p>
+            </div>
+
+            <!-- Feedback Submission Form - Only for Patients -->
+            {% if not request.user.is_superuser %}
+                <div class="glass-card shadow-sm border-0 mb-5">
+                    <div class="glass-header text-white py-3">
+                        <h5 class="mb-0 d-flex align-items-center p-3"><i class="bi bi-star-half me-2"></i> Share Your Experience</h5>
+                    </div>
+                    <div class="card-body p-4">
+                        <form method="POST">
+                            {% csrf_token %}
+                            <div class="mb-4">
+                                <label for="report_title" class="form-label fw-semibold">Feedback Title</label>
+                                <input type="text" name="report_title" id="report_title" class="form-control py-2" 
+                                       placeholder="How would you describe your experience..." required>
+                            </div>
+                            
+                            <div class="mb-4">
+                                <label for="report" class="form-label fw-semibold">Detailed Feedback</label>
+                                <textarea name="report" id="report" class="form-control" rows="4" 
+                                          placeholder="Tell us about your experience..." required></textarea>
+                            </div>
+                            
+                            <!-- Rating Section -->
+                            <div class="mb-4">
+                                <label class="form-label fw-semibold">Rating</label>
+                                <div class="d-flex gap-2 justify-content-center fs-3">
+                                    <input type="radio" class="btn-check" name="rating" id="rating5" value="5" autocomplete="off" required>
+                                    <label class="btn btn-outline-warning rounded-circle p-2 d-flex align-items-center justify-content-center"
+                                           style="width: 48px; height: 48px;"
+                                           for="rating5"><i class="bi bi-star-fill"></i></label>
+                                    
+                                    <input type="radio" class="btn-check" name="rating" id="rating4" value="4" autocomplete="off">
+                                    <label class="btn btn-outline-warning rounded-circle p-2 d-flex align-items-center justify-content-center"
+                                           style="width: 48px; height: 48px;"
+                                           for="rating4"><i class="bi bi-star-fill"></i></label>
+                                    
+                                    <input type="radio" class="btn-check" name="rating" id="rating3" value="3" autocomplete="off">
+                                    <label class="btn btn-outline-warning rounded-circle p-2 d-flex align-items-center justify-content-center"
+                                           style="width: 48px; height: 48px;"
+                                           for="rating3"><i class="bi bi-star-fill"></i></label>
+                                    
+                                    <input type="radio" class="btn-check" name="rating" id="rating2" value="2" autocomplete="off">
+                                    <label class="btn btn-outline-warning rounded-circle p-2 d-flex align-items-center justify-content-center"
+                                           style="width: 48px; height: 48px;"
+                                           for="rating2"><i class="bi bi-star-fill"></i></label>
+                                    
+                                    <input type="radio" class="btn-check" name="rating" id="rating1" value="1" autocomplete="off">
+                                    <label class="btn btn-outline-warning rounded-circle p-2 d-flex align-items-center justify-content-center"
+                                           style="width: 48px; height: 48px;"
+                                           for="rating1"><i class="bi bi-star-fill"></i></label>
+                                </div>
+                                <div class="text-center mt-2">
+                                    <span id="ratingLabel" class="text-muted">Select your rating</span>
+                                </div>
+                            </div>
+                            
+                            <!-- Feedback Submission Button -->
+                            <div class="d-grid">
+                                <button type="submit" class="btn btn-primary py-3">
+                                    <i class="bi bi-send me-2"></i> Submit Feedback
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            {% endif %}
+
+            <!-- Feedback Display Section -->
+            <div class="glass-card shadow-sm border-0">
+                <div class="card-header bg-light py-3" style="background: linear-gradient(135deg, rgba(248, 250, 252, 0.9) 0%, rgba(241, 245, 249, 0.8) 100%); backdrop-filter: blur(20px); border-radius: 30px 30px 0 0;">
+                    <h5 class="mb-0 d-flex align-items-center p-3">
+                        <i class="bi bi-chat-left-text-fill me-2"></i> 
+                        {% if request.user.is_superuser %}
+                            All Patient Feedback
+                        {% else %}
+                            Your Feedback History
+                        {% endif %}
+                    </h5>
+                </div>
+                <div class="card-body p-4">
+                    {% if reports %}
+                        <div class="feedback-list">
+                            {% for Report in reports %}
+                                <div class="feedback-card mb-4 border-0 shadow-sm">
+                                    <div class="card-body p-4">
+                                        <div class="d-flex flex-column flex-md-row justify-content-between align-items-start mb-3">
+                                            <div>
+                                                <h6 class="card-title mb-1 fw-bold">
+                                                    {% if Report.report_title %}
+                                                        {{ Report.report_title }}
+                                                    {% else %}
+                                                        Feedback #{{ Report.id }}
+                                                    {% endif %}
+                                                </h6>
+                                                <div class="d-flex gap-2 mb-2">
+                                                    <!-- Rating Display -->
+                                                    <div class="d-flex align-items-center">
+                                                        {% for i in "12345"|make_list %}
+                                                            {% if forloop.counter <= Report.rating|default:0 %}
+                                                                <i class="bi bi-star-fill text-warning me-1"></i>
+                                                            {% else %}
+                                                                <i class="bi bi-star text-warning me-1"></i>
+                                                            {% endif %}
+                                                        {% endfor %}
+                                                        <small class="ms-2 text-muted">Rating</small>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            
+                                            <!-- Feedback Date -->
+                                            <small class="text-muted d-none d-md-block">
+                                                <i class="bi bi-calendar me-1"></i>{{ Report.created|date:"M d, Y H:i" }}
+                                            </small>
+                                        </div>
+                                        
+                                        <!-- Feedback Content -->
+                                        <p class="card-text mb-3">
+                                            {{ Report.report }}
+                                        </p>
+                                        
+                                        <!-- User Info for Admins -->
+                                        {% if request.user.is_superuser and Report.user %}
+                                            <div class="d-flex align-items-center text-muted mb-3">
+                                                <i class="bi bi-person me-2"></i> Submitted by: <strong class="ms-1">{{ Report.user.username }}</strong>
+                                            </div>
+                                        {% endif %}
+                                        
+                                        <!-- Feedback Date for Mobile -->
+                                        <small class="text-muted d-md-none mb-3">
+                                            <i class="bi bi-calendar me-1"></i>{{ Report.created|date:"M d, Y H:i" }}
+                                        </small>
+                                        
+                                        <!-- Feedback Status -->
+                                        <div class="d-flex justify-content-between align-items-center pt-2 border-top">
+                                            <div>
+                                                <!-- Status for Patients -->
+                                                {% if not request.user.is_superuser %}
+                                                    {% if Report.recived %}
+                                                        <span class="badge bg-success">
+                                                            <i class="bi bi-check-circle-fill"></i> Received & Under Review
+                                                        </span>
+                                                    {% else %}
+                                                        <span class="badge bg-warning text-dark">
+                                                            <i class="bi bi-clock"></i> Pending Review
+                                                        </span>
+                                                    {% endif %}
+                                                {% endif %}
+                                            </div>
+                                            
+                                            <div>
+                                                <!-- Actions for Admins -->
+                                                {% if request.user.is_superuser %}
+                                                    {% if not Report.recived %}
+                                                        <a href="{% url 'chatroom:recived' Report.id %}" class="btn btn-outline-success btn-sm rounded-3 py-1">
+                                                            <i class="bi bi-check-circle"></i> Mark as Received
+                                                        </a>
+                                                    {% else %}
+                                                        <span class="text-success">
+                                                            <i class="bi bi-check-circle-fill"></i> Received
+                                                        </span>
+                                                    {% endif %}
+                                                {% endif %}
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        <div class="empty-state">
+                            <i class="bi bi-emoji-smile-upside-down display-2 text-muted mb-3"></i>
+                            <h5 class="text-muted mb-3">No feedback yet</h5>
+                            <p class="text-muted mb-0">
+                                {% if request.user.is_superuser %}
+                                    Feedback from patients will appear here.
+                                {% else %}
+                                    Your feedback will appear here after submission.
+                                {% endif %}
+                            </p>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Rating Tooltip -->
+<script>
+    document.querySelectorAll('input[type="radio"][name="rating"]').forEach(radio => {
+        radio.addEventListener('change', function() {
+            const ratingLabel = document.getElementById('ratingLabel');
+            const rating = parseInt(this.value);
+            
+            if (rating >= 4) {
+                ratingLabel.textContent = 'Excellent! We appreciate your positive feedback';
+                ratingLabel.classList.remove('text-muted');
+                ratingLabel.classList.add('text-success');
+            } else if (rating === 3) {
+                ratingLabel.textContent = 'Good, but there is room for improvement';
+                ratingLabel.classList.remove('text-muted');
+                ratingLabel.classList.add('text-warning');
+            } else if (rating <= 2) {
+                ratingLabel.textContent = 'We are sorry to hear that, we will improve';
+                ratingLabel.classList.remove('text-muted');
+                ratingLabel.classList.add('text-danger');
+            }
+        });
+    });
+</script>
+
+{% endblock content %}

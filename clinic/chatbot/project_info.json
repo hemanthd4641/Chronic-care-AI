@@ -1,0 +1,237 @@
+{
+  "project_name": "Chronic Care AI - Hostel Management System",
+  "description": "A comprehensive healthcare and hostel management system for chronic disease patients with AI agent capabilities",
+  "services": {
+    "prediction_room": {
+      "name": "Disease Prediction Room",
+      "description": "AI-powered prediction system for chronic diseases",
+      "features": [
+        "Heart Disease Risk Assessment",
+        "Diabetes Risk Prediction", 
+        "Hypertension Risk Analysis",
+        "Kidney Disease Risk Evaluation"
+      ],
+      "how_to_use": "Navigate to Prediction Room → Select disease type → Fill required health parameters → Get instant risk assessment",
+      "url": "/predict/",
+      "requirements": "User must be logged in to access prediction features"
+    },
+    "prediction_history": {
+      "name": "Prediction History",
+      "description": "View your previous disease prediction results",
+      "features": [
+        "Track all past predictions",
+        "View confidence scores",
+        "Compare results over time",
+        "Export prediction data"
+      ],
+      "how_to_use": "Click on Prediction History in navbar → View your prediction timeline",
+      "url": "/predict/history/",
+      "requirements": "Must have made at least one prediction"
+    },
+    "appointments": {
+      "name": "Appointment Booking System",
+      "description": "Book and manage medical appointments with assigned doctors",
+      "features": [
+        "Book appointments with assigned doctor",
+        "View appointment history",
+        "Cancel appointments",
+        "Doctor appointment management"
+      ],
+      "how_to_use": "For Patients: Book Appointment → Select date/time → Add reason → Confirm. For Doctors: View Patient Appointments → Manage status",
+      "url": "/appointments/",
+      "requirements": "Patients must have assigned doctor, Doctors can see all patient appointments"
+    },
+    "private_messaging": {
+      "name": "Private Messaging System",
+      "description": "Secure communication between patients and doctors",
+      "features": [
+        "Send private messages to assigned doctor",
+        "Receive messages from patients (doctors)",
+        "Message history tracking",
+        "Read/unread status"
+      ],
+      "how_to_use": "Click Private Messages → Compose new message → Send to assigned doctor",
+      "url": "/messages/",
+      "requirements": "Must have assigned doctor-patient relationship"
+    },
+    "community_chat": {
+      "name": "Community Chat Room",
+      "description": "Interactive community chat for all users",
+      "features": [
+        "Real-time messaging",
+        "User role identification",
+        "Quick action buttons",
+        "Auto-refresh functionality"
+      ],
+      "how_to_use": "Click Community Chat → Type message → Send. Use quick buttons for common phrases",
+      "url": "/chatroom/",
+      "requirements": "Must be logged in"
+    },
+    "medical_store": {
+      "name": "Medical Store",
+      "description": "Online medical store for purchasing medicines",
+      "features": [
+        "Browse available medicines",
+        "Add to cart",
+        "View cart contents",
+        "Medicine inventory management"
+      ],
+      "how_to_use": "Navigate to Medical Store → Browse medicines → Add to cart → View cart",
+      "url": "/medical-store/",
+      "requirements": "Must be logged in"
+    },
+    "user_profile": {
+      "name": "User Profile Management",
+      "description": "Manage your personal information and settings",
+      "features": [
+        "Update personal details",
+        "Change profile picture",
+        "View account information",
+        "Manage preferences"
+      ],
+      "how_to_use": "Click on Profile → Update information → Save changes",
+      "url": "/profile/",
+      "requirements": "Must be logged in"
+    },
+    "hostel_management": {
+      "name": "Hostel Management",
+      "description": "Manage hostel rooms, allocations, and student information",
+      "features": [
+        "Room allocation",
+        "Student management",
+        "Hostel information",
+        "Room updates"
+      ],
+      "how_to_use": "Access through hostel management section → Manage rooms and students",
+      "url": "/hostel/",
+      "requirements": "Admin access required"
+    },
+    "admission": {
+      "name": "Admission System",
+      "description": "Student admission and doctor-patient assignment management",
+      "features": [
+        "Student registration",
+        "Doctor-patient assignments",
+        "Manage relationships",
+        "View student details"
+      ],
+      "how_to_use": "For Admins: Manage student admissions and doctor assignments",
+      "url": "/admission/",
+      "requirements": "Admin access for management features"
+    },
+    "ai_agent": {
+      "name": "AI Agent Assistant",
+      "description": "Intelligent assistant with enhanced capabilities for doctors and patients",
+      "features": [
+        "Patient registration (doctors only)",
+        "View patient information (doctors only)",
+        "View feedback and messages",
+        "View appointments",
+        "View prediction history",
+        "Doctor-patient assignments (doctors only)"
+      ],
+      "how_to_use": "Access through the AI Assistant chatbot → Ask questions about patients, messages, appointments, etc.",
+      "url": "/chatbot/",
+      "requirements": "Must be logged in"
+    }
+  },
+  "user_roles": {
+    "patient": {
+      "description": "Regular users who can access healthcare services",
+      "permissions": [
+        "Use prediction room",
+        "View prediction history", 
+        "Book appointments with assigned doctor",
+        "Send private messages to doctor",
+        "Participate in community chat",
+        "Use medical store",
+        "Track health and wellness data",
+        "Update profile",
+        "Use AI assistant for general queries"
+      ]
+    },
+    "doctor": {
+      "description": "Superusers who provide medical care and management",
+      "permissions": [
+        "View all patient appointments",
+        "Manage appointment status",
+        "Receive private messages from patients",
+        "View all patient messages",
+        "Manage doctor-patient assignments",
+        "Access all system features",
+        "Manage hostel and admission systems",
+        "Register new patients via AI assistant",
+        "View all assigned patients via AI assistant"
+      ]
+    }
+  },
+  "hostel_info": {
+    "name": "BCM Postmetric Boys Hostel",
+    "location": "Siddapura, Whitefield, Bengaluru, Karnataka, 560066",
+    "address": "Nallurahalli Main Road, Siddapura Varthur Main Road, Whitefield",
+    "bus_lines": ["327", "327A", "329M", "500-FB", "V-500F", "333-G", "304R", "322", "323", "323‑AK"],
+    "nearest_bus_stop": "Siddapura (about 4 min walk, ~246 m)",
+    "metro_line": "Purple Line",
+    "nearest_metro_station": "Nallur Halli (around 37 min walk, ~2.9 km)",
+    "mess_timings": "Breakfast: 7:30–9:00, Lunch: 12:30–2:00, Dinner: 7:30–9:00",
+    "room_types": "Dormitory-style rooms for post-metric boys",
+    "warden": "Warden name is Jagadeesh contact not publicly listed (check hostel office)",
+    "wifi": "Wi‑Fi generally available in common areas; confirm with management",
+    "gate_close_time": "Typically around 10 PM (confirm with hostel office)",
+    "admission_process": "https://bcwd.karnataka.gov.in/74/online--application/en",
+    "college_students": "CMRIT, NHCE, SEA College, Gopalan",
+    "facilities": [
+      "Shared bathrooms",
+      "Mess with routine meals", 
+      "Common room",
+      "Basic furniture (bed, study table)",
+      "Limited parking space"
+    ],
+    "nearby_landmarks": [
+      "Holiday Inn & Suites (Siddapura)",
+      "Prestige Laughing Waters",
+      "The Farmhouse Kitchen & Bakery",
+      "Silicon Pride Apartment",
+      "Siddapura Lake"
+    ],
+    "notes": "Operated by the Karnataka Backward Classes Welfare Dept. as a post-metric boys hostel. Facilities are basic; confirm gate timings and contact details directly from office."
+  },
+  "common_queries": {
+    "prediction": [
+      "How do I use the prediction room?",
+      "What diseases can I predict?",
+      "How accurate are the predictions?",
+      "Can I see my prediction history?"
+    ],
+    "appointments": [
+      "How do I book an appointment?",
+      "Why can't I see my doctor in the list?",
+      "How do I cancel an appointment?",
+      "When can I book appointments?"
+    ],
+    "messaging": [
+      "How do I send a private message?",
+      "Why can't I message my doctor?",
+      "How do I use the community chat?",
+      "Can I see message history?"
+    ],
+    "hostel": [
+      "What are the hostel timings?",
+      "How do I get to the hostel?",
+      "What facilities are available?",
+      "Who is the warden?"
+    ],
+    "ai_agent": [
+      "How do I register a patient?",
+      "How do I view my patients?",
+      "How do I see messages?",
+      "How do I view appointments?"
+    ],
+    "general": [
+      "What services are available?",
+      "How do I update my profile?",
+      "What is this system for?",
+      "How do I get help?"
+    ]
+  }
+}

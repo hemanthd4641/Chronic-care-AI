@@ -1,0 +1,388 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Health Prediction Report - {{ user.username }}</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+        
+        .report-container {
+            background: white;
+            border-radius: 15px;
+            padding: 40px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+        }
+        
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+            padding-bottom: 20px;
+            border-bottom: 3px solid #667eea;
+        }
+        
+        .header h1 {
+            color: #667eea;
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+        
+        .header p {
+            color: #666;
+            font-size: 1.1em;
+        }
+        
+        .user-info {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 30px;
+        }
+        
+        .user-info h3 {
+            color: #667eea;
+            margin-bottom: 15px;
+        }
+        
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        
+        .stat-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 10px;
+            text-align: center;
+        }
+        
+        .stat-card h4 {
+            font-size: 2em;
+            margin-bottom: 5px;
+        }
+        
+        .stat-card p {
+            margin: 0;
+            opacity: 0.9;
+        }
+        
+        .predictions-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 30px;
+            background: white;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+        
+        .predictions-table th {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 15px;
+            text-align: left;
+            font-weight: 600;
+        }
+        
+        .predictions-table td {
+            padding: 15px;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .predictions-table tr:hover {
+            background: #f8f9fa;
+        }
+        
+        .risk-badge {
+            padding: 5px 10px;
+            border-radius: 20px;
+            font-weight: bold;
+            font-size: 0.9em;
+        }
+        
+        .risk-high {
+            background: #dc3545;
+            color: white;
+        }
+        
+        .risk-low {
+            background: #28a745;
+            color: white;
+        }
+        
+        .disease-badge {
+            padding: 5px 10px;
+            border-radius: 20px;
+            font-weight: bold;
+            font-size: 0.9em;
+            background: #6c757d;
+            color: white;
+        }
+        
+        .confidence-bar {
+            width: 100%;
+            height: 20px;
+            background: #e9ecef;
+            border-radius: 10px;
+            overflow: hidden;
+            position: relative;
+        }
+        
+        .confidence-fill {
+            height: 100%;
+            border-radius: 10px;
+            transition: width 0.3s ease;
+        }
+        
+        .confidence-high {
+            background: linear-gradient(90deg, #dc3545, #ff6b6b);
+        }
+        
+        .confidence-low {
+            background: linear-gradient(90deg, #28a745, #51cf66);
+        }
+        
+        .confidence-text {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-weight: bold;
+            font-size: 0.8em;
+            color: white;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.5);
+        }
+        
+        .summary-section {
+            background: #f8f9fa;
+            padding: 30px;
+            border-radius: 10px;
+            margin-bottom: 30px;
+        }
+        
+        .summary-section h3 {
+            color: #667eea;
+            margin-bottom: 20px;
+        }
+        
+        .recommendations {
+            background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+            color: white;
+            padding: 30px;
+            border-radius: 10px;
+            margin-bottom: 30px;
+        }
+        
+        .recommendations h3 {
+            margin-bottom: 20px;
+        }
+        
+        .recommendations ul {
+            list-style: none;
+            padding: 0;
+        }
+        
+        .recommendations li {
+            padding: 10px 0;
+            border-bottom: 1px solid rgba(255,255,255,0.2);
+        }
+        
+        .recommendations li:last-child {
+            border-bottom: none;
+        }
+        
+        .footer {
+            text-align: center;
+            margin-top: 40px;
+            padding-top: 20px;
+            border-top: 2px solid #eee;
+            color: #666;
+        }
+        
+        .page-break {
+            page-break-before: always;
+        }
+        
+        @media print {
+            body {
+                background: white;
+            }
+            
+            .report-container {
+                box-shadow: none;
+                padding: 0;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="report-container">
+        <!-- Header -->
+        <div class="header">
+            <h1>Health Prediction Report</h1>
+            <p>Generated on {{ generated_at|date:"F d, Y \a\t H:i" }}</p>
+        </div>
+        
+        <!-- User Information -->
+        <div class="user-info">
+            <h3>Patient Information</h3>
+            <p><strong>Username:</strong> {{ user.username }}</p>
+            <p><strong>Email:</strong> {{ user.email }}</p>
+            <p><strong>Report Generated:</strong> {{ generated_at|date:"F d, Y \a\t H:i" }}</p>
+        </div>
+        
+        <!-- Statistics -->
+        <div class="stats-grid">
+            <div class="stat-card">
+                <h4>{{ predictions.count }}</h4>
+                <p>Total Predictions</p>
+            </div>
+            <div class="stat-card">
+                <h4>
+                    {% for prediction in predictions %}
+                        {% if prediction.prediction_result == 1 %}
+                            {{ forloop.counter0|add:1 }}
+                        {% endif %}
+                    {% endfor %}
+                </h4>
+                <p>High Risk Results</p>
+            </div>
+            <div class="stat-card">
+                <h4>
+                    {% for prediction in predictions %}
+                        {% if prediction.prediction_result == 0 %}
+                            {{ forloop.counter0|add:1 }}
+                        {% endif %}
+                    {% endfor %}
+                </h4>
+                <p>Low Risk Results</p>
+            </div>
+            <div class="stat-card">
+                <h4>
+                    {% if predictions.count > 0 %}
+                        {% widthratio predictions.count 1 100 %}
+                    {% else %}
+                        0
+                    {% endif %}%
+                </h4>
+                <p>Risk Assessment Coverage</p>
+            </div>
+        </div>
+        
+        <!-- Predictions Table -->
+        <h3 style="color: #667eea; margin-bottom: 20px;">Prediction History</h3>
+        <table class="predictions-table">
+            <thead>
+                <tr>
+                    <th>Date</th>
+                    <th>Disease Type</th>
+                    <th>Risk Level</th>
+                    <th>Confidence</th>
+                    <th>Details</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for prediction in predictions %}
+                <tr>
+                    <td>{{ prediction.created_at|date:"M d, Y H:i" }}</td>
+                    <td>
+                        <span class="disease-badge">{{ prediction.disease_type|title }}</span>
+                    </td>
+                    <td>
+                        {% if prediction.prediction_result == 1 %}
+                            <span class="risk-badge risk-high">High Risk</span>
+                        {% else %}
+                            <span class="risk-badge risk-low">Low Risk</span>
+                        {% endif %}
+                    </td>
+                    <td>
+                        {% if prediction.confidence %}
+                            <div class="confidence-bar">
+                                <div class="confidence-fill {% if prediction.prediction_result == 1 %}confidence-high{% else %}confidence-low{% endif %}" 
+                                     style="width: {{ prediction.confidence|floatformat:0 }}%"></div>
+                                <div class="confidence-text">{{ prediction.confidence|floatformat:1 }}%</div>
+                            </div>
+                        {% else %}
+                            <span style="color: #999;">N/A</span>
+                        {% endif %}
+                    </td>
+                    <td>
+                        <small style="color: #666;">
+                            {% for key, value in prediction.input_data.items %}
+                                {{ key|title }}: {{ value }}{% if not forloop.last %}, {% endif %}
+                            {% endfor %}
+                        </small>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="5" style="text-align: center; padding: 40px; color: #999;">
+                        No predictions found for this user.
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        
+        <!-- Summary Section -->
+        <div class="summary-section">
+            <h3>Summary Analysis</h3>
+            <p><strong>Total Predictions:</strong> {{ predictions.count }}</p>
+            <p><strong>Diseases Tested:</strong> 
+                {% for prediction in predictions %}
+                    {{ prediction.disease_type|title }}{% if not forloop.last %}, {% endif %}
+                {% endfor %}
+            </p>
+            <p><strong>Risk Distribution:</strong></p>
+            <ul>
+                <li>High Risk Results: 
+                    {% for prediction in predictions %}
+                        {% if prediction.prediction_result == 1 %}
+                            {{ forloop.counter0|add:1 }}
+                        {% endif %}
+                    {% endfor %}
+                </li>
+                <li>Low Risk Results: 
+                    {% for prediction in predictions %}
+                        {% if prediction.prediction_result == 0 %}
+                            {{ forloop.counter0|add:1 }}
+                        {% endif %}
+                    {% endfor %}
+                </li>
+            </ul>
+        </div>
+        
+        <!-- Recommendations -->
+        <div class="recommendations">
+            <h3>Health Recommendations</h3>
+            <ul>
+                <li><strong>Regular Monitoring:</strong> Continue tracking your health metrics regularly</li>
+                <li><strong>Lifestyle Changes:</strong> Maintain a healthy diet and regular exercise routine</li>
+                <li><strong>Medical Consultation:</strong> Consult with healthcare professionals for high-risk results</li>
+                <li><strong>Preventive Care:</strong> Focus on preventive measures based on your risk factors</li>
+                <li><strong>Follow-up:</strong> Schedule regular follow-up assessments to track progress</li>
+            </ul>
+        </div>
+        
+        <!-- Footer -->
+        <div class="footer">
+            <p><strong>Chronic Care AI System</strong></p>
+            <p>This report is generated automatically and should be used for informational purposes only.</p>
+            <p>Please consult with healthcare professionals for medical advice and treatment.</p>
+            <p><em>Report generated on {{ generated_at|date:"F d, Y \a\t H:i" }}</em></p>
+        </div>
+    </div>
+</body>
+</html>

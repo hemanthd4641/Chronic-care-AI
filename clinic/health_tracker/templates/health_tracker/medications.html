@@ -1,0 +1,404 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Medication Reminders{% endblock title %}
+
+{% block content %}
+<style>
+    body {
+        background: linear-gradient(135deg, #ffffff 0%, #f8fafc 50%, #e2e8f0 100%);
+        background-attachment: fixed;
+        font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    }
+
+    .glass-card {
+        backdrop-filter: blur(20px) saturate(180%);
+        background: rgba(255, 255, 255, 0.15);
+        border-radius: 25px;
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        box-shadow: 0 25px 70px rgba(31, 38, 135, 0.16);
+        transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        position: relative;
+        overflow: hidden;
+        animation: slideInUp 0.6s ease-out;
+        animation-fill-mode: both;
+    }
+    
+    .glass-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 1px;
+        background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.5), transparent);
+        opacity: 0.8;
+    }
+    
+    .glass-card:hover {
+        transform: translateY(-8px) scale(1.02);
+        box-shadow: 0 35px 90px rgba(31, 38, 135, 0.2);
+        background: rgba(255, 255, 255, 0.25);
+    }
+
+    .gradient-text {
+        background: linear-gradient(135deg, #e6f3ff 0%, #f0f9ff 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        color: #1e40af;
+        font-weight: 900;
+    }
+
+    .btn {
+        border-radius: 15px;
+        font-weight: 700;
+        padding: 12px 20px;
+        transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        position: relative;
+        overflow: hidden;
+        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+    }
+
+    .btn::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+        transition: left 0.6s;
+    }
+
+    .btn:hover::before {
+        left: 100%;
+    }
+
+    .btn:hover {
+        transform: translateY(-3px) scale(1.05);
+        box-shadow: 0 15px 35px rgba(0, 0, 0, 0.2);
+    }
+
+    .btn-primary {
+        background: linear-gradient(135deg, #e6f3ff 0%, #f0f9ff 100%);
+        border: none;
+        color: #1e40af;
+        box-shadow: 0 8px 20px rgba(30, 64, 175, 0.2);
+    }
+
+    .btn-primary:hover {
+        background: linear-gradient(135deg, #dbeafe 0%, #eff6ff 100%);
+        color: #1e40af;
+        box-shadow: 0 15px 35px rgba(30, 64, 175, 0.3);
+    }
+
+    .btn-outline-primary {
+        border: 2px solid rgba(30, 64, 175, 0.3);
+        color: #1e40af;
+        background: rgba(230, 243, 255, 0.3);
+        backdrop-filter: blur(10px);
+    }
+
+    .btn-outline-primary:hover {
+        background: linear-gradient(135deg, #e6f3ff 0%, #f0f9ff 100%);
+        color: #1e40af;
+        border-color: rgba(30, 64, 175, 0.5);
+    }
+
+    .btn-outline-warning {
+        border: 2px solid rgba(217, 119, 6, 0.3);
+        color: #d97706;
+        background: rgba(254, 243, 199, 0.3);
+        backdrop-filter: blur(10px);
+    }
+
+    .btn-outline-warning:hover {
+        background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+        color: #d97706;
+        border-color: rgba(217, 119, 6, 0.5);
+    }
+
+    .btn-outline-success {
+        border: 2px solid rgba(34, 197, 94, 0.3);
+        color: #22c55e;
+        background: rgba(240, 253, 244, 0.3);
+        backdrop-filter: blur(10px);
+    }
+
+    .btn-outline-success:hover {
+        background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%);
+        color: #22c55e;
+        border-color: rgba(34, 197, 94, 0.5);
+    }
+
+    .btn-outline-danger {
+        border: 2px solid rgba(239, 68, 68, 0.3);
+        color: #ef4444;
+        background: rgba(254, 242, 242, 0.3);
+        backdrop-filter: blur(10px);
+    }
+
+    .btn-outline-danger:hover {
+        background: linear-gradient(135deg, #fef2f2 0%, #fee2e2 100%);
+        color: #ef4444;
+        border-color: rgba(239, 68, 68, 0.5);
+    }
+
+    .text-primary {
+        color: #1e40af !important;
+        font-weight: 700;
+    }
+
+    .text-muted {
+        color: #6b7280 !important;
+        font-weight: 500;
+    }
+
+    .badge {
+        border-radius: 12px;
+        padding: 8px 12px;
+        font-size: 0.75rem;
+        font-weight: 600;
+        backdrop-filter: blur(10px);
+    }
+
+    .bg-success {
+        background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%) !important;
+        color: #166534 !important;
+        border: 1px solid rgba(34, 197, 94, 0.2);
+    }
+
+    .bg-secondary {
+        background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%) !important;
+        color: #6c757d !important;
+        border: 1px solid rgba(108, 117, 125, 0.2);
+    }
+
+    .detail-item {
+        display: flex;
+        align-items: center;
+        margin-bottom: 0.75rem;
+        font-size: 0.9rem;
+        font-weight: 500;
+        padding: 8px 12px;
+        background: rgba(255, 255, 255, 0.6);
+        border-radius: 10px;
+        border: 1px solid rgba(226, 232, 240, 0.4);
+        transition: all 0.3s ease;
+    }
+
+    .detail-item:hover {
+        background: rgba(255, 255, 255, 0.8);
+        transform: translateX(4px);
+    }
+
+    .detail-item i {
+        width: 20px;
+        text-align: center;
+    }
+
+    .btn-group {
+        gap: 6px;
+        display: flex;
+    }
+
+    .btn-group .btn {
+        flex: 1;
+        padding: 8px 12px;
+        font-size: 0.8rem;
+        border-radius: 10px;
+    }
+
+    .medication-header h5 {
+        font-size: 1.25rem;
+        margin-bottom: 4px;
+        letter-spacing: 0.5px;
+    }
+
+    @keyframes slideInUp {
+        from {
+            opacity: 0;
+            transform: translateY(40px) scale(0.95);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0) scale(1);
+        }
+    }
+
+    /* Staggered animation for cards */
+    .col-md-6:nth-child(1) .glass-card { animation-delay: 0.1s; }
+    .col-md-6:nth-child(2) .glass-card { animation-delay: 0.2s; }
+    .col-md-6:nth-child(3) .glass-card { animation-delay: 0.3s; }
+    .col-md-6:nth-child(4) .glass-card { animation-delay: 0.4s; }
+    .col-md-6:nth-child(5) .glass-card { animation-delay: 0.5s; }
+    .col-md-6:nth-child(6) .glass-card { animation-delay: 0.6s; }
+
+    /* Empty state animation */
+    .display-1 {
+        animation: float 3s ease-in-out infinite;
+    }
+
+    @keyframes float {
+        0% { transform: translateY(0px); }
+        50% { transform: translateY(-10px); }
+        100% { transform: translateY(0px); }
+    }
+
+    /* Mobile Responsive */
+    @media (max-width: 768px) {
+        .glass-card {
+            margin: 1rem 0;
+            border-radius: 20px;
+        }
+        
+        .btn-group {
+            flex-direction: column;
+        }
+        
+        .btn-group .btn {
+            margin-bottom: 0.5rem;
+        }
+        
+        .d-flex {
+            flex-direction: column;
+            gap: 1rem;
+        }
+        
+        .gradient-text {
+            font-size: 1.75rem;
+        }
+    }
+
+    @media (max-width: 576px) {
+        .glass-card {
+            margin: 0.5rem 0;
+            border-radius: 15px;
+            padding: 1rem !important;
+        }
+        
+        .btn {
+            padding: 10px 16px;
+            font-size: 0.85rem;
+        }
+        
+        .btn-group .btn {
+            padding: 8px 12px;
+            font-size: 0.75rem;
+        }
+    }
+</style>
+
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h2 class="fw-bold gradient-text">
+                    <i class="fas fa-pills me-2"></i>Medication Reminders
+                </h2>
+                <a href="{% url 'add_medication' %}" class="btn btn-primary">
+                    <i class="fas fa-plus me-2"></i>Add Medication
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <div class="row g-4">
+        {% for medication in medications %}
+        <div class="col-md-6 col-lg-4">
+            <div class="glass-card p-4 h-100">
+                <div class="d-flex justify-content-between align-items-start mb-3">
+                    <div class="medication-header">
+                        <h5 class="fw-bold text-primary mb-1">{{ medication.medication_name }}</h5>
+                        <p class="text-muted mb-0">{{ medication.dosage }}</p>
+                    </div>
+                    <span class="badge bg-{% if medication.is_active %}success{% else %}secondary{% endif %}">
+                        {% if medication.is_active %}Active{% else %}Inactive{% endif %}
+                    </span>
+                </div>
+
+                <div class="medication-details">
+                    <div class="detail-item">
+                        <i class="fas fa-clock text-info me-2"></i>
+                        <span>{{ medication.frequency }}</span>
+                    </div>
+                    
+                    <div class="detail-item">
+                        <i class="fas fa-calendar-alt text-success me-2"></i>
+                        <span>Started: {{ medication.start_date }}</span>
+                    </div>
+                    
+                    {% if medication.end_date %}
+                    <div class="detail-item">
+                        <i class="fas fa-calendar-times text-warning me-2"></i>
+                        <span>Ends: {{ medication.end_date }}</span>
+                    </div>
+                    {% endif %}
+                    
+                    {% if medication.notes %}
+                    <div class="detail-item">
+                        <i class="fas fa-sticky-note text-secondary me-2"></i>
+                        <span>{{ medication.notes|truncatechars:50 }}</span>
+                    </div>
+                    {% endif %}
+                </div>
+
+                <div class="medication-actions mt-3">
+                    <div class="btn-group w-100" role="group">
+                        <button type="button" class="btn btn-outline-primary btn-sm" 
+                                onclick="editMedication({{ medication.id }})">
+                            <i class="fas fa-edit me-1"></i>Edit
+                        </button>
+                        <button type="button" class="btn btn-outline-{% if medication.is_active %}warning{% else %}success{% endif %} btn-sm"
+                                onclick="toggleMedication({{ medication.id }}, {{ medication.is_active|yesno:'false,true' }})">
+                            <i class="fas fa-{% if medication.is_active %}pause{% else %}play{% endif %} me-1"></i>
+                            {% if medication.is_active %}Pause{% else %}Activate{% endif %}
+                        </button>
+                        <button type="button" class="btn btn-outline-danger btn-sm"
+                                onclick="deleteMedication({{ medication.id }}, '{{ medication.medication_name }}')">
+                            <i class="fas fa-trash me-1"></i>Delete
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% empty %}
+        <div class="col-12">
+            <div class="glass-card p-5 text-center">
+                <i class="fas fa-pills display-1 text-muted mb-3"></i>
+                <h4 class="text-muted mb-3">No Medications Found</h4>
+                <p class="text-muted mb-4">You haven't added any medication reminders yet.</p>
+                <a href="{% url 'add_medication' %}" class="btn btn-primary">
+                    <i class="fas fa-plus me-2"></i>Add Your First Medication
+                </a>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+
+<script>
+function editMedication(medicationId) {
+    // For now, just show an alert. In a real app, you'd redirect to an edit page
+    alert('Edit functionality will be implemented in the next version.');
+}
+
+function toggleMedication(medicationId, isActive) {
+    const action = isActive ? 'deactivate' : 'activate';
+    const actionText = isActive ? 'deactivate' : 'activate';
+    
+    if (confirm(`Are you sure you want to ${actionText} this medication?`)) {
+        // For now, just show an alert. In a real app, you'd make an AJAX call
+        alert(`${actionText.charAt(0).toUpperCase() + actionText.slice(1)} functionality will be implemented in the next version.`);
+    }
+}
+
+function deleteMedication(medicationId, medicationName) {
+    if (confirm(`Are you sure you want to delete "${medicationName}"? This action cannot be undone.`)) {
+        // Redirect to delete URL
+        window.location.href = `/health-tracker/delete-medication/${medicationId}/`;
+    }
+}
+</script>
+{% endblock content %}
