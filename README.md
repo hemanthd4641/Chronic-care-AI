@@ -1,6 +1,6 @@
 # Chronic Care AI
 
-A comprehensive Django-based healthcare and hostel management system focused on chronic disease support and AI-assisted clinical workflows. The project combines standard web features (appointments, messaging, hostel/admission management) with machine learning disease prediction models and an AI chatbot assistant.
+A comprehensive Django-based healthcare system focused on chronic disease support and AI-assisted clinical workflows. The project combines standard web features (appointments, messaging, admission management) with machine learning disease prediction models and an AI chatbot assistant.
 
 ## Key features
 
@@ -11,7 +11,6 @@ A comprehensive Django-based healthcare and hostel management system focused on 
 - Community Chat Room: Real-time group chat for users.
 - Medical Store: Browse and add medicines to cart, with simple inventory management.
 - User Profile Management: Update personal info, profile picture, and preferences.
-- Hostel Management & Admission: Room allocation, student admissions, and admin tools.
 - AI Agent Assistant (chatbot): AI-powered assistant for doctors and patients to access patient info, messages, appointments, and prediction history.
 
 ## Project layout (important folders)
@@ -99,7 +98,7 @@ Each script will save a joblib file into `clinic/ml_train/ml_models/` (or `ml_mo
 
 ## Chatbot / AI Assistant
 
-- The `chatbot/` app contains an AI agent capable of answering queries about patients, appointments, messages, and predictions. It also includes project and hostel info JSON used by the assistant.
+- The `chatbot/` app contains an AI agent capable of answering queries about patients, appointments, messages, and predictions. It also includes project info JSON used by the assistant.
 - Advanced features (embedding search, LLMs) rely on optional packages (transformers, sentence-transformers, FAISS, LangChain) and may require additional configuration (API keys, model downloads).
 
 ## Configuration notes
